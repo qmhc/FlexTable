@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>iTable Example</title>
+	<link rel="stylesheet" type="text/css" href="../build/itable.css">
+</head>
+<body>
+	<!-- Open DevTools(F12) to Checkout Console. -->
+	<div id="app"></div>
+</body>
+<script type="text/javascript" src="../build/itable.js"></script>
+<script type="text/javascript" src="./mock-min.js"></script>
+<script type="text/javascript" src="./utils.js"></script>
+<script type="text/javascript">
+	const itable = new iTable();
+
+	console.time('render');
+
+	itable.create({
+		index: 'it1',
+		container: '#app',
+		columns: getColumns(),
+		data: makeData(),
+		useSelector: true,
+		// sortable: false,
+		// resizable: false,
+		// usePageOption: false,
+		// pageSize: 15,
+		// pageable: false,
+		filterAll: true,
+		filterOpen: true,
+		useLayer: true,
+		// bodyHeight: 450,
+	});
+
+	console.timeEnd('render');
+</script>
+</html>
