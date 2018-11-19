@@ -15,7 +15,7 @@ $ git clone http://192.168.2.4:3000/qmhc/i-table.git
 
 # npm
 $ npm install
-$ npm run bild
+$ npm run build
 ```
 
 引入 `build` 文件夹下的 `itable.js` 和 `itable.css`
