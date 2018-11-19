@@ -2,21 +2,23 @@
 
 `i-table` 是一款原生的表格工具，用于快速生成数据表格。
 
+![视觉](http://zuoyue.imwork.net:3000/qmhc/i-table/raw/master/public/visual.png)
+
 
 ## 开始
 
-1.  克隆项目至本地
+克隆项目至本地
 
 ```bash
 # git
 $ git clone http://192.168.2.4:3000/qmhc/i-table.git
 
-#npm
+# npm
 $ npm install
 $ npm run bild
 ```
 
-2.  引入 `build` 文件夹下的 `itable.js` 和 `itable.css`
+引入 `build` 文件夹下的 `itable.js` 和 `itable.css`
 
 ```html
 <!-- js -->
@@ -26,7 +28,7 @@ $ npm run bild
 <link rel="stylesheet" href="./build/itable.css">
 ```
 
-3.  创建一个表格
+创建一个表格
 
 ```javascript
 // 控制器实例化
