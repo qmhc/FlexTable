@@ -29,17 +29,24 @@
 				width: 100%;
 				border-color: rgba(0, 0, 0, .2);
 			}
+
+			.it-select {
+				.it-option {
+					top: calc(2em + 2px);
+				}
+			}
 		}
 
 		.it-filter {
 			width: 100%;
 
-			.it-input[type='text'] {
+			.it-input[type='text'], .it-select {
 				max-width: 200px;
 			}
 
 			.it-input[type='number'] {
 				width: calc(50% - .2em);
+				max-width: 100px;
 
 				&:nth-child(odd) {
 					margin-right: .4em;

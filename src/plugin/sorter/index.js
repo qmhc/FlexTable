@@ -7,7 +7,7 @@ import { table, state } from 'core/status';
 import { temp } from 'core/temps';
 import { renderBodyData } from 'core/render';
 import { getKeyState } from 'core/events';
-import { sortByProps } from '@/utils';
+import { sortByProps, checkPathByClass } from '@/utils';
 
 import './style.scss';
 
@@ -100,7 +100,13 @@ export default class {
 			const evt = ev || event;
 
 			const path = evt.path;
-			const target = path.find(value => value.classList && value.classList.contains('it-sort'));
+			let target = null;
+			if (path) {
+				target = path.find(value => value.classList && value.classList.contains('it-sort'));
+			} else {
+				target = evt.target || evt.srcElement;
+				target = checkPathByClass(target, 'it-sort');
+			}
 
 			if (target) {
 				// console.time('sort');

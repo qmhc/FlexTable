@@ -2,9 +2,11 @@
 
 `i-table` 是一款原生的表格工具，用于快速生成数据表格。
 
+
 ## 开始
 
-1. 克隆项目至本地
+1.  克隆项目至本地
+
 ```bash
 # git
 $ git clone http://192.168.2.4:3000/qmhc/i-table.git
@@ -14,7 +16,8 @@ $ npm install
 $ npm run bild
 ```
 
-2. 引入 `build` 文件夹下的 `itable.js` 和 `itable.css`
+2.  引入 `build` 文件夹下的 `itable.js` 和 `itable.css`
+
 ```html
 <!-- js -->
 <script src="./build/itable.js"></script>
@@ -23,14 +26,31 @@ $ npm run bild
 <link rel="stylesheet" href="./build/itable.css">
 ```
 
+3.  创建一个表格
+
+```javascript
+// 控制器实例化
+const itable = new iTable();
+
+// 创建表格
+itable.create({
+    index: 'it1',
+    container: '#app',
+    columns: [{ /*...*/ }],
+    data: [{ /*...*/ }],
+    // ...
+});
+```
+
 ## 例子
 
 简单示例见 `tests` 文件夹下的 `index.html`
 
+
 ## 配置
 
 一个简单的配置
-```javaScript
+```javascript
 {
     // 表格索引 必须、唯一
     index: 'it1',
@@ -50,6 +70,7 @@ $ npm run bild
     useSelector: true,
     filterAll: true,
     useLayer: true,
+    // ...
 }
 ```
 

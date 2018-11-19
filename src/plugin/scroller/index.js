@@ -48,7 +48,7 @@ export default class {
 							// 
 							setTimeout(() => {
 								const tbodyHeight = tbody.getBoundingClientRect().height;
-								console.log({tbodyHeight});
+								// console.log({tbodyHeight});
 								if (tbodyHeight < bodyHeight) {
 									tbody.style.transition = '';
 									scroller.style.height = `${tbodyHeight}px`;
@@ -135,12 +135,18 @@ export default class {
 		}
 
 		iTable.addEventListener('mousedown', ev => {
-			console.log(this.scroll);
+			// console.log(this.scroll);
 			if (this.scroll === false) return;
 			const evt = ev || event;
 
 			const path = evt.path;
-			const target = path.find(value => value.classList && value.classList.contains('it-tbody'));
+			let target = null;
+			if (path) {
+				target = path.find(value => value.classList && value.classList.contains('it-tbody'));
+			} else {
+				target = evt.target || evt.srcElement;
+				target = checkPathByClass(target, 'it-sort');
+			}
 
 			if (target) {
 				this.start = evt.clientY;

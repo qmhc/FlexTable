@@ -257,6 +257,7 @@ export default class {
 		if (filterOpen) {
 			action.classList.add('open');
 			tr.classList.add('open');
+			filterGroup.style.zIndex = 1;
 		}
 
 		action.addEventListener('click', function() {
