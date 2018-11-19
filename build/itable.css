@@ -173,6 +173,12 @@
   transform: translateY(0);
   transition-timing-function: ease-out; }
 
+.iTable .it-thead .it-tr .it-th:first-child {
+  text-align: center; }
+
+.iTable .it-tbody .it-tr .it-td:first-child {
+  text-align: center; }
+
 .iTable .it-check {
   cursor: pointer; }
 

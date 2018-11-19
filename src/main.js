@@ -6,7 +6,7 @@ import './style/itable.scss';
 
 export const iTable = Manager;
 
-const itable = new iTable();
+// const itable = new iTable();
 
 // console.time('render');
 
@@ -15,7 +15,7 @@ const itable = new iTable();
 // 	container: '#app',
 // 	columns: getColumns(),
 // 	data: makeData(),
-// 	// useSelector: true,
+// 	useSelector: true,
 // 	sortable: false,
 // 	resizable: false,
 // 	// usePageOption: false,

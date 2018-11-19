@@ -1,4 +1,24 @@
 .iTable {
+	.it-thead {
+		.it-tr {
+			.it-th {
+				&:first-child {
+					text-align: center;
+				}
+			}
+		}
+	}
+
+	.it-tbody {
+		.it-tr {
+			.it-td {
+				&:first-child {
+					text-align: center;
+				}
+			}
+		}
+	}
+
 	.it-check {
 		cursor: pointer;
 	}

@@ -1,0 +1,5 @@
+*.log
+*.zip
+*.rar
+node_modules/
+!.gitignore

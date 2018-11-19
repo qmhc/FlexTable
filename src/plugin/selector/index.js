@@ -13,6 +13,17 @@ import './style.scss';
 const selectionRecorder = {};
 const checkboxRecorder = {};
 
+function getSelectedDataList(target) {
+	const recorder = checkboxRecorder[target];
+	const selection = selectionRecorder[target];
+	const selectedDataList = [];
+	for (let id of selection) {
+		const data = {...recorder[id].rowData};
+		selectedDataList.push(data);
+	}
+	return selectedDataList;
+}
+
 const checkboxTemp = inputTemp.cloneNode();
 checkboxTemp.setAttribute('type', 'checkbox');
 checkboxTemp.className = 'it-check';
@@ -87,6 +98,9 @@ export default class {
 		state[target].useSelector = useSelector;
 	}
 	create() {
+		const target = this.target;
+		const { target: iTable } = table[target];
+		iTable.getSelected = getSelectedDataList.bind(iTable, target);
 		this.created = true;
 	}
 	bindEvent() {
