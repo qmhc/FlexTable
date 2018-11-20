@@ -4,15 +4,20 @@ import { deepClone } from '@/utils';
 
 class Manager {
 	constructor() {}
-	create({ index, data, columns, container, ...props }) {
+	create({ index, data, columns, container, theme, ...props }) {
+		// 有效索引
 		if (!index) {
 			console.error(`Parameter 'index' must be a String or a Number.`);
 			return false;
 		}
+
+		// 唯一索引
 		if (table[index]) {
 			console.warn(`iTable '${index}' has been created.`);
 			return false;
 		}
+
+		// 获取容器
 		switch (typeof container) {
 			case 'string': 
 				container = document.querySelector(container);
@@ -25,12 +30,23 @@ class Manager {
 				console.error(`Parameter 'container' must be a String or a HTMLObject.`);
 				return false;
 		}
+
+		// 数据克隆
 		if (props.deepClone !== false) data = deepClone(data);
-		if (props.prgeable === false && data.length >= 1000) props.prgeable = true;
+
 		table[index] = { columns, data };
 		render(index, {...props});
 		const fragment = document.createDocumentFragment();
 		const iTable = table[index].target;
+
+		// 设置主题
+		switch (theme) {
+			case 'blue': iTable.classList.add('theme-blue'); break;
+			case 'red': iTable.classList.add('theme-red'); break;
+			case 'dark': iTable.classList.add('theme-dark'); break;
+			default: iTable.classList.add('theme-light');
+		}
+
 		fragment.appendChild(iTable);
 		container.appendChild(fragment);
 		return true;

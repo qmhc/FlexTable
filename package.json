@@ -1,6 +1,6 @@
 {
   "name": "itable",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "private": true,
   "dependencies": {
@@ -28,12 +28,10 @@
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10",
     "webpack-dev-server-output": "0.0.6",
-    "webpack-merge": "^4.1.4",
-    "worker-loader": "^2.0.0"
+    "webpack-merge": "^4.1.4"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "webpack --watch",
     "start": "webpack-dev-server --open --inline --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js"
   },

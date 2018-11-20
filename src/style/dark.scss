@@ -1,0 +1,98 @@
+.iTable.theme-dark {
+	$root-color: black;
+	border-color: rgba($root-color, .5);
+
+	.it-tr-group {
+		border-color: rgba($root-color, .4);
+	}
+
+	.it-thead {
+		color: rgba(white, .85);
+
+		&.group {
+			background: $root-color;
+			border-color: rgba($root-color, .85);
+		}
+
+		&.shadow {
+			background: lighten($root-color, 25%);
+			box-shadow: 0 2px 15px 0 rgba($root-color, .75);
+		}
+
+		&.filter {
+			background: rgba($root-color, .4);
+
+			.it-filter-action {
+				background: rgba($root-color, .6);
+
+				.it-arrow {
+					color: rgba(white, .1);
+				}
+
+				&:hover, &.open {
+					box-shadow: 0 -2px 15px 0 rgba($root-color, 0.75);
+					background: $root-color;
+
+					.it-arrow {
+						color: rgba(white, .65);
+					}
+				}
+			}
+		}
+
+		.it-th {
+			border-color: rgba(white, .35);
+		}
+	}
+
+	.it-tbody {
+		.it-tr-group {
+			&:nth-child(odd) .it-tr {
+				background: rgba($root-color, .55);
+			}
+
+			&:nth-child(even) .it-tr {
+				background: rgba($root-color, .75);
+			}
+
+			.it-tr:hover {
+				background: rgba($root-color, .65);
+			}
+		}
+	}
+
+	.it-tfoot {
+		box-shadow: 0 0 15px 0 rgba($root-color, .75);
+		border-bottom: 1px solid rgba($root-color, .2);
+		background: lighten($root-color, 5%);
+	}
+
+	.it-tbody, .it-tfoot {
+		.it-td {
+			border-color: rgba(white, .35);
+			color: rgba(white, .85);
+		}
+	}
+
+	.it-pagination {
+		box-shadow: 0 0 15px 0 rgba($root-color, .5);
+		background: lighten($root-color, 30%);
+		color: rgba(white, .85);
+
+		.it-prev, .it-next {
+			.it-button {
+				background: rgba($root-color, .5);
+				color: white;
+
+				&[disabled] {
+					opacity: 0.3;
+				}
+
+				&:not([disabled]):hover {
+					background: darken($root-color, 30%);
+					color: rgba(white, .85);
+				}
+			}
+		}
+	}
+}

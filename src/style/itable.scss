@@ -72,6 +72,9 @@
 			line-height: 1;
 			position: relative;
 			border-right: 1px solid rgba(0, 0, 0, .04);
+			display: inline-flex;
+			flex-direction: column;
+			justify-content: center;
 
 			&:last-child {
 				border-right: none;
@@ -146,11 +149,13 @@
 		position: relative;
 		display: inline-block;
 		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: #fff;
 		border-radius: 4px;
 		padding: .4em;
 		min-width: 100px;
 		user-select: none;
 		cursor: pointer;
+		color: rgba(0, 0, 0, 1);
 
 		.it-option {
 			margin: 0;

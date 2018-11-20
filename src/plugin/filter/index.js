@@ -89,7 +89,7 @@ function renderNumberControl(id) {
 	minNumberInput.setAttribute('placeholder', 'min');
 	minNumberInput.addEventListener('input', () => {
 		const value = minNumberInput.value;
-		props.filterValue[0] = +value || undefined;
+		props.filterValue[0] = value !== ''? +value: undefined;
 		this.filterValueChange = true;
 		renderBodyData(target);
 	});
@@ -98,7 +98,7 @@ function renderNumberControl(id) {
 	maxNumberInput.setAttribute('placeholder', 'max');
 	maxNumberInput.addEventListener('input', () => {
 		const value = maxNumberInput.value;
-		props.filterValue[1] = +value || undefined;
+		props.filterValue[1] = value !== ''? +value: undefined;
 		this.filterValueChange = true;
 		renderBodyData(target);
 	});
@@ -299,6 +299,7 @@ export default class {
 					&&
 					typeof filterValue[1] !== 'number'
 				)  continue;
+
 				const resultData = [];
 				for (let i in filterData) {
 					const rowData = filterData[i];

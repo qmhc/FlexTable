@@ -1,10 +1,9 @@
+'use strict';
+
 const path = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
-	entry: {
-		app: './src/main.js'
-	},
 	module: {
 		rules: [
 			{
@@ -16,17 +15,6 @@ module.exports = {
 					options: {
 						presets: ['@babel/preset-env'],
 						plugins: ['@babel/transform-runtime'],
-					},
-				},
-			},
-			{
-				test: /\.worker\.js$/,
-				include: path.resolve(__dirname, 'src'),
-				use: {
-					loader: 'worker-loader',
-					options: {
-						inline: true,
-						fallback: false,
 					},
 				},
 			},
@@ -91,12 +79,8 @@ module.exports = {
 	plugins: [
 		new CleanWebpackPlugin(['build']),
 	],
-	output: {
-		filename: '[name].[hash].js',
-		path: path.resolve(__dirname, 'build'),
-		// globalObject: 'this',
-	},
 	resolve: {
+		extensions: ['.js', '.json', '.jsx'],
 		alias: {
 			core: path.resolve(__dirname, 'src/core/'),
 			plugin: path.resolve(__dirname, 'src/plugin/'),

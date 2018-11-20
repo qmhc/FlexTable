@@ -1,0 +1,95 @@
+.iTable.theme-blue {
+	$root-color: #2d8cf0;
+	border-color: rgba($root-color, .4);
+
+	.it-tr-group {
+		border-color: rgba($root-color, .4);
+	}
+
+	.it-thead {
+		&.group {
+			background: $root-color;
+			color: white;
+			border-color: rgba($root-color, .85);
+		}
+
+		&.shadow {
+			background: rgba($root-color, .5);
+			// background: #87c1fa;
+			background: lighten($root-color, 10%);
+			box-shadow: 0 2px 15px 0 rgba($root-color, .75);
+			color: white;
+		}
+
+		&.filter {
+			background: rgba($root-color, .25);
+
+			.it-filter-action {
+				// border-color: rgba($root-color, .3);
+				background: rgba($root-color, .3);
+
+				&:hover, &.open {
+					box-shadow: 0 0px 15px 0 rgba($root-color, 0.65);
+					background: rgba($root-color, .5);
+				}
+			}
+		}
+
+		.it-th {
+			border-color: rgba(white, .35);
+		}
+	}
+
+	.it-tbody {
+		.it-tr-group {
+			&:nth-child(odd) .it-tr {
+				background: rgba($root-color, .3);
+			}
+
+			&:nth-child(even) .it-tr {
+				background: rgba($root-color, .5);
+			}
+
+			.it-tr:hover {
+				background: rgba($root-color, .6);
+			}
+
+			.it-td {
+				color: rgba(black, .85);
+			}
+		}
+	}
+
+	.it-tfoot {
+		box-shadow: 0 0 15px 0 rgba($root-color, .75);
+		border-bottom: 1px solid rgba($root-color, .2);
+		background: lighten($root-color, 5%);
+		color: white;
+	}
+
+	.it-tbody, .it-tfoot {
+		.it-td {
+			border-color: rgba(white, .35);
+		}
+	}
+
+	.it-pagination {
+		box-shadow: 0 0 15px 0 rgba($root-color, .5);
+		background: rgba($root-color, .45);
+
+		.it-prev, .it-next {
+			.it-button {
+				background: rgba($root-color, .65);
+				color: white;
+
+				&[disabled] {
+					opacity: 0.4;
+				}
+
+				&:not([disabled]):hover {
+					background: rgba($root-color, .9);
+				}
+			}
+		}
+	}
+}

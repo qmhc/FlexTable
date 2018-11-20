@@ -1,3 +1,5 @@
+'use strict';
+
 const webpack = require('webpack');
 const merge = require('webpack-merge');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -6,14 +8,24 @@ const common = require('./webpack.common.js');
 const path = require('path');
 
 const miniCssExtract = new MiniCssExtractPlugin({
-	filename: "itable.css",
-	chunkFilename: "[id].css",
-	disable: process.env.NODE_ENV === "development",
+	filename: 'itable.css',
+	chunkFilename: 'itable.css',
+	disable: process.env.NODE_ENV === 'development',
 });
 
 const uglify = new UglifyJSPlugin({ sourceMap: false });
 
 module.exports = merge(common, {
+	mode: 'production',
+	entry: {
+		app: './src/build.js',
+	},
+	output: {
+		filename: 'itable.js',
+		path: path.resolve(__dirname, 'build'),
+		// library: '',
+		libraryTarget: 'umd',
+	},
 	// devtool: 'source-map',
 	plugins: [		
 		miniCssExtract,
@@ -40,11 +52,4 @@ module.exports = merge(common, {
 			},
 		],
 	},
-	output: {
-		filename: 'itable.js',
-		path: path.resolve(__dirname, 'build'),
-		// library: '',
-		libraryTarget: 'umd',
-	},
-	mode: 'production',
 });

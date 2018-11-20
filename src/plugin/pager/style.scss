@@ -5,13 +5,14 @@
 		align-items: stretch;
 		flex-wrap: wrap;
 		box-shadow: 0 0 15px 0 rgba(0, 0, 0, .1);
+		background: #fff;
 		padding: .3em;
 
 		.it-prev, .it-next {
 			flex: 1;
 			text-align: center;
 
-			button {
+			.it-button {
 				opacity: 1;
 				display: block;
 				appearance: none;

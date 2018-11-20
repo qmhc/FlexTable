@@ -52,6 +52,7 @@ itable.create({
 ## 配置
 
 一个简单的配置
+
 ```javascript
 {
     // 表格索引 必须、唯一
@@ -59,7 +60,7 @@ itable.create({
     // 表格容器 可以是css选择器或者Node对象
     container: '#app',
     // 各列相关参数
-    columns： [{
+    columns: [{
         name: 'Name',
         // accessor: 'name',
         accessor: data => data.name,
@@ -77,3 +78,17 @@ itable.create({
 ```
 
 更具体的配置可以参考例子。
+
+## 主题
+
+`iTable` 内置有四种主题颜色，配置中添加 `theme` 属性可以设置主题
+
+```javascript
+{
+    theme: 'dark',
+    // theme: 'blue',
+    // theme: 'red',
+    // theme: 'light',     // default
+    // ...
+}
+```

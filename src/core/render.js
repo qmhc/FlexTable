@@ -45,6 +45,7 @@ export default function render(target, options) {
 	state[target] = {};
 	const thisPlugins = {};
 	table[target].plugins = thisPlugins;
+	const { id, className } = options;
 
 	// 插件实例化
 	// beforeInit 钩子 (预处理)
@@ -58,6 +59,9 @@ export default function render(target, options) {
 	const wrapper = temp.cloneNode();
 	wrapper.className = 'iTable';
 	table[target].target = wrapper;
+
+	if (typeof id === 'string') wrapper.setAttribute('id', id);
+	if (typeof className === 'string') wrapper.classList.add(className);
 
 	const iTable = tableTemp.cloneNode();
 	wrapper.appendChild(iTable);
