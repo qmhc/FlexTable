@@ -1,11 +1,10 @@
-module.exports = {
-	usePlugins: [
-		'layer',
-		'selector',
-		'filter',
-		'sorter',		
-		'pager',
-		'scroller',
-		'resizer',
-	],
-};
+export default [
+	'layer',
+	'selector',
+	'filter',
+	'sorter',		
+	'pager',
+	'scroller',
+	'resizer',
+	'editor'
+]

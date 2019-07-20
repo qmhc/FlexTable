@@ -22,13 +22,15 @@ module.exports = merge(common, {
 		contentBase: './build',
 		hot: true,
 		inline: true,
+		port: 3016
 		// publicPath: '/assets/',
 	},
 	plugins: [
 		new webpack.NamedModulesPlugin(),
 		new webpack.HotModuleReplacementPlugin(),
 		new HtmlWebpackPlugin({
-			template: './public/index.html',
+			filename: 'index.html',
+			template: path.resolve(__dirname, 'public', 'index.html')
 		}),
 	],
 	optimization: {

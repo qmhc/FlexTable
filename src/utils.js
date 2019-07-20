@@ -116,41 +116,50 @@ export const createSelect = (options, defaultIndex = -1) => {
 	return div;
 };
 
+/**
+ * 获取变量类型
+ * @param {any} any 任意变量
+ */
+export const getType = any => Object.prototype.toString.call(any).replace(/\[object\s(.+)\]/, '$1').toLowerCase()
+
+/**
+ * 根据依赖的属性逐层排序
+ * @param {Array} obj 需要排序的数组
+ * @param {Object|String} props 排序依赖的属性 key-属性名 sorter-排序方法 accessor-数据获取方法 type-升降序
+ */
 export const sortByProps = (obj, props) => {
-	if (!obj.sort || !props.length) return obj;
-	const sortObj = [...obj];
-	const defaultSortMethod = (a, b) => a > b? 1: a < b? -1: 0;
-	props = props.map(
-		value => typeof value === 'object'? value: { key: value, sorter: defaultSortMethod, type: 'asc' }
-	).map(
-		value => { 
-			if (typeof value.accessor !== 'function') {
-				value.accessor = data => data[value.key];
-			}
-			if (typeof value.sorter !== 'function') {
-				value.sorter = defaultSortMethod;
-			}
-			return value;
-		}
-	);
-	sortObj.sort(
-		(prev, next) => {
-			const results = [];
-			for (let i = 0, len = props.length; i < len; i++) {
-				const prop = props[i];
-				const { sorter, type, accessor } = prop;
-				let asc = type === 'asc';
-				const result = sorter(accessor(prev), accessor(next));
-				results.push(asc? result: -result);
-				if (result) break;
-			}
-			for (let result of results) {
-				if (result) return result;
-			}
-			return 0;
-		}
-	);
-	return sortObj;
+  if (!obj.sort || !props.length) return obj
+  const sortObj = [...obj]
+  const defaultSortMethod = (a, b) => a.toString().localeCompare(b)
+  if (getType(props) !== 'array') props = [ props ]
+  props = props.map(
+    value => getType(value) === 'object' ? value : { key: value, sorter: defaultSortMethod, type: 'asc' }
+  ).map(
+    value => {
+      if (getType(value.accessor) !== 'function') {
+        value.accessor = data => data[value.key]
+      }
+      if (getType(value.sorter) !== 'function') {
+        value.sorter = defaultSortMethod
+      }
+      return value
+    }
+  )
+  sortObj.sort(
+    (prev, next) => {
+      const results = []
+      for (let prop of props) {
+        const { sorter, type, accessor } = prop
+        let desc = type === 'desc'
+        const result = sorter(accessor(prev), accessor(next))
+        results.push(desc ? -result : result)
+        // 若不为0则无需进行下一层排序
+        if (result) break
+      }
+      return results.pop() || 0
+    }
+  )
+  return sortObj
 }
 
 export const checkPathByClass = (node, className) => {
@@ -165,27 +174,10 @@ export const checkPathByClass = (node, className) => {
 };
 
 // 简单 (非深度) 去重
-export const getUniqueArray = array => {
-	const uniqueArray = [];
-	// for (let i = 0, len = array.length; i < len; i++) {
-	// 	for (let j = i + 1; j < len; j ++) {
-	// 		if (array[i] === array[j]) {
-	// 			i++;
-	// 			j = i;
-	// 		}
-	// 	}
-	// 	uniqueArray.push(array[i]);
-	// }
-	for (let i = 0, len = array.length; i < len; i++) {
-		if (!uniqueArray.includes(array[i])) {
-			uniqueArray.push(array[i]);
-		}
-	}
-	return uniqueArray;
-}
+export const getUniqueArray = array => [...new Set(array)];
 
 // 生成uuid (v4)
-const CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');		// ABCDEFGHIJKLMNOPQRSTUVWXYZ
+const CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'.split(''); // ABCDEFGHIJKLMNOPQRSTUVWXYZ
 export const getUuid = () => {
 	const uuid = new Array(36);
 	let random1 = 0, random2;
@@ -207,12 +199,67 @@ export const getUuid = () => {
 	return uuid.join('');
 };
 
+/**
+ * 深度拷贝对象或数组 (避免一层死循环)
+ * @param {Object|Array} obj 需要拷贝的对象或数组
+ */
 export const deepClone = obj => {
-	const objStr = JSON.stringify(obj);
-	return JSON.parse(objStr);
-};
+  const type = getType(obj)
+
+  // 类型校验
+  let _root
+  switch (type) {
+    case 'object': _root = {}; break
+    case 'array': _root = []; break
+    default: return obj
+  }
+
+  // 循环数组栈
+  const loopList = [
+    {
+      parent: _root,
+      key: undefined,
+      data: obj
+    }
+  ]
+
+  while (loopList.length) {
+    // 先入后出，深度优先
+    const node = loopList.pop()
+    const { parent, key, data } = node
+    const type = getType(data)
+
+    // 初始化克隆对象_root
+    let res = parent
+    if (getType(key) !== 'undefined') {
+      res = parent[key] = type === 'array' ? [] : {}
+    }
+
+    for (let i in data) {
+      let _data = data[i]
+      let _type = getType(_data)
+      if (type === 'array' || (type === 'object' && Object.prototype.hasOwnProperty.call(data, i))) {
+        // 避免一层死循环
+        if (_data === data) {
+          res[i] = res
+        } else if (_type === 'object' || _type === 'array') {
+          loopList.push({
+            parent: res,
+            key: i,
+            data: _data
+          })
+        } else {
+          res[i] = _data
+        }
+      }
+    }
+  }
+
+  return _root
+}
 
 export default {
+	getType,
 	getStyle,
 	toggleDisabled,
 	sortByProps,

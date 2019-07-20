@@ -2,6 +2,11 @@
 	$root-color: #2d8cf0;
 	border-color: rgba($root-color, .4);
 
+	*::selection {
+		background: lighten($root-color, 15%); 
+		color: rgba(white, .85);
+	}
+
 	.it-tr-group {
 		border-color: rgba($root-color, .4);
 	}

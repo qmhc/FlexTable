@@ -12,10 +12,10 @@ module.exports = {
 				exclude: /(node_modules|bower_components)/,
 				use: {
 					loader: 'babel-loader',
-					options: {
-						presets: ['@babel/preset-env'],
-						plugins: ['@babel/transform-runtime'],
-					},
+					// options: {
+					// 	presets: ['@babel/preset-env'],
+					// 	plugins: ['@babel/transform-runtime'],
+					// },
 				},
 			},
 			{
@@ -80,7 +80,7 @@ module.exports = {
 		new CleanWebpackPlugin(['build']),
 	],
 	resolve: {
-		extensions: ['.js', '.json', '.jsx'],
+		extensions: ['.js', '.json'],
 		alias: {
 			core: path.resolve(__dirname, 'src/core/'),
 			plugin: path.resolve(__dirname, 'src/plugin/'),

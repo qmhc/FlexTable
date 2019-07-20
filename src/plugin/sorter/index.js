@@ -3,169 +3,172 @@
  *	@description 表格数据排序
  */
 
-import { table, state } from 'core/status';
-import { temp } from 'core/temps';
-import { renderBodyData } from 'core/render';
-import { getKeyState } from 'core/events';
-import { sortByProps, checkPathByClass } from '@/utils';
+import { getKeyState } from 'core/events'
+import { sortByProps, checkPathByClass } from '@/utils'
 
-import './style.scss';
-
-// 多列排序缓存
-let sortCacheData = {};
+import './style.scss'
 
 function getPluralSortData(data) {
-	const target = this.target;
-	const { target: iTable, columnProps } = table[target];
-	let { sortBy, sortType } = state[target];
-	const sortHandlers = iTable.querySelectorAll('.it-sort');
+	const { table, columnProps } = this.tableInstance
+	let { sortBy, sortType } = this.state
+	const sortHandlers = table.querySelectorAll('.it-sort')
+
 	const optinos = sortBy.map(
 		(value, index) => {
-			const props = columnProps.find(cp => cp.id === value);
-			const type = sortType[index] === 1? 'asc': 'des';
-			const { accessor, sorter, index: key } = props;
+			const props = columnProps.find(cp => cp.id === value)
+			const type = sortType[index] === 1? 'asc': 'desc'
+			const { accessor, sorter, index: key } = props
 
 			switch (sortType[index]) {
-				case 1: sortHandlers[key].classList.add('asc'); break;
-				case 2: sortHandlers[key].classList.add('des'); break;
+				case 1: sortHandlers[key].classList.add('asc'); break
+				case 2: sortHandlers[key].classList.add('desc'); break
 			}
 
-			return { type, accessor, sorter };
+			return { type, accessor, sorter }
 		}
-	);
-	return sortByProps(data, optinos);
-};
+	)
 
-const defaultSortMethod = (a, b) => a > b? 1: a < b? -1: 0;
+	return sortByProps(data, optinos)
+}
 
-export default class {
-	constructor(target) {
-		this.target = target;
-		this.getSortData = getPluralSortData.bind(this);
-	}
-	shouldUse(state) {
-		return state.sortable !== false;
-	}
-	beforeInit(options) {
-		const target = this.target;
-		const currentState = state[target];
-		const { sortable, sortCache } = options;
-		state[target] = {
-			...currentState,
+const defaultSortMethod = (a, b) => a.toString().localeCompare(b)
+
+export default class Sorter {
+	constructor (tableInstance, options) {
+		this.tableInstance = tableInstance
+		this.getSortData = getPluralSortData.bind(this)
+		
+		const { sortable, sortCache } = options
+
+		this.tableInstance.state = {
+			...this.tableInstance.state,
 			sortable: sortable !== false,
 			sortBy: [undefined],
-			sortType: [0],			// 0 normal | 1 asc | 2 des
+			sortType: [0],			// 0 normal | 1 asc | 2 desc
 			sortData: undefined,
-			sortCache: sortCache === true,
-		};
+			sortCache: sortCache === true, // 多列排序缓存
+		}
+
+		this.state = this.tableInstance.state
 	}
-	beforeRenderData(data) {
-		const target = this.target;
-		const { sortBy, sortCache } = state[target];
+
+	shouldUse () {
+		return this.state.sortable !== false
+	}
+
+	beforeRenderData (data) {
+		const { sortBy } = this.state
+
 		if (typeof sortBy[0] !== 'undefined') {
-			data = this.getSortData(data);
+			data = this.getSortData(data)
 		}
-		return data;
+
+		return data
 	}
-	beforeCreate() {
-		const target = this.target;
-		const { columnProps, columns } = table[target];
-		const sorters = [];
+
+	beforeCreate () {
+		const { columnProps } = this.tableInstance
+
 		for (let props of columnProps) {
-			const { sorter } = props;
-			props.sorter = sorter !== false? typeof value === 'function'? value: defaultSortMethod: false;
-			// console.log({props});
+			const { sorter } = props
+			props.sorter = sorter !== false? typeof value === 'function'? value: defaultSortMethod: false
 		}
 	}
-	create() {
-		const target = this.target;
-		const iTable = table[target].target;
-		const ths = iTable.querySelectorAll('.it-thead.shadow .it-th');
+
+	create () {
+		const table = this.tableInstance.table
+		const ths = table.querySelectorAll('.it-thead.shadow .it-th')
 
 		for (let i = 0, len = ths.length; i < len; i++) {
-			const th = ths[i];
-			th.classList.add('it-sort');
+			const th = ths[i]
+			th.classList.add('it-sort')
 		}
 
-		if (state[target].sortCache) sortCacheData[target] = new Map();
-		this.created = true;
+		if (this.state.sortCache) {
+			this.sortCacheData = new Map()
+		}
+
+		this.created = true
 	}
-	bindEvent() {
-		const key = this.target;
-		const { target: iTable, columnProps } = table[key];
 
-		iTable.addEventListener('click', function(ev) {
-			const thisState = state[key];
-			if (thisState.resizing) return;
-			const evt = ev || event;
+	bindEvent () {
+		const { table, columnProps } = this.tableInstance
 
-			const path = evt.path;
-			let target = null;
+		table.addEventListener('click', ev => {
+			if (this.state.resizing) {
+				return false
+			}
+
+			const evt = ev || event
+			const path = evt.path
+
+			let target = null
+
 			if (path) {
-				target = path.find(value => value.classList && value.classList.contains('it-sort'));
+				target = path.find(value => value.classList && value.classList.contains('it-sort'))
 			} else {
-				target = evt.target || evt.srcElement;
-				target = checkPathByClass(target, 'it-sort');
+				target = evt.target || evt.srcElement
+				target = checkPathByClass(target, 'it-sort')
 			}
 
 			if (target) {
-				// console.time('sort');
-				const id = target.itColumnId;
-				if (!id) return;
-				const props = columnProps.find(value => value.id === id);
-				const { sorter } = props;
+				const id = target.itColumnId
+				
+				if (!id) {
+					return false
+				}
+
+				const props = columnProps.find(value => value.id === id)
+				const { sorter } = props
 
 				if (sorter) {
-					let { sortBy, sortType } = thisState;
+					let { sortBy, sortType } = this.state
 					
-					if (
-						typeof sortBy[0] !== 'undefined'
-						&&
-						(sortBy.length !== 1 || sortBy[0] !== id)
-						&&
-						getKeyState('shift')
-					) {
-						const targetIndex = sortBy.findIndex(value => value === id);
-						let sortIndex = 0;
+					if (typeof sortBy[0] !== 'undefined' && (sortBy.length !== 1 || sortBy[0] !== id) && getKeyState('shift')) {
+						const targetIndex = sortBy.findIndex(value => value === id)
+						let sortIndex = 0
+
 						if (targetIndex !== -1) {
-							sortIndex = targetIndex;
-							sortType[sortIndex] = (sortType[sortIndex] + 1) % 3;
+							sortIndex = targetIndex
+							sortType[sortIndex] = (sortType[sortIndex] + 1) % 3
+
 							if (!sortType[sortIndex]) {
-								sortBy.splice(sortIndex, 1);
-								sortType.splice(sortIndex, 1);
-								target.classList.remove('asc', 'des');
+								sortBy.splice(sortIndex, 1)
+								sortType.splice(sortIndex, 1)
+								target.classList.remove('asc', 'desc')
 							}
 						} else {
-							sortIndex = sortBy.push(id) - 1;
-							sortType[sortIndex] = 1;
+							sortIndex = sortBy.push(id) - 1
+							sortType[sortIndex] = 1
 						}
 					} else {
 						if (sortBy.length > 1 || sortBy[0] !== id) {
-							thisState.sortBy = [id];
-							thisState.sortType = [0];
+							this.state.sortBy = [id];
+							this.state.sortType = [0];
 						}
 
-						iTable.querySelectorAll('.asc, .des').forEach(
-							value => value.classList.remove('asc', 'des')
-						);
-						sortBy = thisState.sortBy;
-						sortType = thisState.sortType;
-						sortType[0] = (sortType[0] + 1) % 3;
+						table.querySelectorAll('.asc, .desc').forEach(
+							value => value.classList.remove('asc', 'desc')
+						)
+
+						sortBy = this.state.sortBy
+						sortType = this.state.sortType
+						sortType[0] = (sortType[0] + 1) % 3
 
 						if (!sortType[0]) {
-							sortBy[0] = undefined;
+							sortBy[0] = undefined
 						} else {
 							switch (sortType[0]) {
-								case 1: target.classList.add('asc'); break;
-								case 2: target.classList.add('des'); break;
+								case 1: target.classList.add('asc'); break
+								case 2: target.classList.add('desc'); break
 							}
 						}
 					}
 
-					renderBodyData(key);
+					this.tableInstance.renderBodyData()
 				}
 				// console.timeEnd('sort');
 			}
-		});
+		})
 	}
 }

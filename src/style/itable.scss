@@ -7,6 +7,11 @@
 
 	* {
 		box-sizing: border-box;
+
+		&::selection {
+			background: lighten(black, 70%); 
+			color: rgba(white, .85);
+		}
 	}
 
 	.it-table {
@@ -40,6 +45,8 @@
 		overflow: hidden;
 		transition: all .2s ease-out;
 		padding: .4em;
+		display: flex;
+		align-items: center;
 	}
 
 	.it-thead {

@@ -1,9 +1,9 @@
-import { table, state } from './status';
-import { sortByProps } from '@/utils';
-import { renderBodyData } from './render';
-import {
-	temp,
-} from './temps';
+// import { table, state } from './status';
+// import { sortByProps } from '@/utils';
+// import { renderBodyData } from './render';
+// import {
+// 	temp,
+// } from './temps';
 
 // 记录按键
 let useCtrl = false;

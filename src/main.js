@@ -1,5 +1,5 @@
 import Mock from 'mockjs';
-import Manager from './core/manager';
+import FlexTable from './core';
 
 import './style/itable.scss';
 import './style/blue.scss';
@@ -27,11 +27,13 @@ const getColumns = () => {
 				{
 					name: 'First Name',
 					accessor: 'firstName',
+					key: 'firstName',
 					filter: true,
 				},
 				{
 					name: 'Last Name',
 					accessor: data => data.lastName,
+					key: 'lastName'
 				},
 			],
 		},
@@ -41,12 +43,14 @@ const getColumns = () => {
 				{
 					name: 'Age',
 					accessor: 'age',
+					key: 'age',
 					footer: data => `<span style="font-weight:700">Max:</span> ${Math.max(...data)}`,
 					resizer: false,
 				},
 				{
 					name: 'Visits',
 					accessor: 'visits',
+					key: 'visits',
 					footer: data => `<span style="font-weight:700">Min:</span> ${Math.min(...data)}`,
 					filter: true,
 					filterOptions: {
@@ -56,6 +60,7 @@ const getColumns = () => {
 				{
 					name: 'Progress',
 					accessor: 'progress',
+					key: 'progress',
 					footer: data => {
 						let sum = 0;
 						for (let value of data) {
@@ -96,16 +101,17 @@ const getColumns = () => {
 	];
 }
 
-const itable = new Manager();
+// const flexTable = new Manager();
 
 console.time('render');
 
-itable.create({
-	index: 'it1',
+const table = new FlexTable({
+	// index: 'it1',
 	container: '#app',
 	columns: getColumns(),
 	data: makeData(),
 	useSelector: true,
+	editable: true,
 	// sortable: false,
 	// resizable: false,
 	// usePageOption: false,
@@ -113,8 +119,10 @@ itable.create({
 	filterAll: true,
 	filterOpen: true,
 	// useLayer: true,
-	// bodyHeight: 450,
-	theme: 'red',
+	bodyHeight: 450,
+	// theme: 'blue',
 });
 
 console.timeEnd('render');
+
+window.table = table

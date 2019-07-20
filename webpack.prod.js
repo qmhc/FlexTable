@@ -8,8 +8,8 @@ const common = require('./webpack.common.js');
 const path = require('path');
 
 const miniCssExtract = new MiniCssExtractPlugin({
-	filename: 'itable.css',
-	chunkFilename: 'itable.css',
+	filename: 'flex-table.css',
+	chunkFilename: 'flex-table.css',
 	disable: process.env.NODE_ENV === 'development',
 });
 
@@ -21,10 +21,13 @@ module.exports = merge(common, {
 		app: './src/build.js',
 	},
 	output: {
-		filename: 'itable.js',
+		filename: 'flex-table.js',
 		path: path.resolve(__dirname, 'build'),
-		// library: '',
+		library: 'FlexTable',
+		libraryExport: 'default',
 		libraryTarget: 'umd',
+		globalObject: 'this',
+		umdNamedDefine: true
 	},
 	// devtool: 'source-map',
 	plugins: [		

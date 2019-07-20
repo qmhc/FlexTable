@@ -2,6 +2,11 @@
 	$root-color: #fa2314;
 	border-color: rgba($root-color, .5);
 
+	*::selection {
+		background: darken($root-color, 10%); 
+		color: rgba(white, .85);
+	}
+
 	.it-tr-group {
 		border-color: rgba($root-color, .4);
 	}
@@ -11,7 +16,7 @@
 
 		&.group {
 			background: darken($root-color, 6%);
-			border-color: rgba($root-color, .85);
+			border-color: rgba(white, .45);
 		}
 
 		&.shadow {
@@ -23,10 +28,10 @@
 			background: rgba($root-color, .4);
 
 			.it-filter-action {
-				background: rgba($root-color, .6);
+				background: rgba($root-color, .65);
 
 				.it-arrow {
-					color: rgba(white, .1);
+					color: rgba(white, .2);
 				}
 
 				&:hover, &.open {
@@ -63,7 +68,7 @@
 
 	.it-tfoot {
 		box-shadow: 0 0 15px 0 $root-color;
-		border-bottom: 1px solid rgba($root-color, .2);
+		border-bottom: 1px solid rgba(white, .35);
 		background: darken($root-color, 6%);
 	}
 

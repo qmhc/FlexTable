@@ -1,41 +1,36 @@
 # iTable
 
-`i-table` 是一款原生的表格工具，用于快速生成数据表格。
+`flex-table` 是一款原生的表格工具，其完全基于flex，没有任何的table相关的html，可用于快速生成数据表格。
 
-![视觉](http://zuoyue.imwork.net:3000/qmhc/i-table/raw/master/public/visual.png)
+![视觉](./public/visual.png)
 
 
 ## 开始
 
-克隆项目至本地
-
 ```bash
-# git
-$ git clone http://192.168.2.4:3000/qmhc/i-table.git
-
-# npm
-$ npm install
-$ npm run build
+npm install --save flex-table
 ```
 
-引入 `build` 文件夹下的 `itable.js` 和 `itable.css`
+引入 `build` 文件夹下的 `flex-table.js` 和 `flex-table.css`
 
 ```html
 <!-- js -->
-<script src="./build/itable.js"></script>
+<script src="./build/flex-table.js"></script>
 
 <!-- css -->
-<link rel="stylesheet" href="./build/itable.css">
+<link rel="stylesheet" href="./build/flex-table.css">
 ```
 
 创建一个表格
 
 ```javascript
-// 控制器实例化
-const itable = new iTable();
+// 实例化后的 FlexTable 其实是一个管理器
+// 可以使用其多次创建表格
+// 每个表格在管理器内有唯一的索引
+const flexTable = new FlexTable();
 
 // 创建表格
-itable.create({
+flexTable.create({
     index: 'it1',
     container: '#app',
     columns: [{ /*...*/ }],
@@ -79,6 +74,8 @@ itable.create({
 
 更具体的配置可以参考例子。
 
+PS: 内置的 `resizer` 插件是基于 `Proxy` 编写的，使用时请注意兼容性
+
 ## 主题
 
 `iTable` 内置有四种主题颜色，配置中添加 `theme` 属性可以设置主题
@@ -92,3 +89,5 @@ itable.create({
     // ...
 }
 ```
+
+如果想自定义配置主题，可以参考 `/src/style` 下的 `scss` 文件配置主题
