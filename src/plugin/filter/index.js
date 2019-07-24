@@ -9,9 +9,9 @@ import {
 	trTemp,
 	thTemp,
 	spanTemp,
-	inputTemp,
+	inputTemp
 } from 'core/temps'
-import { createSelect } from '@/utils'
+import { createSelect, html2Element } from '@/utils'
 
 import './style.scss'
 
@@ -22,17 +22,23 @@ const defaultTextFilter = (value, filter) => {
 	for (let word of keyWords) {
 		if (!value.includes(word)) return false
 	}
+
 	return true
 }
 
 const defaultNumberFilter = (value, filter) => {
-	value = +value;
-	if (Number.isNaN(value)) return false;
+	value = +value
+
+	if (Number.isNaN(value)) {
+		return false
+	}
+
 	const res = (
 		(typeof filter[0] !== 'number' || value >= filter[0])
 		&&
 		(typeof filter[1] !== 'number' || value <= filter[1])
 	)
+
 	return res
 }
 
@@ -44,7 +50,7 @@ function getProps (id) {
 function renderTextControl (id) {
 	const props = getProps.call(this, id)
 
-	const control = temp.cloneNode();
+	const control = temp.cloneNode()
 	control.className = 'it-filter'
 
 	const textInput = inputTemp.cloneNode()
@@ -56,24 +62,32 @@ function renderTextControl (id) {
 
 		this.filterValueChange = true
 		this.tableInstance.renderBodyData()
-	});
-
-	// let _value = '';
-	// Reflect.defineProperty(props, 'filterValue', {
-	// 	get() {
-	// 		return _value;
-	// 	},
-	// 	set(newValue) {
-	// 		if (_value !== newValue) {
-	// 			textInput.value = newValue || '';
-	// 			_value = newValue;
-	// 		}			
-	// 	},
-	// 	enumerable : true,
-	// 	configurable : true,
-	// });
+	})
 
 	control.appendChild(textInput)
+	return control
+}
+
+function renderDateControl (id) {
+	const props = getProps.call(this, id)
+
+	const { dateType } = props.filterOptions
+
+	const control = temp.cloneNode()
+	control.className = 'it-filter'
+
+	const dateInput = inputTemp.cloneNode()
+	dateInput.setAttribute('type', dateType || 'date')
+
+	dateInput.addEventListener('change', () => {
+		const value = dateInput.value
+		props.filterValue = value
+
+		this.filterValueChange = true
+		this.tableInstance.renderBodyData()
+	})
+
+	control.appendChild(dateInput)
 	return control
 }
 
@@ -103,7 +117,7 @@ function renderNumberControl (id) {
 	maxNumberInput.addEventListener('input', () => {
 		const value = maxNumberInput.value;
 		props.filterValue[1] = value !== ''? +value: undefined
-		this.filterValueChange = true;
+		this.filterValueChange = true
 		this.tableInstance.renderBodyData()
 	})
 
@@ -160,7 +174,8 @@ function getPorxyAccessor (accessor, filterValue) {
 	switch (typeof filterValue) {
 		case 'object': return rowData => {
 			const value = accessor(rowData)
-			return value && `<span class="it-highlight">${value}</span>`
+			const html = value ? `<span class="it-highlight">${value}</span>` : '&nbsp;'
+			return html2Element(html)
 		}
 		case 'boolean': return accessor
 	}
@@ -172,7 +187,9 @@ function getPorxyAccessor (accessor, filterValue) {
 	return rowData => {
 		const value = accessor(rowData)
 		if (typeof value === 'object') return value
-		return value && value.toString().replace(new RegExp(keyWords, 'ig'), `<span class="it-highlight">$1</span>`)
+		const html = value ? value.toString().replace(new RegExp(keyWords, 'ig'), `<span class="it-highlight">$1</span>`) : '&nbsp;'
+		const element = html2Element(html)
+		return element || ''
 	}
 }
 
@@ -183,11 +200,12 @@ export default class Filter {
 		this.renderTextControl = renderTextControl.bind(this)
 		this.renderNumberControl = renderNumberControl.bind(this)
 		this.renderSelectControl = renderSelectControl.bind(this)
+		this.renderDateControl = renderDateControl.bind(this)
 		this.renderCheckControl = renderCheckControl.bind(this)
 
 		const { columns } = this.tableInstance
 
-		let { filterAll, filterOpen } = options
+		let { filterAll, filterOpen, filterOpenAction } = options
 		
 		// 设置是否默认所有列都添加筛选
 		filterAll = filterAll === true
@@ -204,8 +222,11 @@ export default class Filter {
 					) !== -1)
 			) !== -1,
 			filterOpen: filterOpen === true,
+			filterOpenAction: filterOpenAction !== false
 		}
+	}
 
+	afterContruct () {
 		this.state = this.tableInstance.state
 	}
 
@@ -219,22 +240,25 @@ export default class Filter {
 
 		for (let i in columnProps) {
 			const props = columnProps[i]
-			const { filter, filterOptions } = props
+			const { filterable, filter, filterOptions } = props
 
-			if (filterAll || filter) {
+			if (filterAll || filterable) {
 				if (typeof filter === 'function') {
 					props.filter = filter
-				} else if ((filterAll && filter !== false) || filter === true) {
-					props.filter = (filterOptions && filterOptions.type === 'number')? defaultNumberFilter: defaultTextFilter
+					props.filterable = true
+				} else if ((filterAll && filterable !== false) || filterable === true) {
+					props.filter = (filterOptions && filterOptions.type === 'number') ? defaultNumberFilter : defaultTextFilter
+					props.filterable = true
 				} else {
-					props.filter = false
+					props.filter = null
+					props.filterable = false
 				}
 			}
 		}
 	}
 
 	create () {
-		const { filterAll, filterOpen } = this.state
+		const { filterAll, filterOpen, filterOpenAction } = this.state
 		const { table, columnProps } = this.tableInstance
 		const tbodyGroup = table.querySelector('.it-tbody-group')
 
@@ -245,19 +269,38 @@ export default class Filter {
 
 		for (let i in columnProps) {
 			const props = columnProps[i]
-			const { width, filter, accessor, id } = props
+			const { width, filterable, accessor, id } = props
 			const th = thTemp.cloneNode()
 			th.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
-			if ((filterAll && filter !== false) || filter) {
+
+			if ((filterAll && filterable !== false) || filterable) {
 				const options = props.filterOptions || { type: 'text' }
 				let filterControl = null
 
 				switch (options.type) {
-					case 'text': filterControl = this.renderTextControl(id); break;					
-					case 'number': filterControl = this.renderNumberControl(id); break;
-					case 'select': filterControl = this.renderSelectControl(id); break;
-					case 'check': filterControl = this.renderCheckControl(id); break;
-					default: throw new Error(`You may be lost 'type' in your filterOption.`);
+					case 'text': {
+						filterControl = this.renderTextControl(id)
+						break
+					}
+					case 'number': {
+						filterControl = this.renderNumberControl(id)
+						break
+					}
+					case 'select': {
+						filterControl = this.renderSelectControl(id)
+						break
+					}
+					case 'date': {
+						filterControl = this.renderDateControl(id)
+						break
+					}
+					case 'check': {
+						filterControl = this.renderCheckControl(id)
+						break
+					}
+					default: {
+						throw new Error(`You may be lost 'type' in your filterOption.`)
+					}
 				}
 
 				th.appendChild(filterControl)				
@@ -270,39 +313,44 @@ export default class Filter {
 		}
 		filterGroup.appendChild(tr)
 
-		const action = temp.cloneNode()
-		action.className = 'it-filter-action'
-		const arrow = spanTemp.cloneNode()
-		arrow.textContent = '≡'
-		arrow.className = 'it-arrow'
-		action.appendChild(arrow)
+		if (filterOpenAction) {
+			const action = temp.cloneNode()
+			action.className = 'it-filter-action'
+			const arrow = spanTemp.cloneNode()
+			arrow.textContent = '≡'
+			arrow.className = 'it-arrow'
+			action.appendChild(arrow)
 
-		if (filterOpen) {
-			action.classList.add('open')
-			tr.classList.add('open')
-			filterGroup.style.zIndex = 1
-		}
-
-		action.addEventListener('click', function() {
-			if (action.classList.contains('open')) {
-				action.classList.remove('open')
-				tr.classList.remove('open')
-				filterGroup.style.zIndex = ''
-
-				this.state.filterOpen = false
-			} else {
+			if (filterOpen) {
 				action.classList.add('open')
 				tr.classList.add('open')
-
-				setTimeout(() => {
-					filterGroup.style.zIndex = 1
-				}, 300)
-
-				this.state.filterOpen = true
+				filterGroup.style.zIndex = 1
 			}
-		});
 
-		filterGroup.appendChild(action)
+			action.addEventListener('click', () => {
+				if (action.classList.contains('open')) {
+					action.classList.remove('open')
+					tr.classList.remove('open')
+					filterGroup.style.zIndex = ''
+
+					this.state.filterOpen = false
+				} else {
+					action.classList.add('open')
+					tr.classList.add('open')
+
+					setTimeout(() => {
+						filterGroup.style.zIndex = 1
+					}, 300)
+
+					this.state.filterOpen = true
+				}
+			})
+
+			filterGroup.appendChild(action)
+		} else {
+			tr.classList.add('no-action')
+			filterGroup.style.zIndex = 1
+		}
 
 		tbodyGroup.parentNode.insertBefore(filterGroup, tbodyGroup)
 		this.created = true
@@ -316,11 +364,11 @@ export default class Filter {
 		let filterData = data
 		let resultCount = 0
 
-		for (let props of columnProps) {			
-			const { filter, filterValue, reflectAccessor } = props
+		for (let props of columnProps) {
+			const { filterable, filter, filterValue, reflectAccessor } = props
 			props.accessor = reflectAccessor
 
-			if (filter && filterValue) {
+			if (filterable && filter && filterValue) {
 				if (typeof filterValue === 'object' && typeof filterValue[0] !== 'number' && typeof filterValue[1] !== 'number') {
 					continue
 				}

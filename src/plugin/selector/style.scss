@@ -1,9 +1,10 @@
-.iTable {
+.flex-table {
 	.it-thead {
 		.it-tr {
 			.it-th {
 				&:first-child {
 					text-align: center;
+					justify-content: center;
 				}
 			}
 		}
@@ -14,6 +15,7 @@
 			.it-td {
 				&:first-child {
 					text-align: center;
+					justify-content: center;
 				}
 			}
 		}

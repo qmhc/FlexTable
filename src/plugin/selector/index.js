@@ -33,8 +33,11 @@ export default class Selector {
 
 		const { data, columns } = this.tableInstance
 
-		for (let rowData of data) {
-			rowData._itId = getUuid()
+		for (let i = 0, len = data.length; i < len; i++) {
+			const rowData = data[i]
+			if (!rowData._itId) {
+				rowData._itId = getUuid()
+			}
 		}
 
 		this.selection = []
@@ -48,7 +51,7 @@ export default class Selector {
 				const uuid = data._itId
 
 				if (!uuid) {
-					return false
+					return ''
 				}
 
 				let rowCheck = null
@@ -63,7 +66,7 @@ export default class Selector {
 						rowData: data,
 					}
 
-					rowCheck.addEventListener('change', function() {
+					rowCheck.addEventListener('change', () => {
 						if (rowCheck.checked) {
 							this.selection.push(uuid)
 						} else {
@@ -79,9 +82,9 @@ export default class Selector {
 
 				return rowCheck
 			},
-			resizer: false,
-			sorter: false,
-			editor: false,
+			resizable: false,
+			sortable: false,
+			editable: false,
 			filter: (value, filter) => {
 				const selected = this.selection.includes(value._itId)
 				return filter? selected: true
@@ -100,8 +103,11 @@ export default class Selector {
 			columns.unshift(selector)
 		}
 
+		this.tableInstance.state.useSelector = useSelector
+	}
+
+	afterContruct () {
 		this.state = this.tableInstance.state
-		this.state.useSelector = useSelector
 	}
 
 	shouldUse () {
@@ -109,7 +115,7 @@ export default class Selector {
 	}
 	
 	create () {
-		this.tableInstance.registerMethod('getSelected' ,getSelectedDataList)
+		this.tableInstance.registerMethod('getSelected', getSelectedDataList)
 		this.created = true
 	}
 
@@ -118,10 +124,8 @@ export default class Selector {
 		const headCheck = table.querySelector('.it-thead.shadow .it-check')
 
 		let type = 0
-
-		const filter = this.tableInstance.plugins ? (this.tableInstance.plugins.filter || null) : null
 		
-		headCheck.addEventListener('change', function(ev) {
+		headCheck.addEventListener('change', ev => {
 			ev.stopPropagation()
 			type = +!type
 
@@ -155,6 +159,8 @@ export default class Selector {
 			}
 
 			headCheck.checked = !!type
+
+			const filter = this.tableInstance.plugins ? (this.tableInstance.plugins.filter.instance || null) : null
 
 			if (filter) {
 				filter.dispatchChange()

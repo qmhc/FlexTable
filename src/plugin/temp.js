@@ -8,6 +8,8 @@ export default class Plugin {
 		// 例如 tableInstance.state.myPlugin = { ...someState }
 		// init core
 	}
+	// 实例化后可基于 FlexTable 的完整 state 进行处理
+	afterContruct () {}
 	// 判断插件是否该使用
 	shouldUse () {
 		return true

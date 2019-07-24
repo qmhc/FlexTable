@@ -10,9 +10,11 @@ import './style.scss';
 export default class Layer {
 	constructor (tableInstance, options) {
 		this.tableInstance = tableInstance
-		this.state = this.tableInstance.state
-
 		this.tableInstance.state.useLayer = options.useLayer === true
+	}
+
+	afterContruct () {
+		this.state = this.tableInstance.state
 	}
 
 	shouldUse () {
@@ -31,7 +33,7 @@ export default class Layer {
 		}
 	}
 
-	create() {
+	create () {
 		const { table } = this.tableInstance
 		const tbodyGroup = table.querySelector('.it-tbody-group')
 		const loadingLayer = temp.cloneNode()
@@ -42,6 +44,9 @@ export default class Layer {
 		loading.textContent = 'Loading...'
 
 		loadingLayer.appendChild(loading)
+		tbodyGroup.appendChild(loadingLayer)
+		this.loadingLayer = loadingLayer
+		this.loading = false
 
 		const notFoundLayer = loadingLayer.cloneNode()
 
@@ -53,6 +58,11 @@ export default class Layer {
 		tbodyGroup.appendChild(notFoundLayer)
 		this.notFoundLayer = notFoundLayer
 		this.notFound = false
+
+		this.tableInstance.registerMethod('displayLoading', this.toggleLoading.bind(this, true), false)
+		this.tableInstance.registerMethod('hiddenLoading', this.toggleLoading.bind(this, false), false)
+		this.tableInstance.registerMethod('displayNotFound', this.toggleNotFound.bind(this, true), false)
+		this.tableInstance.registerMethod('hiddenNotFound', this.toggleNotFound.bind(this, false), false)
 
 		this.created = true
 	}
@@ -78,6 +88,7 @@ export default class Layer {
 			this.loadingLayer.classList.remove('visible')
 		}
 	}
+
 	toggleNotFound (type = true) {
 		// const tbody = table[this.target].target.querySelector('.it-tbody');
 		if (typeof type !== 'boolean') {
@@ -94,7 +105,7 @@ export default class Layer {
 			setTimeout(() => {
 				this.notFound = false
 				// tbody.removeChild(this.notFoundLayer);
-			}, 300)
+			}, 500)
 		}
 	}
-};
+}

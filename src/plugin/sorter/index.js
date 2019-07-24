@@ -48,7 +48,9 @@ export default class Sorter {
 			sortData: undefined,
 			sortCache: sortCache === true, // 多列排序缓存
 		}
+	}
 
+	afterContruct () {
 		this.state = this.tableInstance.state
 	}
 
@@ -66,22 +68,39 @@ export default class Sorter {
 		return data
 	}
 
-	beforeCreate () {
-		const { columnProps } = this.tableInstance
+	// beforeCreate () {
+	// 	const { columnProps } = this.tableInstance
 
-		for (let props of columnProps) {
-			const { sorter } = props
-			props.sorter = sorter !== false? typeof value === 'function'? value: defaultSortMethod: false
-		}
-	}
+	// 	for (let props of columnProps) {
+	// 		const { sorter, sortable } = props
+
+	// 		if (sortable === false) {
+	// 			continue
+	// 		}
+
+	// 		props.sorter = sorter !== false? typeof value === 'function'? value: defaultSortMethod: false
+	// 		props.sortable = props.sorter ? true : false
+	// 	}
+	// }
 
 	create () {
-		const table = this.tableInstance.table
+		const { table, columnProps } = this.tableInstance
 		const ths = table.querySelectorAll('.it-thead.shadow .it-th')
 
 		for (let i = 0, len = ths.length; i < len; i++) {
+			const props = columnProps[i]
+
+			const { sorter, sortable } = props
+
+			props.sorter = sorter !== false ? typeof value === 'function'? value : defaultSortMethod : false
+			props.sortable = sortable !== false && props.sorter ? true : false
+
 			const th = ths[i]
 			th.classList.add('it-sort')
+
+			if (!props.sortable) {
+				th.classList.add('disabled')
+			}
 		}
 
 		if (this.state.sortCache) {
@@ -119,9 +138,8 @@ export default class Sorter {
 				}
 
 				const props = columnProps.find(value => value.id === id)
-				const { sorter } = props
 
-				if (sorter) {
+				if (props.sortable) {
 					let { sortBy, sortType } = this.state
 					
 					if (typeof sortBy[0] !== 'undefined' && (sortBy.length !== 1 || sortBy[0] !== id) && getKeyState('shift')) {

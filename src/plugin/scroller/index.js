@@ -9,15 +9,19 @@ export default class Scroller {
 	constructor (tableInstance, options) {
 		this.tableInstance = tableInstance
 
-		const { bodyHeight } = options
+		const { bodyHeight, wheelDistance } = options
+
 		if (typeof bodyHeight === 'number') {
 			this.tableInstance.state = {
 				...this.tableInstance.state,
 				useScroller: true,
 				bodyHeight: bodyHeight < 200? 200: bodyHeight,
+				wheelDistance: wheelDistance || 20
 			}
 		}
+	}
 
+	afterContruct () {
 		this.state = this.tableInstance.state
 	}
 
@@ -61,7 +65,7 @@ export default class Scroller {
 									tbody.style.transition = 'transform .2s ease-out'
 									this.scroll = true
 								}
-							}, 300)
+							}, 100)
 						}
 					}
 				}
@@ -117,7 +121,6 @@ export default class Scroller {
 
 	bindMoveEvent () {
 		const { table } = this.tableInstance
-		const { bodyHeight } = this.state
 		const scroller = table.querySelector('.it-tbody-group')
 		const tbody = scroller.querySelector('.it-tbody')
 
@@ -131,7 +134,10 @@ export default class Scroller {
 		const finishMoving = () => {
 			this.current += this.distance
 			this.positionCorrect()
+
 			tbody.style.userSelect = ''
+			tbody.style.transition = 'none'
+
 			document.removeEventListener('mousemove', MoveScroller)
 			document.removeEventListener('mouseup', finishMoving)
 		}
@@ -149,12 +155,13 @@ export default class Scroller {
 				target = path.find(value => value.classList && value.classList.contains('it-tbody'))
 			} else {
 				target = evt.target || evt.srcElement
-				target = checkPathByClass(target, 'it-sort')
+				target = checkPathByClass(target, 'it-tbody')
 			}
 
 			if (target) {
 				this.start = evt.clientY
-				target.style.userSelect = 'none'
+				tbody.style.userSelect = 'none'
+				tbody.style.transition = 'none'
 
 				document.addEventListener('mousemove', MoveScroller)
 				document.addEventListener('mouseup', finishMoving)
@@ -174,14 +181,15 @@ export default class Scroller {
 
 			const evt = ev || event
 			const { wheelDeltaY } = evt
+			const { wheelDistance } = this.state
 			const direction = wheelDeltaY / Math.abs(wheelDeltaY) + 1
 
 			if (direction) {
 				// 向上滚动
-				this.current += 20
+				this.current += wheelDistance
 			} else {
 				// 向下滚动
-				this.current -= 20
+				this.current -= wheelDistance
 			}
 
 			tbody.style.transform = `translateY(${this.current}px)`
@@ -204,4 +212,4 @@ export default class Scroller {
 			this.current = bottom
 		}
 	}
-};
+}

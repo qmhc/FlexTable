@@ -97,11 +97,13 @@ export default class Resizer {
 			resizable: resizable !== false,
 			resizing: false
 		}
+	}
 
+	afterContruct () {
 		this.state = this.tableInstance.state
 	}
 
-	shouldUse (state) {
+	shouldUse () {
 		return this.state.resizable
 	}
 
@@ -124,7 +126,7 @@ export default class Resizer {
 
 			const props = columnProps.find(value => value.id === id)
 
-			if (props.resizer !== false) {
+			if (props.resizable !== false) {
 				const resizer = temp.cloneNode()
 				resizer.className = 'it-resizer'
 				resizer.itColumnIndex = i
@@ -176,7 +178,7 @@ export default class Resizer {
 			// 延迟100ms保证防止触发排序器
 			setTimeout(() => {
 				this.state.resizing = false
-			}, 100)
+			}, 200)
 		}
 
 		table.addEventListener('mousedown', ev => {

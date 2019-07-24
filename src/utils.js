@@ -16,105 +16,155 @@ export const toggleDisabled = (button, disabled) => {
 	} else {
 		button.removeAttribute('disabled');
 	}
-};
+}
 
+/**
+ * 创建一个 Select 模版
+ * @param {Array} options 候选项列表 { title, value } 当 title 和 value 一样时可直接传入字符串
+ * @param {*} defaultIndex 默认选项的索引值
+ */
 export const createSelect = (options, defaultIndex = -1) => {
 	for (let i in options) {
-		const option = options[i];
+		const option = options[i]
 		if (typeof option !== 'object') {
 			options[i] = {
-				title: option,
+				title: option.toString(),
 				value: option,
-			};
+			}
 		}
 	}
 
-	const div = document.createElement('div');
-	div.className = 'it-select';
+	const div = document.createElement('div')
+	const down = div.cloneNode()
+	div.className = 'it-select'
+	down.className = 'it-dropdown'
 
-	const span = document.createElement('span');
-	span.innerHTML = '&nbsp;';
-	div.appendChild(span);
+	const span = document.createElement('span')
+	span.textContent = ''
+	div.appendChild(span)
 
-	let _value = '';
+	let _value = ''
+
 	Reflect.defineProperty(div, 'itValue', {
-		get() {
-			return _value;
+		get () {
+			return _value
 		},
-		set(newValue) {
+		set (newValue) {
 			if (_value !== newValue) {
-				span.innerHTML = options.find(opt => opt.value === newValue).title || '&nbsp';
-				_value = newValue;
-			}			
+				const newOption = options.find(opt => opt.value === newValue)
+				span.textContent = (newOption && newOption.title) || ''
+				_value = newValue
+				div.value = newValue
+			}
 		},
 		enumerable : true,
-		configurable : true,
-	});
+		configurable : true
+	})
 
-	const ul = document.createElement('ul');
+	const ul = document.createElement('ul')
 	ul.className = 'it-option'
 
-	const liTemp = document.createElement('li');
+	const liTemp = document.createElement('li')
 	liTemp.className = 'it-item';
 
 	for (let i in options) {
 		const option = options[i]
-		const { title, value } = option;
-		const li = liTemp.cloneNode();
-		li.innerHTML = title || '&nbsp;';
-		li.itValue = value;
-		li.index = i;
+		const { title, value } = option
+		const li = liTemp.cloneNode()
+		li.textContent = title || ''
+		li.value = value
+		li.itValue = value
+		li.index = i
 		if (i == defaultIndex) {
-			div.itValue = value;
-			li.classList.add('current');
+			div.itValue = value
+			div.value = value
+			li.classList.add('current')
 		}
-		ul.appendChild(li);
+		ul.appendChild(li)
 	}
 
-	div.appendChild(ul);
+	down.appendChild(ul)
+	div.appendChild(down)
 
-	ul.addEventListener('click', function(ev) {
-		const evt = ev || event;
-		const target = evt.target || evt.srcElement;
+	down.addEventListener('click', ev => {
+		const evt = ev || event
+		const target = evt.target || evt.srcElement
 		if (target.classList.contains('it-item')) {
-			const newValue = target.itValue;
-			if (div.itValue === newValue) return; 
+			const newValue = target.itValue
+			if (div.itValue === newValue) return
 
-			const current = ul.querySelector('li.it-item.current');
-			if (current) current.classList.remove('current');
+			const current = ul.querySelector('li.it-item.current')
+			if (current) current.classList.remove('current')
 
-			const newTitle = target.textContent;
-			const optionIndex = target.index;
+			// const newTitle = target.textContent
+			const optionIndex = target.index
 
 			// 定义事件
-			const event = new Event('change');
-			event.oldValue = div.itValue;
-			event.newValue = newValue;
-			event.optionIndex = optionIndex;
-			div.dispatchEvent(event);
+			const event = new Event('change')
+			event.oldValue = div.itValue
+			event.newValue = newValue
+			event.optionIndex = optionIndex
+			div.dispatchEvent(event)
 
-			div.itValue = newValue;
-			// span.textContent = newTitle;
-			target.classList.add('current');
+			div.itValue = newValue
+			div.value = newValue
+			target.classList.add('current')
 		}
-	});
+	})
 
-	let showOption = false;
-	div.addEventListener('click', function() {
+	ul.addEventListener('scroll', ev => {
+		ev.stopPropagation()
+	})
+
+	ul.addEventListener('wheel', ev => {
+		ev.stopPropagation()
+	})
+
+	let showOption = false
+
+	div.closeOptions = () => {
+		down.style.opacity = 0
+		
+		div.classList.remove('show')
+		// down.classList.remove('show')
+		ul.classList.remove('show')
+
+		setTimeout(() => {
+			down.style.visibility = 'hidden'
+			div.isOptionsOpen = false
+		}, 300)
+	}
+
+	div.openOptions = () => {
+		const rect = getStyle(div)
+		const { top, height } = rect
+
+		down.style.visibility = 'visible'
+		down.style.top = `${parseFloat(top) + parseFloat(height) + 2}px`
+		down.style.opacity = 1
+
+		div.classList.add('show')
+		ul.classList.add('show')
+
+		div.isOptionsOpen = true
+
+		// setTimeout(() => {
+		// 	down.classList.add('show')
+		// }, 300)
+	}
+
+	div.addEventListener('click', () => {
 		if (showOption) {
-			ul.style.cssText = 'display: none';
+			div.closeOptions()
 		} else {
-			// const rect = div.getBoundingClientRect();
-			const rect = getStyle(div);
-			const { left, top, height, width } = rect;
-			ul.style.display = 'block';
-			ul.style.top = `${parseFloat(top) + parseFloat(height) + 2}px`;
+			div.openOptions()
 		}
-		showOption = !showOption;
-	});
 
-	return div;
-};
+		showOption = !showOption
+	})
+
+	return div
+}
 
 /**
  * 获取变量类型
@@ -258,14 +308,20 @@ export const deepClone = obj => {
   return _root
 }
 
-export default {
-	getType,
-	getStyle,
-	toggleDisabled,
-	sortByProps,
-	getUniqueArray,
-	getUuid,
-	deepClone,
-	prependChild,
-	checkPathByClass,
-};
+/**
+ * 将html字符串转换成Element对象
+ * @param {String} html 可以解析的html字符串
+ */
+export const html2Element = html => {
+	const span = document.createElement('span')
+	try {
+		span.innerHTML = html
+	} catch (e) {
+		return null
+	}
+	const children = span.childNodes
+	if (children && children.length) {
+		return children
+	}
+	return null
+}

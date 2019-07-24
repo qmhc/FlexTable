@@ -7,7 +7,7 @@ import {
 	temp,
 	spanTemp,
 	buttonTemp,
-	inputTemp,
+	inputTemp
 } from 'core/temps'
 import { toggleDisabled, createSelect } from '@/utils'
 
@@ -21,7 +21,7 @@ function getIndexRange({ currentPage, pageSize }) {
 
 function renderPagination() {
 	const { data } = this.tableInstance
-	const { pageOption, currentPage, pageSize, usePageOption } = this.state
+	const { pageOption, currentPage, pageSize, usePageOption, currentOption } = this.state
 
 	const wrapper = temp.cloneNode()
 	wrapper.className = 'it-pagination'
@@ -99,7 +99,8 @@ function renderPagination() {
 	if (usePageOption) {
 		const sizeSelect = spanTemp.cloneNode()
 		sizeSelect.className = 'it-size-select'
-		const select = createSelect(pageOption.map(value => ({title: `${value} 行`, value })), 0)
+		const select = createSelect(pageOption.map(value => ({ title: `${value} 行`, value })), currentOption)
+
 		select.addEventListener('change', ev => {
 			// 分页改变
 			const targetSize = +ev.newValue
@@ -108,27 +109,28 @@ function renderPagination() {
 			const dataIndex = (currentPage - 1) * pageSize + 1
 
 			// 重新计算页码数
-			const computedCurrentPage = Math.ceil(dataIndex / targetSize);
-			input.value = computedCurrentPage;
-			totalPage.textContent = ' / ' + (Math.ceil(data.length / targetSize) || 1);
-			this.state.pageSize = targetSize;
-			this.state.currentPage = computedCurrentPage;
+			const computedCurrentPage = Math.ceil(dataIndex / targetSize)
+			input.value = computedCurrentPage
+			totalPage.textContent = ' / ' + (Math.ceil(data.length / targetSize) || 1)
+			this.state.pageSize = targetSize
+			this.state.currentPage = computedCurrentPage
 
 			// 调整表格结构
 			this.tableInstance.renderBodyStruct()
 
 			// 重填数据
 			this.tableInstance.renderBodyData()		
-		});
-		sizeSelect.appendChild(select);
-		center.appendChild(sizeSelect);
+		})
+
+		sizeSelect.appendChild(select)
+		center.appendChild(sizeSelect)
 	}
 
-	wrapper.appendChild(prev);
-	wrapper.appendChild(center);
-	wrapper.appendChild(next);
+	wrapper.appendChild(prev)
+	wrapper.appendChild(center)
+	wrapper.appendChild(next)
 
-	return wrapper;
+	return wrapper
 }
 
 function changePage(targetPage) {
@@ -145,18 +147,22 @@ export default class Pager {
 		this.changePage = changePage.bind(this)
 		this.renderTraget = renderPagination.bind(this)
 
-		const { pageable, usePageOption, pageSize } = options
+		const { pageable, usePageOption, pageSize, currentPage, currentPageOption } = options
 		const pageOption = options.pageOption || [10, 20, 50, 100]
+		const currentOption = currentPageOption ? pageOption[options.currentPageOption] : pageOption[0]
 
 		this.tableInstance.state = {
 			...this.tableInstance.state,
 			pageable: pageable !== false,
-			currentPage: 1,
+			currentPage: currentPage || 1,
 			pageOption,
-			pageSize: usePageOption === false? (pageSize || 10): pageOption[0],
+			pageSize: usePageOption === false? (pageSize || 10): currentOption,
+			currentOption: currentPageOption || 0,
 			usePageOption: usePageOption !== false,
 		}
+	}
 
+	afterContruct () {
 		this.state = this.tableInstance.state
 	}
 

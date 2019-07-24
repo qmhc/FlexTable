@@ -1,4 +1,4 @@
-import { getUuid } from '@/utils'
+import { getUuid, getType } from '@/utils'
 import {
 	temp,
 	tableTemp,
@@ -7,28 +7,8 @@ import {
 	thTemp,
 	trGroupTemp,
 	trTemp,
-	tdTemp,
+	tdTemp
 } from './temps'
-
-export const defaultColumnWidth = 100
-
-// 插件初始化
-// const plugins = [];
-// const pluginsConfig = require('../plugin/config');
-// const pluginFiles = require.context('../plugin', true, /^\.(\/|\\).+(\/|\\)index\.js$/);
-// const usePlugins = getUniqueArray(pluginsConfig.usePlugins);
-// pluginFiles.keys().forEach(
-// 	key => {
-// 		const name = key.substring(key.search(/(\/|\\)/) + 1, key.search(/(\/|\\)index\.js$/));
-// 		const index = usePlugins.indexOf(name);
-// 		if (index !== -1) {
-// 			const plugin = pluginFiles(key).default;
-// 			if (plugin && typeof plugin.prototype.shouldUse === 'function' && typeof plugin.prototype.create === 'function') {
-// 				plugins[index] = { name, plugin };
-// 			}
-// 		}
-// 	}
-// );
 
 // 渲染主函数
 export default function render(options) {
@@ -38,27 +18,37 @@ export default function render(options) {
 	const { id, className } = options;
 
 	// 插件实例化
-	// constructor 钩子 (预处理)
+	// constructor 钩子 (实例化)
 	for (let i = 0, len = plugins.length; i < len; i++) {
 		const { name, construct } = plugins[i]
-		const instance = new construct(this, options);
+		const instance = new construct(this, options)
 		this.plugins.push({
 			name,
 			instance
 		})
-		// if (plugin.beforeInit) plugin.beforeInit(options);
+	}
+
+	// afterContrcut 钩子 (实例化后)
+	// 其作用在于, 如果插件间想基于 FlexTable 的完整 state 进行处理时, 可在此钩子内进行
+	for (let i = 0, len = this.plugins.length; i < len; i++) {
+		const plugin = this.plugins[i].instance
+
+		if (plugin.afterContruct) {
+			plugin.afterContruct()
+		}
 	}
 
 	// 表格结构生成
-	const wrapper = temp.cloneNode();
-	wrapper.className = 'iTable';
-	this.table = wrapper;
+	const wrapper = temp.cloneNode()
+	wrapper.className = 'flex-table'
+	wrapper.style.visibility = 'hidden'
+	this.table = wrapper
 
-	if (typeof id === 'string') wrapper.setAttribute('id', id);
-	if (typeof className === 'string') wrapper.classList.add(className);
+	if (getType(id) === 'string') wrapper.setAttribute('id', id)
+	if (getType(className) === 'string') wrapper.classList.add(className)
 
-	const iTable = tableTemp.cloneNode();
-	wrapper.appendChild(iTable);
+	const table = tableTemp.cloneNode()
+	wrapper.appendChild(table)
 
 	const theadGroup = theadTemp.cloneNode()
 	const theadChild = theadTemp.cloneNode()
@@ -72,22 +62,22 @@ export default function render(options) {
 	const { groupTr, childTr } = renderHeader.apply(this)
 
 	const column = this.columnProps.length
-	const tableMinWidth = column * defaultColumnWidth
+	const tableMinWidth = column * this.constructor.defaultColumnWidth
 	theadGroup.appendChild(groupTr)
 	theadGroup.style.minWidth = `${tableMinWidth}px`
-	iTable.appendChild(theadGroup)
+	table.appendChild(theadGroup)
 
 	if (childTr) {
 		theadGroup.classList.add('group')
 		theadChild.classList.add('shadow')
 		theadChild.appendChild(childTr)
 		theadChild.style.minWidth = `${tableMinWidth}px`
-		iTable.appendChild(theadChild)
+		table.appendChild(theadChild)
 	} else {
 		theadGroup.classList.add('shadow')
 	}
 
-	iTable.appendChild(tbodyGroup)
+	table.appendChild(tbodyGroup)
 
 	// 渲染表主体
 	renderBodyStruct.apply(this)
@@ -98,7 +88,7 @@ export default function render(options) {
 		const tfootGroup = temp.cloneNode()
 		tfootGroup.className = 'it-tfoot'
 		tfootGroup.appendChild(renderFooter.apply(this))
-		iTable.appendChild(tfootGroup)
+		table.appendChild(tfootGroup)
 	}
 
 	// 暴露表格主体渲染方法
@@ -109,44 +99,75 @@ export default function render(options) {
 	for (let i = 0, len = this.plugins.length; i < len; i++) {
 		const plugin = this.plugins[i].instance
 		const disabled = !plugin.shouldUse()
-		if (disabled) continue
-		if (plugin.beforeCreate) plugin.beforeCreate()
+		
+		if (disabled) {
+			continue
+		}
+
+		if (plugin.beforeCreate) {
+			plugin.beforeCreate()
+		}
+
 		plugin.create()
-		if (plugin.bindEvent) plugin.bindEvent()
-		if (plugin.afterCreate) plugin.afterCreate()
+
+		if (plugin.bindEvent) {
+			plugin.bindEvent()
+		}
+
+		if (plugin.afterCreate) {
+			plugin.afterCreate()
+		}
 	}
 }
 
 // 头部列渲染
 function renderColumn(column) {
-	const { name, accessor, footer, defaultWidth, children } = column;
-	const id = column.id || getUuid();
-	const th = thTemp.cloneNode();
+	const { name, accessor, footer, defaultWidth, children } = column
+	const id = column.id || getUuid()
+	const th = thTemp.cloneNode()
 
-	const content = temp.cloneNode();
-	content.className = 'it-head-content';
-	if (typeof name === 'string') {
-		content.innerHTML = name;
-	} else {
-		content.appendChild(name);
+	const content = temp.cloneNode()
+	content.className = 'it-head-content'
+
+	switch (getType(name)) {
+		case 'number':
+		case 'string': {
+			content.textContent = name
+			break
+		}
+		case 'array':
+		case 'nodelist': {
+			content.innerHTML = ''
+			const fragment = document.createDocumentFragment()
+
+			while (name.length > 0) {
+				fragment.appendChild(name[0])
+			}
+
+			content.appendChild(fragment)
+			break
+		}
+		default: {
+			content.innerHTML = ''
+			content.appendChild(name)
+		}
 	}
 
-	th.appendChild(content);
-	th.itColumnId = id;
-
-	const width = defaultWidth || defaultColumnWidth;
-	th.style.cssText = `flex: ${width} 0 auto; width: ${width}px`;
+	th.appendChild(content)
+	th.itColumnId = id
+	const width = defaultWidth || this.constructor.defaultColumnWidth
+	th.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
 
 	return {
 		...column,
 		id,
-		footer: typeof footer !== 'undefined'? typeof footer === 'function'? footer: () => footer: () => '&nbsp;',
-		accessor: typeof accessor === 'function'? accessor: rowData => rowData[accessor],
+		footer: footer? (getType(footer) === 'function' ? footer : () => footer) : () => '',
+		accessor: getType(accessor) === 'function' ? accessor : rowData => rowData[accessor],
 		width,
 		target: th,
 		parent: !!(children && children.length),
 		hasFooter: !!footer,
-	};
+	}
 }
 
 // 表头渲染
@@ -158,10 +179,10 @@ function renderHeader() {
 
 	let hasChilds = false
 	let useFooter = false
+	
 	for (let i = 0, len = columns.length; i < len; i++) {
 		const column = columns[i]
-
-		const props = renderColumn(column)
+		const props = renderColumn.call(this, column)
 		columnProps.push(props)
 
 		const groupTh = props.target
@@ -169,13 +190,15 @@ function renderHeader() {
 
 		if (props.parent) {
 			hasChilds = true
+
 			const childrenIds = []
 			const { children } = column
 			let width = 0
+
 			for (let j = 0, len = children.length; j < len; j++) {
 				const column = children[j]
 				column.parentTarget = groupTh
-				const props = renderColumn(column)
+				const props = renderColumn.call(this, column)
 				columnProps.push(props)
 
 				const childTh = props.target
@@ -183,13 +206,16 @@ function renderHeader() {
 				width += props.width
 				childrenIds.push(props.id)
 			}
+
 			groupTh.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
 			groupTh.itChildrenSize = children.length
 			groupTh.itChildrenIds = childrenIds
 		}
 	}
 
-	if (hasChilds) columnProps = columnProps.filter(props => !props.parent)
+	if (hasChilds) {
+		columnProps = columnProps.filter(props => !props.parent)
+	}
 
 	for (let i = 0, len = columnProps.length; i < len; i++) {
 		const props = columnProps[i]
@@ -316,18 +342,41 @@ function renderBodyData(target) {
 		const rowData = data[i] || {}
 		const tds = tr.querySelectorAll('.it-td')
 
+		if (!rowData._itId) {
+			rowData._itId = getUuid()
+		}
+
+		tr.itRowId = rowData._itId
+
 		for (let j = 0, len = columnProps.length; j < len; j++) {
 			const { accessor } = columnProps[j]
 			const td = tds[j]
 
 			const result = accessor(rowData)
-			const html = typeof result !== 'undefined'? result: '&nbsp;'
+			const html = result || ''
 
-			if (typeof html !== 'object') {
-				td.innerHTML = html
-			} else {
-				td.innerHTML = ''
-				td.appendChild(html)
+			switch (getType(html)) {
+				case 'number':
+				case 'string': {
+					td.textContent = html
+					break
+				}
+				case 'array':
+				case 'nodelist': {
+					td.innerHTML = ''
+					const fragment = document.createDocumentFragment()
+		
+					while (html.length > 0) {
+						fragment.appendChild(html[0])
+					}
+		
+					td.appendChild(fragment)
+					break
+				}
+				default: {
+					td.innerHTML = ''
+					td.appendChild(html)
+				}
 			}
 		}
 	}
@@ -340,10 +389,11 @@ function renderBodyData(target) {
 }
 
 // 表格脚部渲染
-function renderFooter(target) {
-	const { data, columnProps, state: currentState } = this
+function renderFooter() {
+	const { data, columnProps, state } = this
 
 	const columnData = new Map()
+
 	for (let i = 0, len = columnProps.length; i < len; i++) {
 		columnData.set(i, [])
 	}
@@ -357,6 +407,7 @@ function renderFooter(target) {
 	}
 	
 	const tr = trTemp.cloneNode()
+
 	for (let i = 0, len = columnProps.length; i < len; i++) {
 		const { footer, width } = columnProps[i]
 		const td = tdTemp.cloneNode()
@@ -365,17 +416,36 @@ function renderFooter(target) {
 		const content = temp.cloneNode()
 		content.className = 'it-foot-content'
 
-		const result = footer(columnData.get(i), {...currentState})
-		const title = typeof result !== 'undefined'? result: '&nbsp;'
+		const result = footer(columnData.get(i), { ...state })
+		const title = result || ''
 
-		if (typeof title !== 'object') {
-			content.innerHTML = title
-		} else {
-			content.appendChild(title)
+		switch (getType(title)) {
+			case 'number':
+			case 'string': {
+				content.textContent = title
+				break
+			}
+			case 'array':
+			case 'nodelist': {
+				content.innerHTML = ''
+				const fragment = document.createDocumentFragment()
+	
+				while (title.length > 0) {
+					fragment.appendChild(title[0])
+				}
+	
+				content.appendChild(fragment)
+				break
+			}
+			default: {
+				content.innerHTML = ''
+				content.appendChild(title)
+			}
 		}
 
 		td.appendChild(content)
 		tr.appendChild(td)
 	}
+
 	return tr
 }
