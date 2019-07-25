@@ -12,13 +12,13 @@
 使用 npm
 
 ```bash
-npm install --save flex-table
+npm install --save @qmhc/flex-table
 ```
 
 ```js
-import FlexTable from 'flex-table'
+import FlexTable from '@qmhc/flex-table'
 
-import 'flex-table/dist/flex-table.css'
+import '@qmhc/flex-table/dist/flex-table.css'
 ```
 
 使用标签引入
@@ -133,7 +133,7 @@ const flexTable = new FlexTable({
 随后, 在 FlexTable 上注册插件
 
 ```js
-import FlexTable from 'flex-table'
+import FlexTable from '@qmhc/flex-table'
 import myPlugin from 'my-plugin'
 
 FlexTable.registerPlugin(name, myPlugin)

@@ -13,7 +13,7 @@
     "@babel/runtime": "^7.4.5",
     "core-js": "^3.1.4"
   },
-  "description": "",
+  "description": "A native flex table library",
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.4.5",
@@ -42,9 +42,21 @@
     "webpack-dev-server-output": "0.0.6",
     "webpack-merge": "^4.2.1"
   },
+  "keywords": [
+    "flex-table",
+    "FlexTable",
+    "table",
+    "flex",
+    "component",
+    "components",
+    "vue",
+    "vue.js",
+    "plugin",
+    "native"
+  ],
   "license": "MIT",
   "main": "dist/flex-table.js",
-  "name": "itable",
+  "name": "@qmhc/flex-table",
   "private": false,
   "scripts": {
     "serve": "webpack-dev-server --inline --config ./config/webpack.dev.js",

@@ -1,0 +1,17 @@
+.*
+.env.local
+.env.*.local
+
+.idea
+.vscode
+
+*.log
+*.map
+*.md
+*.yml
+
+babel.config.js
+
+public/
+node_modules/
+tests/
