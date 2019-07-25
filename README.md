@@ -1,82 +1,116 @@
-# iTable
+# Flex Table
 
-`flex-table` 是一款原生的表格工具，其完全基于flex，没有任何的table相关的html，可用于快速生成数据表格。
+`flex-table` 是一款原生的表格工具, 其完全基于flex, 没有任何的table相关的html, 可用于快速生成数据表格
+
+`flex-table` 的核心代码只包含表格的基础渲染功能, 其余的所有功能均由 `plugin` 提供, 用户也可以根据自己的使用替换或添加插件
 
 ![视觉](./public/visual.png)
 
 
-## 开始
+## 开始 (Start)
+
+使用 npm
 
 ```bash
 npm install --save flex-table
 ```
 
-引入 `build` 文件夹下的 `flex-table.js` 和 `flex-table.css`
+```js
+import FlexTable from 'flex-table'
+
+import 'flex-table/dist/flex-table.css'
+```
+
+使用标签引入
 
 ```html
 <!-- js -->
-<script src="./build/flex-table.js"></script>
+<script src="./dist/flex-table.js"></script>
 
 <!-- css -->
-<link rel="stylesheet" href="./build/flex-table.css">
+<link rel="stylesheet" href="./dist/flex-table.css">
 ```
 
 创建一个表格
 
 ```javascript
-// 实例化后的 FlexTable 其实是一个管理器
-// 可以使用其多次创建表格
-// 每个表格在管理器内有唯一的索引
-const flexTable = new FlexTable();
-
 // 创建表格
-flexTable.create({
-    index: 'it1',
-    container: '#app',
-    columns: [{ /*...*/ }],
-    data: [{ /*...*/ }],
-    // ...
-});
+const flexTable = new FlexTable({
+  container: '#app',
+  columns: [{ /*...*/ }],
+  data: [{ /*...*/ }],
+  plugins: {
+      // ...
+  }
+})
 ```
 
-## 例子
+## 例子 (Example)
 
-简单示例见 `tests` 文件夹下的 `index.html`
+简单示例见 `tests` 文件夹下的 [`index.html`](./tests/index.html)
 
 
-## 配置
+## 配置 (Config)
 
-一个简单的配置
+一份完整的配置
 
 ```javascript
 {
-    // 表格索引 必须、唯一
-    index: 'it1',
-    // 表格容器 可以是css选择器或者Node对象
-    container: '#app',
-    // 各列相关参数
-    columns: [{
-        name: 'Name',
-        // accessor: 'name',
-        accessor: data => data.name,
-        children: [],
-    }],
-    data: [{
-        name: 'My Name',
-        // ...
-    }],
-    useSelector: true,
-    filterAll: true,
-    useLayer: true,
-    // ...
+	container: '#app',
+	columns,
+	data,
+	plugins: {
+		selector: {}, // 暂无独立配置项, 只需指定一个空对象
+		editor: {
+			trigger: 'action', // or 'click'
+			// verifier: data => data, // 顶层验证方法
+			columnWidth: 142,
+			labels: {
+				edit: '编辑',
+				save: '保存',
+				cancel: '取消'
+			}
+		},
+		resizer: {}, // 暂无独立配置项, 只需指定一个空对象
+		sorter: {
+			multiple: true, // 开启多列排序功能
+			multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift
+		},
+		pager: {
+			useOptions: true,
+			pageOptions: [10, 15, 20, 25, 30],
+			currentPage: 1,
+			pageSize: 15,
+			labels: {
+				prev: '上一页',
+				next: '下一页',
+				row: '行'
+			}
+		},
+		filter: {
+			filterAll: true, // 所有类均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
+			openAction: false, // filter 是否具有开关按钮
+			filterOpen: true, // filter 具有开关按钮, 设置是否默认打开 openAction 为 false 时忽略
+		},
+		layer: {
+			loading: false,
+			notFound: true,
+			delay: 500
+		},
+		scroller: {
+			height: 450,
+			mouse: true,
+			wheel: false,
+			wheelDistance: 20
+		}
+	},
+	theme: 'light'
 }
 ```
 
-更具体的配置可以参考例子。
+<!-- PS: 内置的 `resizer` 插件是基于 `Proxy` 编写的，使用时请注意兼容性 -->
 
-PS: 内置的 `resizer` 插件是基于 `Proxy` 编写的，使用时请注意兼容性
-
-## 主题
+## 主题 (Theme)
 
 `iTable` 内置有四种主题颜色，配置中添加 `theme` 属性可以设置主题
 
@@ -90,4 +124,19 @@ PS: 内置的 `resizer` 插件是基于 `Proxy` 编写的，使用时请注意�
 }
 ```
 
-如果想自定义配置主题，可以参考 `/src/style` 下的 `scss` 文件配置主题
+如果这不是你想要的主题, 可以参考 `/src/style` 下的 `scss` 文件配置主题
+
+## 插件 (Plugin)
+
+可以根据使用需要 (如实时加载数据) 实现自己的插件, 插件的模版可以参考 [`./src/plugin/temp.js`](././src/plugin/temp.js)
+
+随后, 在 FlexTable 上注册插件
+
+```js
+import FlexTable from 'flex-table'
+import myPlugin from 'my-plugin'
+
+FlexTable.registerPlugin(name, myPlugin)
+```
+
+也可以使用 `replacePlugin` 方法替换具体插件
