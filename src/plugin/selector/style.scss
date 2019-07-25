@@ -2,7 +2,7 @@
 	.it-thead {
 		.it-tr {
 			.it-th {
-				&:first-child {
+				&.it-selector-control {
 					text-align: center;
 					justify-content: center;
 				}
@@ -13,7 +13,7 @@
 	.it-tbody {
 		.it-tr {
 			.it-td {
-				&:first-child {
+				&.it-selector-control {
 					text-align: center;
 					justify-content: center;
 				}

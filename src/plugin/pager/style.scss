@@ -57,6 +57,11 @@
 			.it-size-select {
 				display: inline-block;
 				white-space: nowrap;
+				text-align: left;
+
+				.it-select {
+					min-width: 75px;
+				}
 			}
 
 			.it-input {

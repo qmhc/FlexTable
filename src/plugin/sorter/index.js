@@ -3,23 +3,23 @@
  *	@description 表格数据排序
  */
 
-import { getKeyState } from 'core/events'
-import { sortByProps, checkPathByClass } from '@/utils'
+import { getKeyState, registerKey, isKeyRegistered } from 'core/events'
+import { getType, sortByProps, checkPathByClass } from '@/utils'
 
 import './style.scss'
 
 function getPluralSortData(data) {
 	const { table, columnProps } = this.tableInstance
-	let { sortBy, sortType } = this.state
+	let { sortBy, types } = this.state
 	const sortHandlers = table.querySelectorAll('.it-sort')
 
 	const optinos = sortBy.map(
 		(value, index) => {
 			const props = columnProps.find(cp => cp.id === value)
-			const type = sortType[index] === 1? 'asc': 'desc'
+			const type = types[index] === 1? 'asc': 'desc'
 			const { accessor, sorter, index: key } = props
 
-			switch (sortType[index]) {
+			switch (types[index]) {
 				case 1: sortHandlers[key].classList.add('asc'); break
 				case 2: sortHandlers[key].classList.add('desc'); break
 			}
@@ -33,25 +33,53 @@ function getPluralSortData(data) {
 
 const defaultSortMethod = (a, b) => a.toString().localeCompare(b)
 
+const multipleKeyWhitelist = {
+	ctrl: 17,
+	shift: 16,
+	alt: 18
+}
+
+for (let name in multipleKeyWhitelist) {
+	const code = multipleKeyWhitelist[name]
+	if (!isKeyRegistered(code)) {
+		registerKey(code)
+	}
+}
+
 export default class Sorter {
 	constructor (tableInstance, options) {
 		this.tableInstance = tableInstance
 		this.getSortData = getPluralSortData.bind(this)
-		
-		const { sortable, sortCache } = options
 
-		this.tableInstance.state = {
-			...this.tableInstance.state,
-			sortable: sortable !== false,
-			sortBy: [undefined],
-			sortType: [0],			// 0 normal | 1 asc | 2 desc
-			sortData: undefined,
-			sortCache: sortCache === true, // 多列排序缓存
+		const { state } = this.tableInstance
+
+		const sortable = getType(options.sorter) === 'object'
+
+		if (sortable) {
+			const { multiple, multipleKey } = options.sorter
+
+			const keyName = getType(multipleKey) === 'string' ? multipleKey.toLowerCase() : ''
+
+			state.sorter = {
+				sortable,
+				sortBy: [undefined], // 记录列id
+				types: [0], // 0 normal | 1 asc | 2 desc
+				sortData: undefined,
+				multiple: multiple === true,
+				multipleKey: Object.keys(multipleKeyWhitelist).includes(keyName) ? multipleKeyWhitelist[keyName] : multipleKeyWhitelist.shift
+				// cache: cache === true // 多列排序缓存, 在与分页插件的结合上存在一些问题, 暂不实现
+			}
+		} else {
+			state.sorter = {
+				sortable
+			}
 		}
+
+		this.state = state.sorter
 	}
 
 	afterContruct () {
-		this.state = this.tableInstance.state
+		this.globalState = this.tableInstance.state
 	}
 
 	shouldUse () {
@@ -59,29 +87,14 @@ export default class Sorter {
 	}
 
 	beforeRenderData (data) {
-		const { sortBy } = this.state
+		const { sortable, sortBy } = this.state
 
-		if (typeof sortBy[0] !== 'undefined') {
+		if (sortable && typeof sortBy[0] !== 'undefined') {
 			data = this.getSortData(data)
 		}
 
 		return data
 	}
-
-	// beforeCreate () {
-	// 	const { columnProps } = this.tableInstance
-
-	// 	for (let props of columnProps) {
-	// 		const { sorter, sortable } = props
-
-	// 		if (sortable === false) {
-	// 			continue
-	// 		}
-
-	// 		props.sorter = sorter !== false? typeof value === 'function'? value: defaultSortMethod: false
-	// 		props.sortable = props.sorter ? true : false
-	// 	}
-	// }
 
 	create () {
 		const { table, columnProps } = this.tableInstance
@@ -103,9 +116,9 @@ export default class Sorter {
 			}
 		}
 
-		if (this.state.sortCache) {
-			this.sortCacheData = new Map()
-		}
+		// if (this.state.cache) {
+		// 	this.cacheData = new Map()
+		// }
 
 		this.created = true
 	}
@@ -114,7 +127,7 @@ export default class Sorter {
 		const { table, columnProps } = this.tableInstance
 
 		table.addEventListener('click', ev => {
-			if (this.state.resizing) {
+			if (this.globalState.resizer && this.globalState.resizer.resizing) {
 				return false
 			}
 
@@ -140,29 +153,30 @@ export default class Sorter {
 				const props = columnProps.find(value => value.id === id)
 
 				if (props.sortable) {
-					let { sortBy, sortType } = this.state
-					
-					if (typeof sortBy[0] !== 'undefined' && (sortBy.length !== 1 || sortBy[0] !== id) && getKeyState('shift')) {
+					let { sortBy, types, multiple, multipleKey } = this.state
+
+					console.log(getKeyState(multipleKey))
+					if (multiple && typeof sortBy[0] !== 'undefined' && (sortBy.length !== 1 || sortBy[0] !== id) && getKeyState(multipleKey)) {
 						const targetIndex = sortBy.findIndex(value => value === id)
 						let sortIndex = 0
 
 						if (targetIndex !== -1) {
 							sortIndex = targetIndex
-							sortType[sortIndex] = (sortType[sortIndex] + 1) % 3
+							types[sortIndex] = (types[sortIndex] + 1) % 3
 
-							if (!sortType[sortIndex]) {
+							if (!types[sortIndex]) {
 								sortBy.splice(sortIndex, 1)
-								sortType.splice(sortIndex, 1)
+								types.splice(sortIndex, 1)
 								target.classList.remove('asc', 'desc')
 							}
 						} else {
 							sortIndex = sortBy.push(id) - 1
-							sortType[sortIndex] = 1
+							types[sortIndex] = 1
 						}
 					} else {
 						if (sortBy.length > 1 || sortBy[0] !== id) {
-							this.state.sortBy = [id];
-							this.state.sortType = [0];
+							this.state.sortBy = [id]
+							this.state.types = [0]
 						}
 
 						table.querySelectorAll('.asc, .desc').forEach(
@@ -170,22 +184,27 @@ export default class Sorter {
 						)
 
 						sortBy = this.state.sortBy
-						sortType = this.state.sortType
-						sortType[0] = (sortType[0] + 1) % 3
+						types = this.state.types
+						types[0] = (types[0] + 1) % 3
 
-						if (!sortType[0]) {
+						if (!types[0]) {
 							sortBy[0] = undefined
 						} else {
-							switch (sortType[0]) {
-								case 1: target.classList.add('asc'); break
-								case 2: target.classList.add('desc'); break
+							switch (types[0]) {
+								case 1: {
+									target.classList.add('asc')
+									break
+								}
+								case 2: {
+									target.classList.add('desc')
+									break
+								}
 							}
 						}
 					}
 
 					this.tableInstance.renderBodyData()
 				}
-				// console.timeEnd('sort');
 			}
 		})
 	}

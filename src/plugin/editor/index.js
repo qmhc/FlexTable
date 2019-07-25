@@ -3,11 +3,7 @@
  *	@description 表格编辑插件
  */
 
-import {
-	temp,
-  inputTemp,
-  buttonTemp
-} from 'core/temps';
+import { temp, inputTemp, buttonTemp } from 'core/temps'
 import { checkPathByClass, getType, createSelect } from '../../utils'
 
 import './style.scss'
@@ -20,7 +16,7 @@ editInputTemp.classList.add('it-editor-control')
 function createEditButton (data) {
   const editButton = buttonTemp.cloneNode()
   editButton.classList.add('it-editor-edit')
-  editButton.textContent = 'Edit'
+  editButton.textContent = this.labels.edit
 
   editButton.addEventListener('click', () => {
     const rowActions = editButton.parentNode
@@ -86,7 +82,7 @@ function createEditButton (data) {
 function createSaveButton (data) {
   const saveButton = buttonTemp.cloneNode()
   saveButton.classList.add('it-editor-save')
-  saveButton.textContent = 'Save'
+  saveButton.textContent = this.labels.save
 
   saveButton.addEventListener('click', () => {
     const rowActions = saveButton.parentNode
@@ -148,7 +144,7 @@ function createSaveButton (data) {
 function createCancelButton (data) {
   const cancelButton = buttonTemp.cloneNode()
   cancelButton.classList.add('it-editor-cancel')
-  cancelButton.textContent = 'Cancel'
+  cancelButton.textContent = this.labels.cancel
 
   cancelButton.addEventListener('click', () => {
     const rowActions = cancelButton.parentNode
@@ -212,15 +208,28 @@ function insertData (cell, data) {
 }
 
 export default class {
-	constructor(tableInstance, options) {
-		this.tableInstance = tableInstance
+	constructor(tableInstance, options = {}) {
+    this.tableInstance = tableInstance
+
+    const { columns, state } = this.tableInstance
     
-    const { columns, data } = this.tableInstance
-    let { editable, editTrigger, editVerifier } = options
-    editable = editable === true
-    editTrigger = editTrigger === 'action' ? 1 : 0
+    const editable = getType(options.editor) === 'object'
 
     if (editable) {
+      const { trigger, verifier, columnWidth } = options.editor
+
+      const labels = options.editor.labels || {}
+
+      this.labels = {
+        edit: 'Edit',
+        save: 'Save',
+        cancel: 'Cancel',
+        ...labels
+      }
+
+      this.trigger = trigger === 'action' ? 1 : 0
+      this.verifier = getType(verifier) === 'function' ? verifier : null
+    
       for (let i in columns) {
         const column = columns[i]
         if (column.children && column.children.length) {
@@ -232,82 +241,81 @@ export default class {
           column.editable = column.editable !== false ? (getType(column.key) === 'string' ? true : false) : false
         }
       }
-    }
 
-    for (let i = 0, len = data.length; i < len; i++) {
-			const rowData = data[i]
-			if (!rowData._itId) {
-				rowData._itId = getUuid()
-			}
-    }
+      // 使用独立编辑时, 添加action列
+      if (this.trigger) {
+        this.recorder = {}
 
-    this.verifier = editVerifier
+        const editAction = {
+          name: 'Action',
+          accessor: data => {
+            const uuid = data._itId
 
-    // 使用独立编辑时, 添加action列
-    if (editTrigger) {
-      this.recorder = {}
+            if (!uuid) {
+              return ''
+            }
 
-      const editAction = {
-        name: 'Action',
-        accessor: data => {
-          const uuid = data._itId
+            let rowActions = null
 
-          if (!uuid) {
-            return ''
-          }
+            if (this.recorder[uuid]) {
+              rowActions = this.recorder[uuid]
+            } else {
+              rowActions = temp.cloneNode()
+              rowActions.classList.add('it-editor-actions')
 
-          let rowActions = null
+              this.recorder[uuid] = rowActions
 
-          if (this.recorder[uuid]) {
-            rowActions = this.recorder[uuid]
-          } else {
-            rowActions = temp.cloneNode()
-            rowActions.classList.add('it-editor-actions')
+              // 编辑按钮
+              const editButton = createEditButton.call(this, data)
 
-            this.recorder[uuid] = rowActions
+              // 保存按钮
+              const saveButton = createSaveButton.call(this, data)
 
-            // 编辑按钮
-            const editButton = createEditButton.call(this, data)
+              // 取消按钮
+              const cancelButton = createCancelButton.call(this, data)
 
-            // 保存按钮
-            const saveButton = createSaveButton.call(this, data)
+              rowActions.appendChild(editButton)
+              rowActions.appendChild(saveButton)
+              rowActions.appendChild(cancelButton)
 
-            // 取消按钮
-            const cancelButton = createCancelButton.call(this, data)
+              rowActions._itId = uuid
+            }
 
-            rowActions.appendChild(editButton)
-            rowActions.appendChild(saveButton)
-            rowActions.appendChild(cancelButton)
+            return rowActions
+          },
+          resizable: false,
+          sortable: false,
+          filterable: false,
+          editable: false,
+          defaultWidth: columnWidth || 142
+        }
 
-            rowActions._itId = uuid
-          }
+        const children = columns[columns.length - 1].children
 
-          return rowActions
-        },
-        resizable: false,
-        sortable: false,
-        filterable: false,
-        editable: false,
-        defaultWidth: 142
+        if (children && children.length) {
+          children.push(editAction)
+        } else {
+          columns.push(editAction)
+        }
       }
 
-      const children = columns[columns.length - 1].children
-
-      if (children && children.length) {
-        children.push(editAction)
-      } else {
-        columns.push(editAction)
+      state.editor = {
+        editable,
+        trigger: this.trigger,
+        verifier: this.verifier,
+        columnWidth: columnWidth || 142
+      }
+    } else {
+      state.editor = {
+        editable
       }
     }
 
-    this.tableInstance.state = {
-      ...this.tableInstance.state,
-      editable,
-      editTrigger,
-      editVerifier: typeof editVerifier === 'function' ? editVerifier : null
-    }
+    this.state = state.editor
+  }
 
-    this.state = this.tableInstance.state
+  afterContruct () {
+    this.globalState = this.tableInstance.state
   }
   
 	shouldUse() {
@@ -320,7 +328,8 @@ export default class {
   }
   
 	bindEvent() {
-    if (this.state.editTrigger) {
+    // trigger is not click
+    if (this.state.trigger) {
       return false
     }
 
@@ -348,11 +357,16 @@ export default class {
 
       setTimeout(() => {
         node.classList.remove('editing')
-      }, 200)
+      }, 300)
     }
 
     body.addEventListener('click', ev => {
+      if (this.globalState.scroller && this.globalState.scroller.scrolling) {
+        return false
+      }
+
       const node = checkPathByClass(ev.target, 'it-td')
+      
       if (node) {
         if (node.classList.contains('editing')) {
           return false
@@ -380,13 +394,13 @@ export default class {
                 if (select.isOptionsOpen) {
                   select.addEventListener('transitionend', () => {
                     updateData(node, select, accessor, verifier, rowData, key)
-                    node.style.overflow = ''
+                    // node.style.overflow = ''
                     document.removeEventListener('click', clickOutside)
                   })
                   select.closeOptions()
                 } else {
                   updateData(node, select, accessor, verifier, rowData, key)
-                  node.style.overflow = ''
+                  // node.style.overflow = ''
                   document.removeEventListener('click', clickOutside)
                 }
               }
@@ -394,7 +408,7 @@ export default class {
               return false
             }
 
-            node.style.overflow = 'visible'
+            // node.style.overflow = 'visible'
             node.innerHTML = ''
             node.appendChild(select)
 

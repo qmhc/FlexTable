@@ -15,13 +15,21 @@ export default function render(options) {
 	this.state = {}
 	this.plugins = []
 	const plugins = [...this.constructor.plugins]
-	const { id, className } = options;
+	const { id, className } = options
+
+	// 建立数据索引
+	for (let i = 0, len = this.data.length; i < len; i++) {
+		const rowData = this.data[i]
+		if (!rowData._itId) {
+			rowData._itId = getUuid()
+		}
+	}
 
 	// 插件实例化
 	// constructor 钩子 (实例化)
 	for (let i = 0, len = plugins.length; i < len; i++) {
 		const { name, construct } = plugins[i]
-		const instance = new construct(this, options)
+		const instance = new construct(this, options.plugins || {})
 		this.plugins.push({
 			name,
 			instance
@@ -122,7 +130,7 @@ export default function render(options) {
 
 // 头部列渲染
 function renderColumn(column) {
-	const { name, accessor, footer, defaultWidth, children } = column
+	const { name, className, accessor, footer, defaultWidth, children } = column
 	const id = column.id || getUuid()
 	const th = thTemp.cloneNode()
 
@@ -157,6 +165,10 @@ function renderColumn(column) {
 	th.itColumnId = id
 	const width = defaultWidth || this.constructor.defaultColumnWidth
 	th.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
+
+	if (getType(className) === 'string') {
+		th.classList.add(className)
+	}
 
 	return {
 		...column,
@@ -237,6 +249,7 @@ function renderBodyStruct() {
 	const afterHookFns = []
 	// beforeRenderBody 钩子 (表格结构变化)
 	let length = data.length
+
 	for (let i = 0, len = plugins.length; i < len; i++) {
 		const plugin = plugins[i].instance
 		const disabled = !plugin.shouldUse()
@@ -249,6 +262,7 @@ function renderBodyStruct() {
 			afterHookFns.unshift(plugin.afterRenderBody.bind(plugin))
 		}
 	}
+
 	const tbody = table.querySelector('.it-tbody')
 	const trGroups = tbody.querySelectorAll('.it-tr-group')
 
@@ -293,6 +307,12 @@ function renderBodyStruct() {
 				td.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
 				td.rowIndex = parseInt(i)
 				td.columnIndex = parseInt(j)
+
+				const props = columnProps[j]
+				if (getType(props.className) === 'string') {
+					td.classList.add(props.className)
+				}
+
 				tr.appendChild(td)
 			}
 
@@ -311,7 +331,7 @@ function renderBodyStruct() {
 }
 
 // 渲染数据方法
-function renderBodyData(target) {
+function renderBodyData() {
 	const { table, plugins, columnProps } = this
 
 	const afterHookFns = []
@@ -339,44 +359,52 @@ function renderBodyData(target) {
 
 	for (let i = 0, len = trGroups.length; i < len; i++) {
 		const tr = trGroups[i].querySelector('.it-tr')
-		const rowData = data[i] || {}
-		const tds = tr.querySelectorAll('.it-td')
+		if (data[i]) {
+			const rowData = data[i] || {}
+			const tds = tr.querySelectorAll('.it-td')
 
-		if (!rowData._itId) {
-			rowData._itId = getUuid()
-		}
+			if (!rowData._itId) {
+				rowData._itId = getUuid()
+			}
 
-		tr.itRowId = rowData._itId
+			tr.itRowId = rowData._itId
 
-		for (let j = 0, len = columnProps.length; j < len; j++) {
-			const { accessor } = columnProps[j]
-			const td = tds[j]
+			for (let j = 0, len = columnProps.length; j < len; j++) {
+				const { accessor } = columnProps[j]
+				const td = tds[j]
 
-			const result = accessor(rowData)
-			const html = result || ''
+				const result = accessor(rowData)
+				const html = (result === 0 || result) ? result : ''
 
-			switch (getType(html)) {
-				case 'number':
-				case 'string': {
-					td.textContent = html
-					break
-				}
-				case 'array':
-				case 'nodelist': {
-					td.innerHTML = ''
-					const fragment = document.createDocumentFragment()
-		
-					while (html.length > 0) {
-						fragment.appendChild(html[0])
+				switch (getType(html)) {
+					case 'number':
+					case 'string': {
+						td.textContent = html
+						break
 					}
-		
-					td.appendChild(fragment)
-					break
+					case 'array':
+					case 'nodelist': {
+						td.innerHTML = ''
+						const fragment = document.createDocumentFragment()
+			
+						while (html.length > 0) {
+							fragment.appendChild(html[0])
+						}
+			
+						td.appendChild(fragment)
+						break
+					}
+					default: {
+						td.innerHTML = ''
+						td.appendChild(html)
+					}
 				}
-				default: {
-					td.innerHTML = ''
-					td.appendChild(html)
-				}
+			}
+		} else {
+			const tds = tr.querySelectorAll('.it-td')
+			for (let i = 0, len = columnProps.length; i < len; i++) {
+				tds[i].innerHTML = ''
+				tr.itRowId = undefined
 			}
 		}
 	}

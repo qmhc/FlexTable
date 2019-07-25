@@ -3,7 +3,7 @@
  *	@description 表格数据选择 (复选框)
  */
 
-import { getUuid } from '@/utils'
+import { getType } from '@/utils'
 import { inputTemp } from 'core/temps'
 
 import './style.scss'
@@ -22,100 +22,105 @@ checkboxTemp.setAttribute('type', 'checkbox')
 checkboxTemp.className = 'it-check'
 
 export default class Selector {
-	constructor (tableInstance, options) {
+	constructor (tableInstance, options = {}) {
 		this.tableInstance = tableInstance
 
-		const { useSelector } = options
+		const { state } = this.tableInstance
 
-		if (useSelector !== true) {
-			return false
-		}
+		const selectable = getType(options.selector) === 'object'
 
-		const { data, columns } = this.tableInstance
+		if (selectable) {
+			const { columns } = this.tableInstance
 
-		for (let i = 0, len = data.length; i < len; i++) {
-			const rowData = data[i]
-			if (!rowData._itId) {
-				rowData._itId = getUuid()
+			this.selection = []
+			this.recorder = {}
+	
+			const headCheck = checkboxTemp.cloneNode()
+	
+			const selector = {
+				name: headCheck,
+				className: 'it-selector-control',
+				accessor: data => {
+					const uuid = data._itId
+	
+					if (!uuid) {
+						return ''
+					}
+	
+					let rowCheck = null
+	
+					if (this.recorder[uuid]) {
+						rowCheck = this.recorder[uuid].target
+					} else {
+						rowCheck = checkboxTemp.cloneNode()
+	
+						this.recorder[uuid] = {
+							target: rowCheck,
+							rowData: data,
+						}
+	
+						rowCheck.addEventListener('change', () => {
+							if (rowCheck.checked) {
+								this.selection.push(uuid)
+							} else {
+								const index = this.selection.indexOf(uuid)
+								if (index !== -1) {
+									this.selection.splice(index, 1)
+								}
+							}
+						})
+	
+						rowCheck._itId = uuid
+					}
+	
+					return rowCheck
+				},
+				resizable: false,
+				sortable: false,
+				editable: false,
+				filter: (value, filter) => {
+					const selected = this.selection.includes(value._itId)
+					return filter? selected: true
+				},
+				filterOptions: {
+					type: 'check',
+				},
+				defaultWidth: 32
+			}
+	
+			const children = columns[0].children
+	
+			if (children && children.length) {
+				children.unshift(selector)
+			} else {
+				columns.unshift(selector)
+			}
+
+			state.selector = {
+				selectable
+			}
+		} else {
+			state.selector = {
+				selectable
 			}
 		}
 
-		this.selection = []
-		this.recorder = {}
-
-		const headCheck = checkboxTemp.cloneNode()
-
-		const selector = {
-			name: headCheck,
-			accessor: data => {
-				const uuid = data._itId
-
-				if (!uuid) {
-					return ''
-				}
-
-				let rowCheck = null
-
-				if (this.recorder[uuid]) {
-					rowCheck = this.recorder[uuid].target
-				} else {
-					rowCheck = checkboxTemp.cloneNode()
-
-					this.recorder[uuid] = {
-						target: rowCheck,
-						rowData: data,
-					}
-
-					rowCheck.addEventListener('change', () => {
-						if (rowCheck.checked) {
-							this.selection.push(uuid)
-						} else {
-							const index = this.selection.indexOf(uuid)
-							if (index !== -1) {
-								this.selection.splice(index, 1)
-							}
-						}
-					})
-
-					rowCheck._itId = uuid
-				}
-
-				return rowCheck
-			},
-			resizable: false,
-			sortable: false,
-			editable: false,
-			filter: (value, filter) => {
-				const selected = this.selection.includes(value._itId)
-				return filter? selected: true
-			},
-			filterOptions: {
-				type: 'check',
-			},
-			defaultWidth: 32
-		}
-
-		const children = columns[0].children
-
-		if (children && children.length) {
-			children.unshift(selector)
-		} else {
-			columns.unshift(selector)
-		}
-
-		this.tableInstance.state.useSelector = useSelector
+		this.state = state.selector
 	}
 
 	afterContruct () {
-		this.state = this.tableInstance.state
+		this.globalState = this.tableInstance.state
 	}
 
 	shouldUse () {
-		return this.state.useSelector
+		return this.state.selectable
 	}
 	
 	create () {
-		this.tableInstance.registerMethod('getSelected', getSelectedDataList)
+		if (this.state.selectable) {
+			this.tableInstance.registerMethod('getSelected', getSelectedDataList.bind(this), false)
+		}
+		
 		this.created = true
 	}
 

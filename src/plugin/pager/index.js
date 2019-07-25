@@ -9,7 +9,7 @@ import {
 	buttonTemp,
 	inputTemp
 } from 'core/temps'
-import { toggleDisabled, createSelect } from '@/utils'
+import { getType, toggleDisabled, createSelect } from '@/utils'
 
 import './style.scss'
 
@@ -21,7 +21,7 @@ function getIndexRange({ currentPage, pageSize }) {
 
 function renderPagination() {
 	const { data } = this.tableInstance
-	const { pageOption, currentPage, pageSize, usePageOption, currentOption } = this.state
+	const { pageOptions, currentPage, pageSize, useOptions } = this.state
 
 	const wrapper = temp.cloneNode()
 	wrapper.className = 'it-pagination'
@@ -46,7 +46,7 @@ function renderPagination() {
 	const prevButton = buttonTemp.cloneNode()
 	const nextButton = buttonTemp.cloneNode()
 
-	prevButton.textContent = '上一页'
+	prevButton.textContent = this.labels.prev
 	prevButton.setAttribute('disabled', '')
 	prevButton.addEventListener('click', () => {
 		if (prevButton.getAttribute('disabled')) {
@@ -57,7 +57,7 @@ function renderPagination() {
 	})
 	this.prevButton = prevButton
 
-	nextButton.textContent = '下一页';
+	nextButton.textContent = this.labels.next
 	nextButton.addEventListener('click', () => {
 		if (nextButton.getAttribute('disabled')) {
 			return false
@@ -96,10 +96,11 @@ function renderPagination() {
 	center.appendChild(page)
 
 	// 分页控件
-	if (usePageOption) {
+	if (useOptions) {
 		const sizeSelect = spanTemp.cloneNode()
 		sizeSelect.className = 'it-size-select'
-		const select = createSelect(pageOption.map(value => ({ title: `${value} 行`, value })), currentOption)
+		const select = createSelect(pageOptions.map(value => ({ title: `${value} ${this.labels.row}`, value })))
+		select.itValue = pageSize
 
 		select.addEventListener('change', ev => {
 			// 分页改变
@@ -143,31 +144,48 @@ function changePage(targetPage) {
 export default class Pager {
 	constructor(tableInstance, options) {
 		this.tableInstance = tableInstance
-		
+
 		this.changePage = changePage.bind(this)
 		this.renderTraget = renderPagination.bind(this)
 
-		const { pageable, usePageOption, pageSize, currentPage, currentPageOption } = options
-		const pageOption = options.pageOption || [10, 20, 50, 100]
-		const currentOption = currentPageOption ? pageOption[options.currentPageOption] : pageOption[0]
+		const { state } = this.tableInstance
 
-		this.tableInstance.state = {
-			...this.tableInstance.state,
-			pageable: pageable !== false,
-			currentPage: currentPage || 1,
-			pageOption,
-			pageSize: usePageOption === false? (pageSize || 10): currentOption,
-			currentOption: currentPageOption || 0,
-			usePageOption: usePageOption !== false,
+		const pageable = getType(options.pager) === 'object'
+
+		if (pageable) {
+			const { useOptions, pageOptions, pageSize, currentPage } = options.pager
+
+			const labels = options.pager.labels || {}
+
+			this.labels = {
+				prev: 'Prev',
+				next: 'Next',
+				row: 'Row',
+				...labels
+			}
+
+			state.pager = {
+				pageable,
+				useOptions: useOptions !== false,
+				pageOptions: getType(pageOptions) === 'array' ? [...pageOptions] : [10, 20, 50, 100],
+				currentPage: currentPage || 1,
+				pageSize: pageSize || 10
+			}
+		} else {
+			state.pager = {
+				pageable
+			}
 		}
+
+		this.state = state.pager
 	}
 
 	afterContruct () {
-		this.state = this.tableInstance.state
+		this.globalState = this.tableInstance.state
 	}
 
 	shouldUse () {
-		return this.state.pageable !== false
+		return this.state.pageable
 	}
 
 	beforeRenderBody () {

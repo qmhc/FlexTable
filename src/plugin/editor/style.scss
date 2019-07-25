@@ -1,6 +1,10 @@
 .flex-table {
-  .it-tbody .it-td {
-    cursor: default;
+  .it-tbody {
+    user-select: none;
+
+    .it-td {
+      cursor: default;
+    }
   }
 
   .it-tr-group {
@@ -15,6 +19,10 @@
 
   .it-td {
     min-height: 40px;
+
+    &.editing {
+      overflow: visible;
+    }
   }
 
   .it-editor-control {
@@ -30,6 +38,7 @@
     &.it-select {
       padding: 0 2px;
       height: 1.5em;
+      min-width: 75px;
     }
   }
 

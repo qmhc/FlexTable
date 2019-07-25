@@ -3,33 +3,56 @@
  *	@description 表格提示遮罩层
  */
 
-import { temp } from 'core/temps';
+import { temp } from 'core/temps'
+import { getType } from '@/utils'
 
-import './style.scss';
+import './style.scss'
 
 export default class Layer {
 	constructor (tableInstance, options) {
 		this.tableInstance = tableInstance
-		this.tableInstance.state.useLayer = options.useLayer === true
+
+		const { state } = this.tableInstance
+
+		const layerable = getType(options.layer) === 'object'
+
+		if (layerable) {
+			const { loading, notFound, delay } = options.layer
+
+			state.layer = {
+				layerable,
+				loading: loading === true,
+				notFound: notFound !== false,
+				delay: delay || 500
+			}
+		} else {
+			state.layer = {
+				layerable
+			}
+		}
+
+		this.state = state.layer
 	}
 
 	afterContruct () {
-		this.state = this.tableInstance.state
+		this.globalState = this.tableInstance.state
 	}
 
 	shouldUse () {
-		return this.state.useLayer
+		return this.state.layerable
 	}
 
-	beforeRenderBody () {
-		if (this.created && this.notFound) {
-			this.toggleNotFound(false)
-		}
-	}
+	// beforeRenderBody () {
+	// 	if (this.created && this.notFound) {
+	// 		this.toggleNotFound(false)
+	// 	}
+	// }
 
 	beforeRenderData () {
-		if (this.created && this.notFound) {
-			this.toggleNotFound(false)
+		if (this.created && this.state.loading) {
+			if (!this.loading) {
+				this.toggleLoading(true)
+			}
 		}
 	}
 
@@ -69,8 +92,22 @@ export default class Layer {
 
 	afterRenderData (data) {
 		if (this.created) {
-			if (!data.length) {
-				this.toggleNotFound(true)
+			const { loading, notFound, delay } = this.state
+
+			if (notFound) {
+				if (this.notFound && data.length) {
+					this.toggleNotFound(false)
+				} else if (!this.notFound && !data.length) {
+					this.toggleNotFound(true)
+				}
+			}
+			
+			if (loading) {
+				if (this.loading) {
+					setTimeout(() => {
+						this.toggleLoading(false)
+					}, delay)
+				}
 			}
 		}
 	}

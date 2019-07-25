@@ -4,6 +4,7 @@
  */
 
 import { temp } from 'core/temps'
+import { getType } from '@/utils'
 
 import './style.scss'
 
@@ -89,18 +90,27 @@ export default class Resizer {
 		this.tableInstance = tableInstance
 		this.defaultColumnWidth = this.tableInstance.constructor.defaultColumnWidth
 
-		const resizable = options.resizable
-			
-		this.tableInstance.state = {
-			...this.tableInstance.state,
-			columnWidth: new Proxy({}, getProxyHandler.call(this)),
-			resizable: resizable !== false,
-			resizing: false
+		const { state } = this.tableInstance
+
+		const resizable = getType(options.resizer) === 'object'
+
+		if (resizable) {
+			state.resizer = {
+				resizable,
+				columnWidth: new Proxy({}, getProxyHandler.call(this)),
+				resizing: false
+			}
+		} else {
+			state.resizer = {
+				resizable
+			}
 		}
+
+		this.state = state.resizer
 	}
 
 	afterContruct () {
-		this.state = this.tableInstance.state
+		this.globalState = this.tableInstance.state
 	}
 
 	shouldUse () {

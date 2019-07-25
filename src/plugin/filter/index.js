@@ -11,7 +11,7 @@ import {
 	spanTemp,
 	inputTemp
 } from 'core/temps'
-import { createSelect, html2Element } from '@/utils'
+import { getType, createSelect, html2Element } from '@/utils'
 
 import './style.scss'
 
@@ -174,7 +174,7 @@ function getPorxyAccessor (accessor, filterValue) {
 	switch (typeof filterValue) {
 		case 'object': return rowData => {
 			const value = accessor(rowData)
-			const html = value ? `<span class="it-highlight">${value}</span>` : '&nbsp;'
+			const html = (value === 0 || value) ? `<span class="it-highlight">${value}</span>` : '&nbsp;'
 			return html2Element(html)
 		}
 		case 'boolean': return accessor
@@ -187,7 +187,7 @@ function getPorxyAccessor (accessor, filterValue) {
 	return rowData => {
 		const value = accessor(rowData)
 		if (typeof value === 'object') return value
-		const html = value ? value.toString().replace(new RegExp(keyWords, 'ig'), `<span class="it-highlight">$1</span>`) : '&nbsp;'
+		const html = (value === 0 || value) ? value.toString().replace(new RegExp(keyWords, 'ig'), `<span class="it-highlight">$1</span>`) : '&nbsp;'
 		const element = html2Element(html)
 		return element || ''
 	}
@@ -203,31 +203,30 @@ export default class Filter {
 		this.renderDateControl = renderDateControl.bind(this)
 		this.renderCheckControl = renderCheckControl.bind(this)
 
-		const { columns } = this.tableInstance
+		const { state } = this.tableInstance
 
-		let { filterAll, filterOpen, filterOpenAction } = options
+		const filterable = getType(options.filter) === 'object'
 		
-		// 设置是否默认所有列都添加筛选
-		filterAll = filterAll === true
-		
-		this.tableInstance.state = {
-			...this.tableInstance.state,
-			filterAll,
-			filterable: filterAll || columns.findIndex(
-				column => 
-					column.filter
-					||
-					(column.children && column.children.findIndex(
-						column => column.filter
-					) !== -1)
-			) !== -1,
-			filterOpen: filterOpen === true,
-			filterOpenAction: filterOpenAction !== false
+		if (filterable) {
+			const { filterAll, filterOpen, openAction } = options.filter
+
+			state.filter = {
+				filterAll: filterAll === true, // 设置是否默认所有列都添加筛选
+				filterOpen: filterOpen === true,
+				openAction: openAction !== false,
+				filterable
+			}
+		} else {
+			state.filter = {
+				filterable
+			}
 		}
+
+		this.state = state.filter
 	}
 
 	afterContruct () {
-		this.state = this.tableInstance.state
+		this.globalState = this.tableInstance.state
 	}
 
 	shouldUse () {
@@ -243,7 +242,7 @@ export default class Filter {
 			const { filterable, filter, filterOptions } = props
 
 			if (filterAll || filterable) {
-				if (typeof filter === 'function') {
+				if (getType(filter) === 'function') {
 					props.filter = filter
 					props.filterable = true
 				} else if ((filterAll && filterable !== false) || filterable === true) {
@@ -258,7 +257,7 @@ export default class Filter {
 	}
 
 	create () {
-		const { filterAll, filterOpen, filterOpenAction } = this.state
+		const { filterAll, filterOpen, openAction } = this.state
 		const { table, columnProps } = this.tableInstance
 		const tbodyGroup = table.querySelector('.it-tbody-group')
 
@@ -269,9 +268,13 @@ export default class Filter {
 
 		for (let i in columnProps) {
 			const props = columnProps[i]
-			const { width, filterable, accessor, id } = props
+			const { width, filterable, accessor, id, className } = props
 			const th = thTemp.cloneNode()
 			th.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
+
+			if (getType(className) === 'string') {
+				th.classList.add(className)
+			}
 
 			if ((filterAll && filterable !== false) || filterable) {
 				const options = props.filterOptions || { type: 'text' }
@@ -313,7 +316,7 @@ export default class Filter {
 		}
 		filterGroup.appendChild(tr)
 
-		if (filterOpenAction) {
+		if (openAction) {
 			const action = temp.cloneNode()
 			action.className = 'it-filter-action'
 			const arrow = spanTemp.cloneNode()

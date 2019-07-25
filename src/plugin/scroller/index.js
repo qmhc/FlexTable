@@ -3,30 +3,47 @@
  *	@description 表格滚动条
  */
 
+import { getType } from '@/utils'
+
 import './style.scss'
 
 export default class Scroller {
-	constructor (tableInstance, options) {
+	constructor (tableInstance, options = {}) {
 		this.tableInstance = tableInstance
 
-		const { bodyHeight, wheelDistance } = options
+		const { state } = this.tableInstance
 
-		if (typeof bodyHeight === 'number') {
-			this.tableInstance.state = {
-				...this.tableInstance.state,
-				useScroller: true,
-				bodyHeight: bodyHeight < 200? 200: bodyHeight,
-				wheelDistance: wheelDistance || 20
+		const scrollable = getType(options.scroller) === 'object'
+
+		if (scrollable) {
+			const { height, mouse, wheel, wheelDistance } = options.scroller
+
+			state.scroller = {
+				scrollable,
+				height: height || 300,
+				mouse: mouse !== false,
+				wheel: wheel === true,
+				wheelDistance: wheelDistance || 20,
+				scrolling: false
+			}
+		} else {
+			state.scroller = {
+				scrollable
 			}
 		}
+
+		this.state = state.scroller
 	}
 
 	afterContruct () {
-		this.state = this.tableInstance.state
+		this.globalState = this.tableInstance.state
 	}
 
 	shouldUse() {
-		return this.state.useScroller === true
+		if (this.state.native) {
+			return false
+		}
+		return this.state.scrollable
 	}
 	
 	beforeCreate () {
@@ -46,14 +63,14 @@ export default class Scroller {
 						const addedNodes = [...mutation.addedNodes]
 
 						if (addedNodes.includes(table)) {
-							const { bodyHeight } = this.state
+							const { height } = this.state
 							const scroller = table.querySelector('.it-tbody-group')
 							const tbody = scroller.querySelector('.it-tbody')
 
 							setTimeout(() => {
 								const tbodyHeight = tbody.getBoundingClientRect().height
 
-								if (tbodyHeight < bodyHeight) {
+								if (tbodyHeight < height) {
 									tbody.style.transition = ''
 									scroller.style.height = `${tbodyHeight}px`
 									tbody.style.transform = 'translateY(0)'
@@ -76,13 +93,14 @@ export default class Scroller {
 	}
 
 	create () {
-		const { bodyHeight } = this.state
+		const { height } = this.state
 		const { table } = this.tableInstance
 		const scroller = table.querySelector('.it-tbody-group')
 		const tbody = scroller.querySelector('.it-tbody')
 
-		scroller.style.height = `${bodyHeight}px`
+		scroller.style.height = `${height}px`
 		tbody.style.position = 'absolute'
+		tbody.style.overflow = 'hidden'
 
 		this.created = true
 		this.scroll = true
@@ -93,18 +111,23 @@ export default class Scroller {
 		this.distance = 0
 		this.current = 0
 
-		this.bindWheelEvent()
-		this.bindMoveEvent()
+		if (this.state.wheel) {
+			this.bindWheelEvent()
+		}
+		
+		if (this.state.mouse) {
+			this.bindMoveEvent()
+		}
 	}
 
 	afterRenderBody () {
 		const { table } = this.tableInstance
-		const { bodyHeight } = this.state
+		const { height } = this.state
 		const scroller = table.querySelector('.it-tbody-group')
 		const tbody = scroller.querySelector('.it-tbody')
 		const tbodyHeight = tbody.getBoundingClientRect().height
-
-		if (tbodyHeight < bodyHeight) {
+	
+		if (tbodyHeight < height) {
 			tbody.style.transition = ''
 			scroller.style.height = `${tbodyHeight}px`
 			tbody.style.transform = 'translateY(0)'
@@ -114,7 +137,7 @@ export default class Scroller {
 			this.current = 0
 		} else {
 			tbody.style.transition = 'transform .2s ease-out'
-			scroller.style.height = `${bodyHeight}px`
+			scroller.style.height = `${height}px`
 			this.scroll = true
 		}
 	}
@@ -126,7 +149,13 @@ export default class Scroller {
 
 		const MoveScroller = ev => {
 			const evt = ev || event
+
 			this.distance = evt.clientY - this.start
+
+			if (!this.state.scrolling && Math.abs(this.distance) >= 10) {
+				this.state.scrolling = true
+			}
+
 			tbody.style.transform = `translateY(${this.current + this.distance}px)`
 			return false
 		}
@@ -137,6 +166,12 @@ export default class Scroller {
 
 			tbody.style.userSelect = ''
 			tbody.style.transition = 'none'
+
+			if (this.state.scrolling) {
+				setTimeout(() => {
+					this.state.scrolling = false
+				}, 200)
+			}
 
 			document.removeEventListener('mousemove', MoveScroller)
 			document.removeEventListener('mouseup', finishMoving)
@@ -199,10 +234,10 @@ export default class Scroller {
 
 	positionCorrect () {
 		const { table } = this.tableInstance
-		const { bodyHeight } = this.state
+		const { height } = this.state
 		const tbody = table.querySelector('.it-tbody');
-		const { height } = tbody.getBoundingClientRect()
-		const bottom = -(height - bodyHeight)
+		const tbodyRect = tbody.getBoundingClientRect()
+		const bottom = -(tbodyRect.height - height)
 
 		if (this.current > 0) {
 			tbody.style.transform = 'translateY(0)'

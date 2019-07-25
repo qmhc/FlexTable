@@ -16,7 +16,15 @@ const makeData = (size = 386) => {
 		}]
 	})
 	return data.person
-};
+}
+
+const range = count => {
+	const list = []
+	for (let i = 0; i < count; i++) {
+		list.push(i)
+	}
+	return list
+}
 
 const getColumns = () => {
 	return [
@@ -55,7 +63,8 @@ const getColumns = () => {
 						return span
 					},
 					resizable: false,
-					editType: 'number'
+					editType: 'select',
+					editOptions: range(45)
 				},
 				{
 					name: 'Visits',
@@ -71,8 +80,7 @@ const getColumns = () => {
 					filterOptions: {
 						type: 'number'
 					},
-					editType: 'select',
-					editOptions: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]
+					editType: 'number'
 				},
 				{
 					name: 'Progress',
@@ -123,35 +131,63 @@ const getColumns = () => {
 	]
 }
 
-// const flexTable = new Manager();
+
+const columns = getColumns()
+const data = makeData()
 
 console.time('render')
 
 const table = new FlexTable({
-	// index: 'it1',
 	container: '#app',
-	columns: getColumns(),
-	data: makeData(),
-	useSelector: true,
-	editable: true,
-	// editTrigger: 'action',
-	// sortable: false,
-	// resizable: false,
-	// usePageOption: false,
-	// pageable: false,
-	filterAll: true, // 所有类均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
-	filterOpen: true, // filter 具有开关按钮, 设置是否默认打开
-	filterOpenAction: false, // filter 是否具有开关按钮
-	// useLayer: true, // 使用遮罩层
-	bodyHeight: 450,
+	columns,
+	data,
+	plugins: {
+		selector: {}, // 暂无独立配置项, 只需指定一个空对象
+		editor: {
+			trigger: 'action', // or 'click'
+			// verifier: data => data, // 顶层验证方法
+			columnWidth: 142,
+			labels: {
+				edit: '编辑',
+				save: '保存',
+				cancel: '取消'
+			}
+		},
+		resizer: {}, // 暂无独立配置项, 只需指定一个空对象
+		sorter: {
+			multiple: true, // 开启多列排序功能
+			multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift
+		},
+		pager: {
+			useOptions: true,
+			pageOptions: [10, 15, 20, 25, 30],
+			currentPage: 1,
+			pageSize: 15,
+			labels: {
+				prev: '上一页',
+				next: '下一页',
+				row: '行'
+			}
+		},
+		filter: {
+			filterAll: true, // 所有类均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
+			openAction: false, // filter 是否具有开关按钮
+			filterOpen: true, // filter 具有开关按钮, 设置是否默认打开 openAction 为 false 时忽略
+		},
+		// layer: {
+		// 	loading: true,
+		// 	notFound: false,
+		// 	delay: 500
+		// },
+		scroller: {
+			height: 450,
+			mouse: true,
+			wheel: false,
+			wheelDistance: 20
+		}
+	}
 	// theme: 'blue',
-	pageable: true,
-	usePageOption: true,
-	pageOption: [10, 20, 50, 100],
-	// pageSize: 10, // usePageOption === false 时有效
-	currentPage: 1,
-	currentPageOption: 1 // 当前选中分页选项的索引
-});
+})
 
 console.timeEnd('render')
 

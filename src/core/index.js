@@ -9,8 +9,8 @@ for (let i = 0, len = PluginConfig.length; i < len; i++) {
   try {
     const module = require(`../plugin/${name}`)
     FlexTable.registerPlugin(name, module.default)
-  } catch (e) {
-    console.warn(e)
+  } catch (error) {
+    console.warn(error)
   }
 }
 
