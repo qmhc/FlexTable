@@ -61,7 +61,7 @@ function renderTextControl (id) {
 		props.filterValue = value
 
 		this.filterValueChange = true
-		this.tableInstance.renderBodyData()
+		this.tableInstance.refresh()
 	})
 
 	control.appendChild(textInput)
@@ -84,7 +84,7 @@ function renderDateControl (id) {
 		props.filterValue = value
 
 		this.filterValueChange = true
-		this.tableInstance.renderBodyData()
+		this.tableInstance.refresh()
 	})
 
 	control.appendChild(dateInput)
@@ -107,7 +107,7 @@ function renderNumberControl (id) {
 		const value = minNumberInput.value;
 		props.filterValue[0] = value !== ''? +value: undefined
 		this.filterValueChange = true
-		this.tableInstance.renderBodyData()
+		this.tableInstance.refresh()
 	})
 
 	const maxNumberInput = inputTemp.cloneNode()
@@ -118,7 +118,7 @@ function renderNumberControl (id) {
 		const value = maxNumberInput.value;
 		props.filterValue[1] = value !== ''? +value: undefined
 		this.filterValueChange = true
-		this.tableInstance.renderBodyData()
+		this.tableInstance.refresh()
 	})
 
 	control.appendChild(minNumberInput)
@@ -143,7 +143,7 @@ function renderSelectControl (id) {
 		props.filterValue = value
 
 		this.filterValueChange = true
-		this.tableInstance.renderBodyData()
+		this.tableInstance.refresh()
 	})
 
 	control.appendChild(select)
@@ -163,7 +163,7 @@ function renderCheckControl (id) {
 		const checked = checkbox.checked
 		props.filterValue = checked;
 		this.filterValueChange = true
-		this.tableInstance.renderBodyData()
+		this.tableInstance.refresh()
 	});
 
 	control.appendChild (checkbox)

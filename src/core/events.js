@@ -13,7 +13,7 @@ export const getKeyState = code => {
 
 export const registerKey = code => {
 	if (recorder.find(item => item.code === code)) {
-		throw new Error(`The Key named '${name}' has been registered`)
+		throw new Error(`The Key coded '${code}' has been registered`)
 	}
 
 	recorder.push({

@@ -172,7 +172,7 @@ export default class Selector {
 			}
 
 			if (this.state.filterable) {
-				renderBodyData(target)
+				refresh(target)
 			}
 		})
 	}

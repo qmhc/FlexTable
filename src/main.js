@@ -18,9 +18,9 @@ const makeData = (size = 386) => {
 	return data.person
 }
 
-const range = count => {
+const range = (count, start = 1) => {
 	const list = []
-	for (let i = 0; i < count; i++) {
+	for (let i = start; i <= count; i++) {
 		list.push(i)
 	}
 	return list
@@ -64,7 +64,7 @@ const getColumns = () => {
 					},
 					resizable: false,
 					editType: 'select',
-					editOptions: range(45)
+					editOptions: range(45, 16)
 				},
 				{
 					name: 'Visits',
@@ -147,6 +147,7 @@ const table = new FlexTable({
 			trigger: 'action', // or 'click'
 			// verifier: data => data, // 顶层验证方法
 			columnWidth: 142,
+			columnName: '操作', // trigger 为 'action' 时, 指定 Action 列的名称
 			labels: {
 				edit: '编辑',
 				save: '保存',

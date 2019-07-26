@@ -100,8 +100,8 @@ export default function render(options) {
 	}
 
 	// 暴露表格主体渲染方法
-	this.renderBodyStruct = renderBodyStruct.bind(this)
-	this.renderBodyData = renderBodyData.bind(this)
+	this.registerMethod('refreshStruct', renderBodyStruct)
+	this.registerMethod('refresh', renderBodyData)
 
 	// 加载插件
 	for (let i = 0, len = this.plugins.length; i < len; i++) {

@@ -56,7 +56,7 @@ export default class FlexTable {
 
   /**
    * 根据插件名称替换插件
-   * @param {String} name 需要喜欢的插件名称
+   * @param {String} name 需要替换的插件名称
    * @param {Object} construct 插件的新构造方法 (函数) (对象)
    */
   static replacePlugin (name, construct) {
@@ -107,6 +107,7 @@ export default class FlexTable {
     this.columns = columns
 
     // 初始化 this.table
+    // 注册 refresh 和 refreshStruch 两个方法
     Renderer.call(this, { ...props })
     
 		const fragment = document.createDocumentFragment()
@@ -157,9 +158,7 @@ export default class FlexTable {
     if (bind) {
       this[name] = method.bind(this, ...args)
     } else {
-      this[name] = () => {
-        return method(...args)
-      }
+      this[name] = () => method(...args)
     }
   }
 }

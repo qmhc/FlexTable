@@ -203,7 +203,7 @@ export default class Sorter {
 						}
 					}
 
-					this.tableInstance.renderBodyData()
+					this.tableInstance.refresh()
 				}
 			}
 		})

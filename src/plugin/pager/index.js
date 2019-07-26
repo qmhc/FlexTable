@@ -117,10 +117,10 @@ function renderPagination() {
 			this.state.currentPage = computedCurrentPage
 
 			// 调整表格结构
-			this.tableInstance.renderBodyStruct()
+			this.tableInstance.refreshStruct()
 
 			// 重填数据
-			this.tableInstance.renderBodyData()		
+			this.tableInstance.refresh()		
 		})
 
 		sizeSelect.appendChild(select)
@@ -138,7 +138,7 @@ function changePage(targetPage) {
 	targetPage = targetPage > 0? targetPage: 1
 
 	this.state.currentPage = targetPage
-	this.tableInstance.renderBodyData()
+	this.tableInstance.refresh()
 }
 
 export default class Pager {

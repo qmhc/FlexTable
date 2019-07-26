@@ -216,7 +216,7 @@ export default class {
     const editable = getType(options.editor) === 'object'
 
     if (editable) {
-      const { trigger, verifier, columnWidth } = options.editor
+      const { trigger, verifier, columnWidth, columnName } = options.editor
 
       const labels = options.editor.labels || {}
 
@@ -247,7 +247,7 @@ export default class {
         this.recorder = {}
 
         const editAction = {
-          name: 'Action',
+          name: columnName || 'Action',
           accessor: data => {
             const uuid = data._itId
 
@@ -303,7 +303,8 @@ export default class {
         editable,
         trigger: this.trigger,
         verifier: this.verifier,
-        columnWidth: columnWidth || 142
+        columnWidth: columnWidth || 142,
+        columnName: columnName || 'Action'
       }
     } else {
       state.editor = {
