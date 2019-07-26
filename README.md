@@ -108,6 +108,33 @@ const flexTable = new FlexTable({
 }
 ```
 
+`columns` 的完整配置
+
+```js
+{
+  name: 'First Name', // 表头列名, 可以是 Number String Array<HTMLElemnt> NodeList HTMLElement
+  accessor: data => data.firstName, // 在渲染数据时告诉 FlexTable 该怎么读取数据, 参数为行数据, 返回值参考 name 属性
+  key: 'firstName', // 该列的属性名, 这很重要, 保证 FlexTable 能读取到数据的原始值
+  footer: data => `Total: ${data.length}`, // 脚部渲染方法, 参数为列数据, 返回值参考 name 属性
+  resizable: true, // 是否可以调整列宽
+  sortable: true, // 是否可以排序
+  filterable: true, // 是否可以过滤
+  filter: (value, filter, origin) => { // 可以自定义过滤方法, 参数分别为 accessor 读取后的值, 输入的 filter 值, 数据的原始值
+    if (value.includes(filter)) {
+      return true
+    }
+  },
+  filterOptions: {
+    type: 'text',
+    // options: ['prepare', 'process', 'finish'] // type 为 'select' 时使用
+  }
+  editable: true, // 是否可以编辑
+  editType: 'select', // 编辑控件类型
+  editOptions: ['Kegdhi', 'Tshudgh', 'Asihvsit'] // 'select' 时使用
+  defaultWidth: 100 // 默认列宽
+}
+```
+
 <!-- PS: 内置的 `resizer` 插件是基于 `Proxy` 编写的，使用时请注意兼容性 -->
 
 ## 主题 (Theme)

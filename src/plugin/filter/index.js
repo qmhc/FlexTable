@@ -368,7 +368,7 @@ export default class Filter {
 		let resultCount = 0
 
 		for (let props of columnProps) {
-			const { filterable, filter, filterValue, reflectAccessor } = props
+			const { filterable, filter, filterValue, reflectAccessor, key } = props
 			props.accessor = reflectAccessor
 
 			if (filterable && filter && filterValue) {
@@ -379,11 +379,12 @@ export default class Filter {
 				const resultData = []
 
 				for (let i in filterData) {
-					const rowData = filterData[i];
+					const rowData = filterData[i]
 					const value = reflectAccessor(rowData)
+					const originValue = rowData[key]
 
-					if (filter(value, filterValue)) {
-						resultData.push(rowData);
+					if (filter(value, filterValue, originValue)) {
+						resultData.push(rowData)
 						resultCount++
 					}
 				}
