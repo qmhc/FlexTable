@@ -65,6 +65,7 @@ const flexTable = new FlexTable({
       trigger: 'action', // or 'click'
       // verifier: data => data, // 顶层验证方法
       columnWidth: 142,
+      columnName: '操作', // editor 列头
       labels: {
         edit: '编辑',
         save: '保存',
@@ -104,7 +105,8 @@ const flexTable = new FlexTable({
       wheelDistance: 20
     }
   },
-  theme: 'light'
+  theme: 'light',
+  deepClone: true
 }
 ```
 

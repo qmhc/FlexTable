@@ -1,8 +1,8 @@
-export const prependChild = (target, child) => {
-	target.insertBefore(child, target.firstChild);
+export function prependChild (target, child) {
+	target.insertBefore(child, target.firstChild)
 }
 
-export const getStyle = obj => {
+export function getStyle (obj) {
 	if (window.getComputedStyle) {
 		return window.getComputedStyle(obj, null);
 	} else {
@@ -10,7 +10,7 @@ export const getStyle = obj => {
 	}
 }
 
-export const toggleDisabled = (button, disabled) => {
+export function toggleDisabled (button, disabled) {
 	if (disabled) {
 		button.setAttribute('disabled', '');
 	} else {
@@ -18,12 +18,23 @@ export const toggleDisabled = (button, disabled) => {
 	}
 }
 
+export function checkPathByClass (node, className) {
+	if (!node.parentNode) return null
+	if (node.classList.contains(className)) return node
+	while (node.parentNode) {
+		node = node.parentNode
+		if (node === document.body) return null
+		if (node.classList.contains(className)) return node
+	}
+	return null
+}
+
 /**
  * 创建一个 Select 模版
  * @param {Array} options 候选项列表 { title, value } 当 title 和 value 一样时可直接传入字符串
  * @param {*} defaultIndex 默认选项的索引值
  */
-export const createSelect = (options, defaultIndex = -1) => {
+export function createSelect (options, defaultIndex = -1) {
 	for (let i in options) {
 		const option = options[i]
 		if (typeof option !== 'object') {
@@ -170,14 +181,16 @@ export const createSelect = (options, defaultIndex = -1) => {
  * 获取变量类型
  * @param {any} any 任意变量
  */
-export const getType = any => Object.prototype.toString.call(any).replace(/\[object\s(.+)\]/, '$1').toLowerCase()
+export function getType (any) {
+	return Object.prototype.toString.call(any).replace(/\[object\s(.+)\]/, '$1').toLowerCase()
+}
 
 /**
  * 根据依赖的属性逐层排序
  * @param {Array} obj 需要排序的数组
  * @param {Object|String} props 排序依赖的属性 key-属性名 sorter-排序方法 accessor-数据获取方法 type-升降序
  */
-export const sortByProps = (obj, props) => {
+export function sortByProps (obj, props) {
   if (!obj.sort || !props.length) return obj
   const sortObj = [...obj]
   const defaultSortMethod = (a, b) => a.toString().localeCompare(b)
@@ -212,48 +225,41 @@ export const sortByProps = (obj, props) => {
   return sortObj
 }
 
-export const checkPathByClass = (node, className) => {
-	if (!node.parentNode) return null;
-	if (node.classList.contains(className)) return node;
-	while (node.parentNode) {
-		node = node.parentNode;
-		if (node === document.body) return null;
-		if (node.classList.contains(className)) return node;
-	}
-	return null;
-};
-
 // 简单 (非深度) 去重
-export const getUniqueArray = array => [...new Set(array)];
+export function getUniqueArray (array) {
+	return [...new Set(array)]
+}
 
 // 生成uuid (v4)
-const CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'.split(''); // ABCDEFGHIJKLMNOPQRSTUVWXYZ
-export const getUuid = () => {
-	const uuid = new Array(36);
-	let random1 = 0, random2;
+const CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'.split('') // ABCDEFGHIJKLMNOPQRSTUVWXYZ
+
+export function getUuid () {
+	const uuid = new Array(36)
+	let random1 = 0, random2
 	for (let i = 0; i < 36; i++) {
 		switch (i) {
 			case 8:
 			case 13:
 			case 18:
-			case 23: uuid[i] = '-'; break;
-			case 14: uuid[i] = '4'; break;
+			case 23: uuid[i] = '-'; break
+			case 14: uuid[i] = '4'; break
 			default: {
-				if (random1 <= 0x02) random1 = 0x2000000 + (Math.random() * 0x1000000)|0;
-				random2 = random1 & 0xf;
-				random1 = random1 >> 4;
-				uuid[i] = CHARS[(i === 19)? (random2 & 0x3)|0x8: random2];
-			};
+				if (random1 <= 0x02) random1 = 0x2000000 + (Math.random() * 0x1000000) | 0
+				random2 = random1 & 0xf
+				random1 = random1 >> 4
+				uuid[i] = CHARS[(i === 19)? (random2 & 0x3)|0x8: random2]
+			}
 		}
 	}
-	return uuid.join('');
-};
+
+	return uuid.join('')
+}
 
 /**
  * 深度拷贝对象或数组 (避免一层死循环)
  * @param {Object|Array} obj 需要拷贝的对象或数组
  */
-export const deepClone = obj => {
+export function deepClone (obj) {
   const type = getType(obj)
 
   // 类型校验
@@ -312,7 +318,7 @@ export const deepClone = obj => {
  * 将html字符串转换成Element对象
  * @param {String} html 可以解析的html字符串
  */
-export const html2Element = html => {
+export function html2Element (html) {
 	const span = document.createElement('span')
 	try {
 		span.innerHTML = html
