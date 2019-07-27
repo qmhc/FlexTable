@@ -4,9 +4,9 @@ export function prependChild (target, child) {
 
 export function getStyle (obj) {
 	if (window.getComputedStyle) {
-		return window.getComputedStyle(obj, null);
+		return window.getComputedStyle(obj, null)
 	} else {
-		return obj.currentStyle;
+		return obj.currentStyle
 	}
 }
 
@@ -34,7 +34,7 @@ export function checkPathByClass (node, className) {
  * @param {Array} options 候选项列表 { title, value } 当 title 和 value 一样时可直接传入字符串
  * @param {*} defaultIndex 默认选项的索引值
  */
-export function createSelect (options, defaultIndex = -1) {
+export function createSelect (options, defaultIndex = -1, placement = 'bottom') {
 	for (let i in options) {
 		const option = options[i]
 		if (typeof option !== 'object') {
@@ -66,6 +66,21 @@ export function createSelect (options, defaultIndex = -1) {
 				span.textContent = (newOption && newOption.title) || ''
 				_value = newValue
 				div.value = newValue
+
+				const current = ul.querySelector('li.it-item.current')
+
+				if (current) {
+					current.classList.remove('current')
+				}
+
+				for (let i = 0, len = ul.itOptions.length; i < len; i++) {
+					if (ul.itOptions[i].itValue === newValue) {
+						ul.itOptions[i].classList.add('current')
+						break
+					}
+				}
+
+				return true
 			}
 		},
 		enumerable : true,
@@ -75,8 +90,15 @@ export function createSelect (options, defaultIndex = -1) {
 	const ul = document.createElement('ul')
 	ul.className = 'it-option'
 
+	if (placement === 'top') {
+		ul.classList.add('top')
+		div.classList.add('top')
+	}
+
 	const liTemp = document.createElement('li')
-	liTemp.className = 'it-item';
+	liTemp.className = 'it-item'
+
+	ul.itOptions = []
 
 	for (let i in options) {
 		const option = options[i]
@@ -91,6 +113,7 @@ export function createSelect (options, defaultIndex = -1) {
 			div.value = value
 			li.classList.add('current')
 		}
+		ul.itOptions.push(li)
 		ul.appendChild(li)
 	}
 
@@ -100,12 +123,13 @@ export function createSelect (options, defaultIndex = -1) {
 	down.addEventListener('click', ev => {
 		const evt = ev || event
 		const target = evt.target || evt.srcElement
+
 		if (target.classList.contains('it-item')) {
 			const newValue = target.itValue
 			if (div.itValue === newValue) return
 
-			const current = ul.querySelector('li.it-item.current')
-			if (current) current.classList.remove('current')
+			// const current = ul.querySelector('li.it-item.current')
+			// if (current) current.classList.remove('current')
 
 			// const newTitle = target.textContent
 			const optionIndex = target.index
@@ -118,8 +142,8 @@ export function createSelect (options, defaultIndex = -1) {
 			div.dispatchEvent(event)
 
 			div.itValue = newValue
-			div.value = newValue
-			target.classList.add('current')
+			// div.value = newValue
+			// target.classList.add('current')
 		}
 	})
 
@@ -147,21 +171,29 @@ export function createSelect (options, defaultIndex = -1) {
 	}
 
 	div.openOptions = () => {
-		const rect = getStyle(div)
-		const { top, height } = rect
+		const divStyle = getStyle(div)
+		const { top, height } = divStyle
 
-		down.style.visibility = 'visible'
-		down.style.top = `${parseFloat(top) + parseFloat(height) + 2}px`
-		down.style.opacity = 1
+		if (ul.classList.contains('top')) {
+			down.style.top = ''
+			down.style.bottom = `${parseFloat(top) + parseFloat(height) + 2}px`
+		} else {
+			div.classList.remove('top')
+			down.style.top = `${parseFloat(top) + parseFloat(height) + 2}px`
+			down.style.bottom = ''
+		}
 
-		div.classList.add('show')
-		ul.classList.add('show')
-
-		div.isOptionsOpen = true
-
-		// setTimeout(() => {
-		// 	down.classList.add('show')
-		// }, 300)
+		setTimeout(() => {
+			ul.style.transition = ''
+			down.style.visibility = 'visible'
+			
+			down.style.opacity = 1
+	
+			div.classList.add('show')
+			ul.classList.add('show')
+	
+			div.isOptionsOpen = true
+		}, 10)
 	}
 
 	div.addEventListener('click', () => {

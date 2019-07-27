@@ -99,7 +99,7 @@ function renderPagination() {
 	if (useOptions) {
 		const sizeSelect = spanTemp.cloneNode()
 		sizeSelect.className = 'it-size-select'
-		const select = createSelect(pageOptions.map(value => ({ title: `${value} ${this.labels.row}`, value })))
+		const select = createSelect(pageOptions.map(value => ({ title: `${value} ${this.labels.row}`, value })), 0, 'top')
 		select.itValue = pageSize
 
 		select.addEventListener('change', ev => {
