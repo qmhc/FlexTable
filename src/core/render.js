@@ -302,8 +302,11 @@ function renderBodyStruct() {
 
       for (let j = 0, len = columnProps.length; j < len; j++) {
         const td = tdTemp.cloneNode()
-        const width = parseFloat(ths[j].style.width)
+        const th = ths[j]
+
+        const width = parseFloat(th.style.width)
         td.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
+        
         td.rowIndex = parseInt(i)
         td.columnIndex = parseInt(j)
 
@@ -359,7 +362,7 @@ function renderBodyData() {
 
   for (let i = 0, len = trGroups.length; i < len; i++) {
     const tr = trGroups[i].querySelector('.it-tr')
-    
+
     if (data[i]) {
       const rowData = data[i] || {}
       const tds = tr.querySelectorAll('.it-td')
