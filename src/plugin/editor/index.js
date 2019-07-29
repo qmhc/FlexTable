@@ -302,9 +302,19 @@ export default class {
         const children = columns[columns.length - 1].children
 
         if (children && children.length) {
-          children.push(editAction)
+          const index = children.findIndex(item => item.className === 'it-editor-item')
+          if (!~index) {
+            children.push(editAction)
+          } else {
+            children.splice(index, 1, editAction)
+          }
         } else {
-          columns.push(editAction)
+          const index = columns.findIndex(item => item.className === 'it-editor-item')
+          if (!~index) {
+            columns.push(editAction)
+          } else {
+            columns.splice(index, 1, editAction)
+          }
         }
       }
 

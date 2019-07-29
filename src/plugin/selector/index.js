@@ -91,9 +91,19 @@ export default class Selector {
 			const children = columns[0].children
 	
 			if (children && children.length) {
-				children.unshift(selector)
+				const index = children.findIndex(item => item.className === 'it-selector-control')
+				if (!~index) {
+					children.unshift(selector)
+				} else {
+					children.splice(index, 1, selector)
+				}
 			} else {
-				columns.unshift(selector)
+				const index = columns.findIndex(item => item.className === 'it-selector-control')
+				if (!~index) {
+					columns.unshift(selector)
+				} else {
+					columns.splice(index, 1, selector)
+				}
 			}
 
 			state.selector = {
