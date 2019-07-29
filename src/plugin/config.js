@@ -5,6 +5,6 @@ export default [
 	'sorter',		
 	'pager',
 	'scroller',
-	'resizer',
-	'editor'
+	'editor',
+	'resizer'
 ]

@@ -155,7 +155,6 @@ export default class Sorter {
 				if (props.sortable) {
 					let { sortBy, types, multiple, multipleKey } = this.state
 
-					console.log(getKeyState(multipleKey))
 					if (multiple && typeof sortBy[0] !== 'undefined' && (sortBy.length !== 1 || sortBy[0] !== id) && getKeyState(multipleKey)) {
 						const targetIndex = sortBy.findIndex(value => value === id)
 						let sortIndex = 0

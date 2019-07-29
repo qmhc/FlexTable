@@ -67,5 +67,5 @@
     "serve": "webpack-dev-server --inline --config ./config/webpack.dev.js",
     "build": "webpack --config ./config/webpack.prod.js"
   },
-  "version": "0.1.10"
+  "version": "0.1.11"
 }

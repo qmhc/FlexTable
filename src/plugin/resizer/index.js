@@ -105,6 +105,8 @@ export default class Resizer {
 		const resizable = getType(options.resizer) === 'object'
 
 		if (resizable) {
+			this.force = false
+
 			state.resizer = {
 				resizable,
 				columnWidth: new Proxy({}, getProxyHandler.call(this)),
@@ -125,6 +127,12 @@ export default class Resizer {
 
 	shouldUse () {
 		return this.state.resizable
+	}
+
+	beforeRenderBody (count) {
+		if (count === 0) {
+			this.force = true
+		}
 	}
 
 	create() {
@@ -225,7 +233,7 @@ export default class Resizer {
 	}
 
 	afterRenderBody () {
-		if (this.created) {
+		if (this.created && this.force) {
 			const { table } = this.tableInstance
 			const { columnWidth } = this.state
 			const ths = table.querySelectorAll('.it-thead.shadow .it-th')
@@ -233,11 +241,14 @@ export default class Resizer {
 			for (let i = 0, len = ths.length; i < len; i++) {
 				const th = ths[i]
 				const { width } = th.getBoundingClientRect()
-				
+
 				if (width) {
+					columnWidth[i.toString()] = 0
 					columnWidth[i.toString()] = width
 				}
 			}
+
+			this.force = false
 		}
 	}
 }
