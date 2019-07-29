@@ -186,10 +186,14 @@
 			list-style: none;
 			border-top: 1px solid #eee;
 			min-width: 100px;
-			max-height: 350px;
+			max-height: 250px;
 			transition: transform .3s ease-in-out;
 			transform: translateY(-85%);
 			overflow-y: auto;
+
+			&.top {
+				transform: translateY(85%);
+			}
 			
 			&.show {
 				transform: translateY(0);
@@ -237,6 +241,12 @@
 		&.show {
 			&::before {
 				transform: rotate(-90deg);
+			}
+		}
+
+		&.top.show {
+			&::before {
+				transform: rotate(90deg);
 			}
 		}
 	}

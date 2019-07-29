@@ -130,51 +130,50 @@ export default function render(options) {
 
 // 头部列渲染
 function renderColumn(column) {
-	const { name, className, accessor, footer, defaultWidth, children } = column
-	const id = column.id || getUuid()
+	column.id = column.id || getUuid()
+
+	const { id, name, className, accessor, footer, defaultWidth, children, key } = column
 	const th = thTemp.cloneNode()
 
 	const content = temp.cloneNode()
-	content.className = 'it-head-content'
-
-	switch (getType(name)) {
-		case 'number':
-		case 'string': {
-			content.textContent = name
-			break
-		}
-		case 'array':
-		case 'nodelist': {
-			content.innerHTML = ''
-			const fragment = document.createDocumentFragment()
-
-			while (name.length > 0) {
-				fragment.appendChild(name[0])
-			}
-
-			content.appendChild(fragment)
-			break
-		}
-		default: {
-			content.innerHTML = ''
-			content.appendChild(name)
-		}
-	}
+  content.className = 'it-head-content'
+  
+  renderElement(content, name)
 
 	th.appendChild(content)
 	th.itColumnId = id
 	const width = defaultWidth || this.constructor.defaultColumnWidth
 	th.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
 
-	if (getType(className) === 'string') {
-		th.classList.add(className)
-	}
+	if (className) {
+		setClassName(th, className)
+  }
+
+  let _accessor
+  
+  switch(getType(accessor)) {
+    case 'undefined': {
+      _accessor = rowData => rowData[key]
+    }
+    case 'string': {
+      _accessor = rowData => rowData[accessor]
+      break
+    }
+    case 'function': {
+      _accessor = accessor
+      break
+    }
+    default: {
+      throw new Error('A column has illegal accessor')
+    }
+  }
 
 	return {
 		...column,
-		id,
+    id,
+    key,
 		footer: footer? (getType(footer) === 'function' ? footer : () => footer) : () => '',
-		accessor: getType(accessor) === 'function' ? accessor : rowData => rowData[accessor],
+		accessor: _accessor,
 		width,
 		target: th,
 		parent: !!(children && children.length),
@@ -309,8 +308,9 @@ function renderBodyStruct() {
 				td.columnIndex = parseInt(j)
 
 				const props = columnProps[j]
-				if (getType(props.className) === 'string') {
-					td.classList.add(props.className)
+
+				if (props.className) {
+					setClassName(td, props.className)
 				}
 
 				tr.appendChild(td)
@@ -376,29 +376,7 @@ function renderBodyData() {
 				const result = accessor(rowData)
 				const html = (result === 0 || result) ? result : ''
 
-				switch (getType(html)) {
-					case 'number':
-					case 'string': {
-						td.textContent = html
-						break
-					}
-					case 'array':
-					case 'nodelist': {
-						td.innerHTML = ''
-						const fragment = document.createDocumentFragment()
-			
-						while (html.length > 0) {
-							fragment.appendChild(html[0])
-						}
-			
-						td.appendChild(fragment)
-						break
-					}
-					default: {
-						td.innerHTML = ''
-						td.appendChild(html)
-					}
-				}
+				renderElement(td, html)
 			}
 		} else {
 			const tds = tr.querySelectorAll('.it-td')
@@ -447,33 +425,66 @@ function renderFooter() {
 		const result = footer(columnData.get(i), { ...state })
 		const title = result || ''
 
-		switch (getType(title)) {
-			case 'number':
-			case 'string': {
-				content.textContent = title
-				break
-			}
-			case 'array':
-			case 'nodelist': {
-				content.innerHTML = ''
-				const fragment = document.createDocumentFragment()
-	
-				while (title.length > 0) {
-					fragment.appendChild(title[0])
-				}
-	
-				content.appendChild(fragment)
-				break
-			}
-			default: {
-				content.innerHTML = ''
-				content.appendChild(title)
-			}
-		}
+    renderElement(content, title)
 
 		td.appendChild(content)
 		tr.appendChild(td)
 	}
 
 	return tr
+}
+
+// 为 node 设置类名
+function setClassName (node, className) {
+  let type = getType(className)
+
+  switch (type) {
+    case 'string': {
+      node.classList.add(className)
+      return true
+    }
+    case 'array': {
+      for (let i = 0, len = className.length; i < len; i++) {
+        node.classList.add(className[i])
+      }
+      return true
+    }
+    case 'object': {
+      for (let name in className) {
+        if (className[name]) {
+          node.classList.add(name)
+        }
+      }
+      return true
+    }
+  }
+
+  return false
+}
+
+// 为 node 设置 html
+function renderElement (node, html) {
+	switch (getType(html)) {
+		case 'number':
+		case 'string': {
+			node.textContent = html
+			break
+		}
+		case 'array':
+		case 'nodelist': {
+			node.innerHTML = ''
+			const fragment = document.createDocumentFragment()
+
+			while (html.length > 0) {
+				fragment.appendChild(html[0])
+			}
+
+			node.appendChild(fragment)
+			break
+		}
+		default: {
+			node.innerHTML = ''
+			node.appendChild(html)
+		}
+	}
 }

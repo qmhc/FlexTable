@@ -65,7 +65,7 @@ const flexTable = new FlexTable({
       trigger: 'action', // or 'click'
       // verifier: data => data, // 顶层验证方法
       columnWidth: 142,
-      columnName: '操作', // trigger 为 'action' 时, 指定 Action 列的名称
+      columnName: '操作', // editor 列头
       labels: {
         edit: '编辑',
         save: '保存',
@@ -106,7 +106,7 @@ const flexTable = new FlexTable({
     }
   },
   theme: 'light',
-  deepClone: true // 由于 FlexTable 会对 data 进行一定的修改, 可以选择是否深度克隆数据
+  deepClone: true
 }
 ```
 

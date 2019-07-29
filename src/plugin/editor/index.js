@@ -27,6 +27,8 @@ function createEditButton (data) {
 
     rowActions.classList.add('editing')
 
+    this.editingCount++
+
     const { columnProps } = this.tableInstance
 
     let tr = null
@@ -93,6 +95,8 @@ function createSaveButton (data) {
     
     rowActions.classList.remove('editing')
 
+    this.editingCount--
+
     const { columnProps } = this.tableInstance
 
     let tr = null
@@ -154,6 +158,8 @@ function createCancelButton (data) {
     }
     
     rowActions.classList.remove('editing')
+
+    this.editingCount--
 
     const { columnProps } = this.tableInstance
 
@@ -242,12 +248,15 @@ export default class {
         }
       }
 
+      this.editingCount = 0
+
       // 使用独立编辑时, 添加action列
       if (this.trigger) {
         this.recorder = {}
 
         const editAction = {
           name: columnName || 'Action',
+          className: 'it-editor-item',
           accessor: data => {
             const uuid = data._itId
 
@@ -325,6 +334,8 @@ export default class {
   
 	create() {
     // create code
+    const { table } = this.tableInstance
+    this.topAction = table.querySelector('.it-th.it-editor-item')
 		this.created = true
   }
   
@@ -358,6 +369,7 @@ export default class {
 
       setTimeout(() => {
         node.classList.remove('editing')
+        this.editingCount--
       }, 300)
     }
 
@@ -380,6 +392,8 @@ export default class {
 
         if (props && props.editable && rowData) {
           node.classList.add('editing')
+          
+          this.editingCount++
 
           const { key, accessor, verifier, editType, editOptions } = props
 

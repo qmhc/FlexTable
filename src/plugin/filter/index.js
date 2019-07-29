@@ -172,7 +172,7 @@ function renderCheckControl (id) {
 
 function getPorxyAccessor (accessor, filterValue) {
 	switch (typeof filterValue) {
-		case 'object': return rowData => {
+		case 'object': return (rowData) => {
 			const value = accessor(rowData)
 			const html = (value === 0 || value) ? `<span class="it-highlight">${value}</span>` : '&nbsp;'
 			return html2Element(html)
@@ -184,7 +184,7 @@ function getPorxyAccessor (accessor, filterValue) {
 		(prev, next) => next.length - prev.length 
 	).join('|') + ')'
 
-	return rowData => {
+	return (rowData) => {
 		const value = accessor(rowData)
 		if (typeof value === 'object') return value
 		const html = (value === 0 || value) ? value.toString().replace(new RegExp(keyWords, 'ig'), `<span class="it-highlight">$1</span>`) : '&nbsp;'
