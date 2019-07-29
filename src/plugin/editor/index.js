@@ -133,7 +133,7 @@ function createSaveButton (data) {
           }
 
           data[key] = content
-          const html = accessor(data) || ''
+          const html = accessor(data)
           insertData(td, html)
         }
       }
@@ -176,7 +176,7 @@ function createCancelButton (data) {
         const td = tds[i]
         const { accessor } = columnProps[i]
 
-        const html = accessor(data) || ''
+        const html = accessor(data)
         insertData(td, html)
       }
     }
@@ -188,6 +188,12 @@ function createCancelButton (data) {
 }
 
 function insertData (cell, data) {
+  cell.classList.remove('editing')
+
+  if (!data && data !== 0) {
+    data = ''
+  }
+
   switch (getType(data)) {
     case 'number':
     case 'string': {
@@ -374,11 +380,11 @@ export default class {
       }
 
       rowData[key] = content
-      const html = accessor(rowData) || ''
+      const html = accessor(rowData)
       insertData(node, html)
 
       setTimeout(() => {
-        node.classList.remove('editing')
+        // node.classList.remove('editing')
         this.editingCount--
       }, 300)
     }
