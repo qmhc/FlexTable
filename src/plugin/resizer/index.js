@@ -13,7 +13,8 @@ function getProxyHandler() {
 	const _this = this
 	return {
 		set (obj, prop, value) {
-			const old = obj[prop];
+			const old = obj[prop]
+
 			if (typeof old !== 'undefined' && old !== value) {
 				// console.log(
 				// 	`%cResizer%c >> column %c${prop}%c width change from %c${old}%c to %c${value}`,
@@ -30,6 +31,7 @@ function getProxyHandler() {
 			} else {
 				obj[prop] = value
 			}
+
 			return true
 		}
 	}
@@ -37,51 +39,59 @@ function getProxyHandler() {
 
 function renderResize(index) {
 	const { table, columnProps } = this.tableInstance
-	const nthOfType = +index + 1;
-	const columnWidth = this.state.columnWidth;
-	const targetWidth = columnWidth[index];
-	const props = columnProps[+index];
-	props.width = targetWidth;
+	const nthOfType = +index + 1
+	const columnWidth = this.state.columnWidth
+	const targetWidth = columnWidth[index]
+	const props = columnProps[+index]
+	props.width = targetWidth
 
-	const theads = table.querySelectorAll('.it-thead, .it-tbody-group, .it-tfoot');
-	const childThs = table.querySelectorAll(`.it-thead.resize .it-th:nth-of-type(${nthOfType})`);
+	const theads = table.querySelectorAll('.it-thead, .it-tbody-group, .it-tfoot')
+	const childThs = table.querySelectorAll(`.it-thead.resize .it-th:nth-of-type(${nthOfType})`)
 	const tbodyTds = table.querySelectorAll(`
 		.it-tbody .it-tr>.it-td:nth-of-type(${nthOfType}),
 		.it-tfoot .it-tr>.it-td:nth-of-type(${nthOfType})
 	`);
-	const groupTh = props.parentTarget;
+	const groupTh = props.parentTarget
 
-	let tableWidth = 0;
+	let tableWidth = 0
+
 	for (let key in columnWidth) {
-		const width = columnWidth[key];
-		tableWidth += width;
+		const width = columnWidth[key]
+		tableWidth += width
 	}
+
 	for (let i = 0, len = theads.length; i < len; i++) {
-		const thead = theads[i];
-		thead.style.minWidth = `${tableWidth}px`;
+		const thead = theads[i]
+		thead.style.minWidth = `${tableWidth}px`
 	}
 
 	// 用于保持两层表头结构 (flex布局) 一致性
 	if (!childThs[0].itResize) {
-		childThs[0].itResize = true;
-		if (groupTh) groupTh.itChildrenSize--;
+		childThs[0].itResize = true
+
+		if (groupTh) {
+			groupTh.itChildrenSize--
+		}
 	}
 
 	if (groupTh) {
-		const { itChildrenIds, itChildrenSize } = groupTh;
-		let width = 0;
+		const { itChildrenIds, itChildrenSize } = groupTh
+		let width = 0
+
 		for (let id of itChildrenIds) {
-			width += columnProps.find(props => props.id === id).width;
+			width += columnProps.find(props => props.id === id).width
 		}
-		groupTh.style.cssText = `flex: ${itChildrenSize * 100} 0 auto; width: ${width}px`;
-	}		
+
+		groupTh.style.cssText = `flex: ${itChildrenSize * 100} 0 auto; width: ${width}px`
+	}
+
 	for (let i = 0, len = childThs.length; i < len; i++) {
-		childThs[i].style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`;
+		childThs[i].style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`
 	}
 	
 	for (let i = 0, len = tbodyTds.length; i < len; i++) {
-		const td = tbodyTds[i];
-		td.style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`;
+		const td = tbodyTds[i]
+		td.style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`
 	}
 }
 
@@ -212,5 +222,22 @@ export default class Resizer {
 				document.addEventListener('mouseup', resizeFinish)
 			}
 		})
+	}
+
+	afterRenderBody () {
+		if (this.created) {
+			const { table } = this.tableInstance
+			const { columnWidth } = this.state
+			const ths = table.querySelectorAll('.it-thead.shadow .it-th')
+
+			for (let i = 0, len = ths.length; i < len; i++) {
+				const th = ths[i]
+				const { width } = th.getBoundingClientRect()
+				
+				if (width) {
+					columnWidth[i.toString()] = width
+				}
+			}
+		}
 	}
 }
