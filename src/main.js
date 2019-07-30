@@ -35,7 +35,8 @@ const getColumns = () => {
 					name: 'First Name',
 					accessor: 'firstName',
 					key: 'firstName',
-					filter: true
+					filter: true,
+					defaultSort: 1
 				},
 				{
 					name: 'Last Name',

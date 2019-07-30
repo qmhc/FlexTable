@@ -223,37 +223,52 @@ export function getType (any) {
  * @param {Object|String} props 排序依赖的属性 key-属性名 sorter-排序方法 accessor-数据获取方法 type-升降序
  */
 export function sortByProps (obj, props) {
-  if (!obj.sort || !props.length) return obj
+  if (!obj.sort || !props.length) {
+		return obj
+	}
+
   const sortObj = [...obj]
-  const defaultSortMethod = (a, b) => a.toString().localeCompare(b)
-  if (getType(props) !== 'array') props = [ props ]
+	const defaultSortMethod = (a, b) => a.toString().localeCompare(b)
+	
+  if (getType(props) !== 'array') {
+		props = [props]
+	}
+
   props = props.map(
     value => getType(value) === 'object' ? value : { key: value, sorter: defaultSortMethod, type: 'asc' }
   ).map(
     value => {
       if (getType(value.accessor) !== 'function') {
         value.accessor = data => data[value.key]
-      }
+			}
+			
       if (getType(value.sorter) !== 'function') {
         value.sorter = defaultSortMethod
-      }
+			}
+			
       return value
     }
-  )
+	)
+	
   sortObj.sort(
     (prev, next) => {
       const results = []
       for (let prop of props) {
-        const { sorter, type, accessor } = prop
+				const { sorter, type, accessor } = prop
+				
         let desc = type === 'desc'
-        const result = sorter(accessor(prev), accessor(next))
+				const result = sorter(accessor(prev), accessor(next))
+				
         results.push(desc ? -result : result)
         // 若不为0则无需进行下一层排序
-        if (result) break
+        if (result) {
+					break
+				}
       }
       return results.pop() || 0
     }
-  )
+	)
+	
   return sortObj
 }
 

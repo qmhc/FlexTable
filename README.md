@@ -123,6 +123,8 @@ const flexTable = new FlexTable({
   footer: data => `Total: ${data.length}`, // 脚部渲染方法, 参数为列数据, 返回值参考 name 属性
   resizable: true, // 是否可以调整列宽
   sortable: true, // 是否可以排序
+  defaultSort: 1, // 默认排序 1 正序 2 倒序
+  sorter: (prev, next) => prev.toString().localeCompare(next), // 排序的方法
   filterable: true, // 是否可以过滤
   // 可以自定义过滤方法, 参数分别为 accessor 读取后的值, 输入的 filter 值, 数据的原始值
   filter: (value, filter, origin) => {

@@ -15,13 +15,19 @@ function getPluralSortData(data) {
 
 	const optinos = sortBy.map(
 		(value, index) => {
-			const props = columnProps.find(cp => cp.id === value)
+			const props = columnProps.find(item => item.id === value)
 			const type = types[index] === 1? 'asc': 'desc'
 			const { accessor, sorter, index: key } = props
 
 			switch (types[index]) {
-				case 1: sortHandlers[key].classList.add('asc'); break
-				case 2: sortHandlers[key].classList.add('desc'); break
+				case 1: {
+					sortHandlers[key].classList.add('asc')
+					break
+				}
+				case 2: {
+					sortHandlers[key].classList.add('desc')
+					break
+				}
 			}
 
 			return { type, accessor, sorter }
@@ -62,8 +68,8 @@ export default class Sorter {
 
 			state.sorter = {
 				sortable,
-				sortBy: [undefined], // 记录列id
-				types: [0], // 0 normal | 1 asc | 2 desc
+				sortBy: [], // 记录列id
+				types: [], // 0 normal | 1 asc | 2 desc
 				sortData: undefined,
 				multiple: multiple === true,
 				multipleKey: Object.keys(multipleKeyWhitelist).includes(keyName) ? multipleKeyWhitelist[keyName] : multipleKeyWhitelist.shift
@@ -87,29 +93,46 @@ export default class Sorter {
 	}
 
 	beforeRenderData (data) {
-		const { sortable, sortBy } = this.state
+		if (this.created) {
+			const { sortable, sortBy } = this.state
 
-		if (sortable && typeof sortBy[0] !== 'undefined') {
-			data = this.getSortData(data)
+			if (sortable && typeof sortBy[0] !== 'undefined') {
+				data = this.getSortData(data)
+			}
+
+			return data
 		}
-
-		return data
 	}
 
 	create () {
 		const { table, columnProps } = this.tableInstance
 		const ths = table.querySelectorAll('.it-thead.shadow .it-th')
 
+		const { sortBy, types } = this.state
+
 		for (let i = 0, len = ths.length; i < len; i++) {
 			const props = columnProps[i]
 
-			const { sorter, sortable } = props
+			const { sorter, sortable, defaultSort, id } = props
 
 			props.sorter = sorter !== false ? typeof value === 'function'? value : defaultSortMethod : false
 			props.sortable = sortable !== false && props.sorter ? true : false
 
 			const th = ths[i]
 			th.classList.add('it-sort')
+
+			const type = defaultSort % 3
+
+			if (type) {
+				sortBy.push(id)
+				types.push(type)
+
+				if (type === 1) {
+					th.classList.add('asc')
+				} else {
+					th.classList.add('desc')
+				}
+			}
 
 			if (!props.sortable) {
 				th.classList.add('disabled')
@@ -121,6 +144,10 @@ export default class Sorter {
 		// }
 
 		this.created = true
+
+		if (sortBy.length) {
+			this.tableInstance.refresh()
+		}
 	}
 
 	bindEvent () {
