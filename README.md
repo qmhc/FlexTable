@@ -59,6 +59,9 @@ const flexTable = new FlexTable({
   container: '#app',
   columns,
   data,
+  className: '',
+  id: '',
+  rowClassName: (data, index) => '', // index 为数据渲染在表格的行索引
   plugins: {
     selector: {}, // 暂无独立配置项, 只需指定一个空对象
     editor: {
@@ -121,7 +124,8 @@ const flexTable = new FlexTable({
   resizable: true, // 是否可以调整列宽
   sortable: true, // 是否可以排序
   filterable: true, // 是否可以过滤
-  filter: (value, filter, origin) => { // 可以自定义过滤方法, 参数分别为 accessor 读取后的值, 输入的 filter 值, 数据的原始值
+  // 可以自定义过滤方法, 参数分别为 accessor 读取后的值, 输入的 filter 值, 数据的原始值
+  filter: (value, filter, origin) => {
     if (value.includes(filter)) {
       return true
     }

@@ -72,7 +72,7 @@ function renderPagination() {
 
 	// 控制页码范围
 	input.addEventListener('input', () => {
-		const { pageSize } = thisState
+		const { pageSize } = this.state
 		const maxPage = Math.ceil(this.dataTotal / pageSize) || 1
 		const targetPage = input.value
 		input.value = targetPage < 1? 1: targetPage > maxPage? maxPage: targetPage
@@ -81,7 +81,7 @@ function renderPagination() {
 	// 跳转到对应页面
 	input.addEventListener('blur', () => {
 		const targetPage = input.value
-		const { currentPage } = thisState
+		const { currentPage } = this.state
 		if (targetPage === currentPage) return
 		this.changePage(targetPage)
 		// changButtonState();
