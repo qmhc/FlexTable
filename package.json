@@ -67,5 +67,9 @@
     "serve": "webpack-dev-server --inline --config ./config/webpack.dev.js",
     "build": "webpack --config ./config/webpack.prod.js"
   },
-  "version": "0.1.12"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qmhc/FlexTable"
+  },
+  "version": "0.1.13"
 }
