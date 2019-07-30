@@ -1,4 +1,5 @@
 import Renderer from './render'
+import { registerEvent, unregisterEvent } from './events'
 
 export default class FlexTable {
   static defaultColumnWidth = 100
@@ -105,6 +106,12 @@ export default class FlexTable {
     this.data = props.deepClone === true ? deepClone(data) : [...data]
 
     this.columns = columns
+
+    this.eventWhiteList = new Set()
+    this.events = {}
+
+    this.registerMethod('on', registerEvent)
+    this.registerMethod('off', unregisterEvent)
 
     // 初始化 this.table
     // 注册 refresh 和 refreshStruch 两个方法

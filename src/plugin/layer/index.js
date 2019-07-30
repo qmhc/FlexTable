@@ -17,13 +17,15 @@ export default class Layer {
 		const layerable = getType(options.layer) === 'object'
 
 		if (layerable) {
-			const { loading, notFound, delay } = options.layer
+			const { loading, notFound, delay, loadingText, notFoundText } = options.layer
 
 			state.layer = {
 				layerable,
 				loading: loading === true,
 				notFound: notFound !== false,
-				delay: delay || 500
+				delay: delay || 500,
+				loadingText: loadingText || 'Loading...',
+				notFoundText: notFoundText || 'Not Found'
 			}
 		} else {
 			state.layer = {
@@ -64,7 +66,7 @@ export default class Layer {
 
 		const loading = temp.cloneNode()
 		loading.className = 'it-message'
-		loading.textContent = 'Loading...'
+		loading.textContent = this.state.loadingText
 
 		loadingLayer.appendChild(loading)
 		tbodyGroup.appendChild(loadingLayer)
@@ -74,7 +76,7 @@ export default class Layer {
 		const notFoundLayer = loadingLayer.cloneNode()
 
 		const notFound = loading.cloneNode()
-		notFound.textContent = 'Not Found'
+		notFound.textContent = this.state.notFoundText
 
 		notFoundLayer.appendChild(notFound)
 		// prependChild(tbodyGroup, notFoundLayer)

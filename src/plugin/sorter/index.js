@@ -4,6 +4,7 @@
  */
 
 import { getKeyState, registerKey, isKeyRegistered } from 'core/events'
+// import { addEventWhiteList, dispatchEvent } from 'core/events'
 import { getType, sortByProps, checkPathByClass } from '@/utils'
 
 import './style.scss'
@@ -39,14 +40,14 @@ function getPluralSortData(data) {
 
 const defaultSortMethod = (a, b) => a.toString().localeCompare(b)
 
-const multipleKeyWhitelist = {
+const multipleKeyWhiteList = {
 	ctrl: 17,
 	shift: 16,
 	alt: 18
 }
 
-for (let name in multipleKeyWhitelist) {
-	const code = multipleKeyWhitelist[name]
+for (let name in multipleKeyWhiteList) {
+	const code = multipleKeyWhiteList[name]
 	if (!isKeyRegistered(code)) {
 		registerKey(code)
 	}
@@ -72,9 +73,11 @@ export default class Sorter {
 				types: [], // 0 normal | 1 asc | 2 desc
 				sortData: undefined,
 				multiple: multiple === true,
-				multipleKey: Object.keys(multipleKeyWhitelist).includes(keyName) ? multipleKeyWhitelist[keyName] : multipleKeyWhitelist.shift
+				multipleKey: Object.keys(multipleKeyWhiteList).includes(keyName) ? multipleKeyWhiteList[keyName] : multipleKeyWhiteList.shift
 				// cache: cache === true // 多列排序缓存, 在与分页插件的结合上存在一些问题, 暂不实现
 			}
+
+			// addEventWhiteList.apply(this.tableInstance, ['columnSort'])
 		} else {
 			state.sorter = {
 				sortable
@@ -182,10 +185,11 @@ export default class Sorter {
 				if (props.sortable) {
 					let { sortBy, types, multiple, multipleKey } = this.state
 
+					let sortIndex = 0
+
 					if (multiple && typeof sortBy[0] !== 'undefined' && (sortBy.length !== 1 || sortBy[0] !== id) && getKeyState(multipleKey)) {
 						const targetIndex = sortBy.findIndex(value => value === id)
-						let sortIndex = 0
-
+						
 						if (targetIndex !== -1) {
 							sortIndex = targetIndex
 							types[sortIndex] = (types[sortIndex] + 1) % 3
@@ -200,7 +204,7 @@ export default class Sorter {
 							types[sortIndex] = 1
 						}
 					} else {
-						if (sortBy.length > 1 || sortBy[0] !== id) {
+						if (sortBy.length > 1 || sortBy[sortIndex] !== id) {
 							this.state.sortBy = [id]
 							this.state.types = [0]
 						}
@@ -211,12 +215,12 @@ export default class Sorter {
 
 						sortBy = this.state.sortBy
 						types = this.state.types
-						types[0] = (types[0] + 1) % 3
+						types[sortIndex] = (types[sortIndex] + 1) % 3
 
-						if (!types[0]) {
-							sortBy[0] = undefined
+						if (!types[sortIndex]) {
+							sortBy[sortIndex] = undefined
 						} else {
-							switch (types[0]) {
+							switch (types[sortIndex]) {
 								case 1: {
 									target.classList.add('asc')
 									break
@@ -230,6 +234,17 @@ export default class Sorter {
 					}
 
 					this.tableInstance.refresh()
+
+					// const _props = []
+					
+					// for (let i = 0, len = sortBy.length; i < len; i++) {
+					// 	_props.push({
+					// 		id: sortBy[i],
+					// 		type: types[i]
+					// 	})
+					// }
+
+					// dispatchEvent.apply(this.tableInstance, ['columnSort', { index: props.index, id, props: _props }])
 				}
 			}
 		})

@@ -4,6 +4,7 @@
  */
 
 import { temp } from 'core/temps'
+import { addEventWhiteList, dispatchEvent } from 'core/events'
 import { getType } from '@/utils'
 
 import './style.scss'
@@ -27,7 +28,8 @@ function getProxyHandler() {
 				// 	'color: #fff; font-weight: 700; background: #19be6b; padding: 0 .3em',
 				// );
 				obj[prop] = value
-				renderResize.apply(_this, [prop, old])
+				renderResize.apply(_this, [parseInt(prop)])
+				dispatchEvent.apply(_this.tableInstance, ['columnResize', { index: parseInt(prop), oldWidth: old, newWidth: value }])
 			} else {
 				obj[prop] = value
 			}
@@ -39,10 +41,10 @@ function getProxyHandler() {
 
 function renderResize(index) {
 	const { table, columnProps } = this.tableInstance
-	const nthOfType = +index + 1
+	const nthOfType = index + 1
 	const columnWidth = this.state.columnWidth
 	const targetWidth = columnWidth[index]
-	const props = columnProps[+index]
+	const props = columnProps[index]
 	props.width = targetWidth
 
 	const theads = table.querySelectorAll('.it-thead, .it-tbody-group, .it-tfoot')
@@ -112,6 +114,8 @@ export default class Resizer {
 				columnWidth: new Proxy({}, getProxyHandler.call(this)),
 				resizing: false
 			}
+
+			addEventWhiteList.apply(this.tableInstance, ['columnResize'])
 		} else {
 			state.resizer = {
 				resizable
@@ -165,7 +169,7 @@ export default class Resizer {
 				columnWidth[i.toString()] = 0
 			}
 
-			columnWidth[i.toString()] = parseFloat(th.style.width) || this.defaultColumnWidth
+			columnWidth[i.toString()] = parseInt(th.style.width) || this.defaultColumnWidth
 		}
 
 		this.created = true
@@ -192,10 +196,10 @@ export default class Resizer {
 			const column = table.querySelectorAll('.it-thead.shadow .it-th')[index]
 			const columnRect = column.getBoundingClientRect()
 
-			const currentWidth = columnRect.width;
+			const currentWidth = columnRect.width
 			const targetWidth = (currentWidth + end - start)
 
-			this.state.columnWidth[index.toString()] = targetWidth
+			this.state.columnWidth[index.toString()] = parseInt(targetWidth)
 			table.removeChild(handler)
 			start = 0
 			end = 0
@@ -244,7 +248,7 @@ export default class Resizer {
 
 				if (width) {
 					columnWidth[i.toString()] = 0
-					columnWidth[i.toString()] = width
+					columnWidth[i.toString()] = parseInt(width)
 				}
 			}
 

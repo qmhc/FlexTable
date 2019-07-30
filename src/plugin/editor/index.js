@@ -4,11 +4,12 @@
  */
 
 import { temp, inputTemp, buttonTemp } from 'core/temps'
-import { checkPathByClass, getType, createSelect } from '../../utils'
+import { addEventWhiteList, dispatchEvent } from 'core/events'
+import { checkPathByClass, getType, createSelect } from '@/utils'
 
 import './style.scss'
 
-const inputTypeWhitelist = ['text', 'number', 'date', 'week', 'month', 'time', 'datetime-locat']
+const inputTypeWhiteList = ['text', 'number', 'date', 'week', 'month', 'time', 'datetime-locat']
 
 const editInputTemp = inputTemp.cloneNode()
 editInputTemp.classList.add('it-editor-control')
@@ -60,7 +61,7 @@ function createEditButton (data) {
 
             let inputType = 'text'
 
-            if (inputTypeWhitelist.includes(editType)) {
+            if (inputTypeWhiteList.includes(editType)) {
               inputType = editType
             }
 
@@ -137,6 +138,8 @@ function createSaveButton (data) {
           insertData(td, html)
         }
       }
+
+      dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'action', data: {...data} }])
     }
 
     return false
@@ -156,7 +159,7 @@ function createCancelButton (data) {
     if (!rowActions) {
       return false
     }
-    
+
     rowActions.classList.remove('editing')
 
     this.editingCount--
@@ -179,6 +182,8 @@ function createCancelButton (data) {
         const html = accessor(data)
         insertData(td, html)
       }
+
+      dispatchEvent.apply(this.tableInstance, ['editCancel', { type: 'action', data: {...data} }])
     }
 
     return false
@@ -331,6 +336,8 @@ export default class {
         columnWidth: columnWidth || 142,
         columnName: columnName || 'Action'
       }
+
+      addEventWhiteList.apply(this.tableInstance, ['editSave', 'editCancel'])
     } else {
       state.editor = {
         editable
@@ -379,9 +386,17 @@ export default class {
         }
       }
 
+      const old = rowData[key]
       rowData[key] = content
+
       const html = accessor(rowData)
       insertData(node, html)
+
+      if (old !== content) {
+        dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'click', data: {...rowData}, key, content }])
+      } else {
+        dispatchEvent.apply(this.tableInstance, ['editCancel', { type: 'click', data: {...rowData}, key }])
+      }
 
       setTimeout(() => {
         // node.classList.remove('editing')
@@ -452,7 +467,7 @@ export default class {
 
             let inputType = 'text'
 
-            if (inputTypeWhitelist.includes(editType)) {
+            if (inputTypeWhiteList.includes(editType)) {
               inputType = editType
             }
 

@@ -4,6 +4,7 @@
  */
 
 import { getType } from '@/utils'
+import { addEventWhiteList, dispatchEvent } from 'core/events'
 import { inputTemp } from 'core/temps'
 
 import './style.scss'
@@ -60,14 +61,21 @@ export default class Selector {
 						}
 	
 						rowCheck.addEventListener('change', () => {
+							let type = 'select'
+
 							if (rowCheck.checked) {
 								this.selection.push(uuid)
 							} else {
 								const index = this.selection.indexOf(uuid)
+
 								if (index !== -1) {
 									this.selection.splice(index, 1)
 								}
+
+								type = 'cancel'
 							}
+
+							dispatchEvent.apply(this.tableInstance, ['selectChange', { type, id: uuid, data: {...data}, selection: [...this.selection] }])
 						})
 	
 						rowCheck._itId = uuid
@@ -109,6 +117,8 @@ export default class Selector {
 			state.selector = {
 				selectable
 			}
+
+			addEventWhiteList.apply(this.tableInstance, ['selectChange'])
 		} else {
 			state.selector = {
 				selectable

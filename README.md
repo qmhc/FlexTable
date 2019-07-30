@@ -99,7 +99,9 @@ const flexTable = new FlexTable({
     layer: {
       loading: false,
       notFound: true,
-      delay: 500
+      delay: 500,
+      loadingText: '加载中',
+			notFoundText: '无数据'
     },
     scroller: {
       height: 450,

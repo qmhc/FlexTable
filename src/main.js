@@ -150,7 +150,7 @@ const table = new FlexTable({
 	plugins: {
 		selector: {}, // 暂无独立配置项, 只需指定一个空对象
 		editor: {
-			trigger: 'action', // or 'click'
+			// trigger: 'action', // or 'click'
 			// verifier: data => data, // 顶层验证方法
 			columnWidth: 142,
 			columnName: '操作',
@@ -184,7 +184,9 @@ const table = new FlexTable({
 		// layer: {
 		// 	loading: true,
 		// 	notFound: false,
-		// 	delay: 500
+		// 	delay: 500,
+		// 	loadingText: '加载中',
+		// 	notFoundText: '无数据'
 		// },
 		scroller: {
 			height: 450,
@@ -199,3 +201,19 @@ const table = new FlexTable({
 console.timeEnd('render')
 
 window.table = table
+
+table.on('editSave', ev => {
+	console.log(ev)
+})
+
+table.on('editCancel', ev => {
+	console.log(ev)
+})
+
+table.on('columnResize', ev => {
+	console.log(ev)
+})
+
+table.on('selectChange', ev => {
+	console.log(ev)
+})
