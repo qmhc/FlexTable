@@ -143,6 +143,9 @@ const table = new FlexTable({
 	container: '#app',
 	columns,
 	data,
+	className: 'my-flex-table',
+	id: 'myTable',
+	rowClassName: data => 'my-table-row',
 	plugins: {
 		selector: {}, // 暂无独立配置项, 只需指定一个空对象
 		editor: {

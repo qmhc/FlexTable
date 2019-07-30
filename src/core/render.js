@@ -12,10 +12,24 @@ import {
 
 // 渲染主函数
 export default function render(options) {
+  const plugins = [...this.constructor.plugins]
+  const { id, className, rowClassName } = options
+
   this.state = {}
   this.plugins = []
-  const plugins = [...this.constructor.plugins]
-  const { id, className } = options
+
+  switch(getType(rowClassName)) {
+    case 'string':
+    case 'array':
+    case 'object': {
+      this.rowClassName = () => rowClassName
+      break
+    }
+    case 'function': {
+      this.rowClassName = rowClassName
+      break
+    }
+  }
 
   // 建立数据索引
   for (let i = 0, len = this.data.length; i < len; i++) {
@@ -268,7 +282,7 @@ function renderBodyStruct() {
   if (trGroups.length) {
     // 结构变化
     const currentLength = trGroups.length
-    // const groupTemp = trGroups[0];
+
     if (length > currentLength) {
       // 增加行数
       const count = length - currentLength
@@ -361,7 +375,9 @@ function renderBodyData() {
   const trGroups = tbody.querySelectorAll('.it-tr-group')
 
   for (let i = 0, len = trGroups.length; i < len; i++) {
-    const tr = trGroups[i].querySelector('.it-tr')
+    const trGroup = trGroups[i]
+    const tr = trGroup.querySelector('.it-tr')
+    trGroup.className = 'it-tr-group'
 
     if (data[i]) {
       const rowData = data[i] || {}
@@ -372,6 +388,10 @@ function renderBodyData() {
       }
 
       tr.itRowId = rowData._itId
+
+      if (this.rowClassName) {
+        setClassName(trGroup, this.rowClassName(rowData, i))
+      }
 
       for (let j = 0, len = columnProps.length; j < len; j++) {
         const { accessor } = columnProps[j]
@@ -444,19 +464,32 @@ function setClassName (node, className) {
 
   switch (type) {
     case 'string': {
+      if (className.startsWith('it-')) {
+        return false
+      }
       node.classList.add(className)
       return true
     }
     case 'array': {
       for (let i = 0, len = className.length; i < len; i++) {
+        if (className[i].startsWith('it-')) {
+          continue
+        }
+
         node.classList.add(className[i])
       }
       return true
     }
     case 'object': {
       for (let name in className) {
+        if (name.startsWith('it-')) {
+          continue
+        }
+
         if (className[name]) {
           node.classList.add(name)
+        } else {
+          node.classList.remove(name)
         }
       }
       return true
