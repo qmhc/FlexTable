@@ -118,7 +118,7 @@ export default class Sorter {
 
 			const { sorter, sortable, defaultSort, id } = props
 
-			props.sorter = sorter !== false ? typeof value === 'function'? value : defaultSortMethod : false
+			props.sorter = sorter !== false ? getType(sorter) === 'function'? sorter : defaultSortMethod : false
 			props.sortable = sortable !== false && props.sorter ? true : false
 
 			const th = ths[i]

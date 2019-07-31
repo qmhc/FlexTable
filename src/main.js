@@ -33,14 +33,14 @@ const getColumns = () => {
 			children: [
 				{
 					name: 'First Name',
-					accessor: data => {
-						const a = document.createElement('a')
-						a.textContent = 'Click'
-						return [a, data.firstName]
-					},
+					accessor: 'firstName',
 					key: 'firstName',
 					filter: true,
-					defaultSort: 1
+					defaultSort: 1,
+					sorter: (prev, next) => {
+						// console.log(prev, next)
+						return prev.toString().localeCompare(next)
+					}
 				},
 				{
 					name: 'Last Name',
