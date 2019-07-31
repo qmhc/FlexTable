@@ -33,7 +33,11 @@ const getColumns = () => {
 			children: [
 				{
 					name: 'First Name',
-					accessor: 'firstName',
+					accessor: data => {
+						const a = document.createElement('a')
+						a.textContent = 'Click'
+						return [a, data.firstName]
+					},
 					key: 'firstName',
 					filter: true,
 					defaultSort: 1
@@ -49,6 +53,7 @@ const getColumns = () => {
 					// 	type: 'date',
 					// 	dateType: 'datetime-local'
 					// }
+					editable: () => false
 				}
 			]
 		},

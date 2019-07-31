@@ -45,7 +45,13 @@ function createEditButton (data) {
         const td = tds[i]
         const props = columnProps[i]
 
-        if (props && props.editable !== false) {
+        let editable = props.editable
+
+        if (getType(editable) === 'function') {
+          editable = !!editable(data)
+        }
+
+        if (props && editable !== false) {
           td.classList.add('editing')
 
           const { key, editType, editOptions } = props
@@ -210,8 +216,15 @@ function insertData (cell, data) {
       cell.innerHTML = ''
       const fragment = document.createDocumentFragment()
 
-      while (data.length > 0) {
-        fragment.appendChild(data[0])
+      data = [...data]
+      for (let i = 0, len = data.length; i < len; i++) {
+        let element = data[i]
+
+        if (getType(element) === 'string') {
+          element = document.createTextNode(element)
+        }
+
+        fragment.appendChild(element)
       }
 
       cell.appendChild(fragment)
@@ -249,13 +262,25 @@ export default class {
     
       for (let i in columns) {
         const column = columns[i]
+
         if (column.children && column.children.length) {
           for (let j in column.children) {
+            column.children[j] = {
+              editable: true,
+              ...column.children[j]
+            }
+
             const truthColumn = column.children[j]
-            truthColumn.editable = truthColumn.editable !== false ? (getType(truthColumn.key) === 'string' ? true : false) : false
+
+            truthColumn.editable = getType(truthColumn.key) === 'string' ? truthColumn.editable : false
           }
         } else {
-          column.editable = column.editable !== false ? (getType(column.key) === 'string' ? true : false) : false
+          columns[i] = {
+            editable: true,
+            ...columns[i]
+          }
+
+          columns[i].editable = getType(columns[i].key) === 'string' ? columns[i].editable : false
         }
       }
 
@@ -421,7 +446,13 @@ export default class {
         const rowData = data.find(item => item._itId === uuid)
         const props = columnProps[index]
 
-        if (props && props.editable && rowData) {
+        let editable = props.editable
+
+        if (getType(editable) === 'function') {
+          editable = !!editable(rowData)
+        }
+
+        if (props && editable && rowData) {
           node.classList.add('editing')
           
           this.editingCount++
@@ -438,16 +469,18 @@ export default class {
 
               if (!path.includes(select)) {
                 if (select.isOptionsOpen) {
+                  let timer = 0
                   select.addEventListener('transitionend', () => {
-                    updateData(node, select, accessor, verifier, rowData, key)
-                    // node.style.overflow = ''
                     document.removeEventListener('click', clickOutside)
+                    clearTimeout(timer)
+                    timer = setTimeout(() => {
+                      updateData(node, select, accessor, verifier, rowData, key)
+                    }, 20)
                   })
                   select.closeOptions()
                 } else {
-                  updateData(node, select, accessor, verifier, rowData, key)
-                  // node.style.overflow = ''
                   document.removeEventListener('click', clickOutside)
+                  updateData(node, select, accessor, verifier, rowData, key)
                 }
               }
 

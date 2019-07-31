@@ -512,8 +512,14 @@ function renderElement (node, html) {
       node.innerHTML = ''
       const fragment = document.createDocumentFragment()
 
-      while (html.length > 0) {
-        fragment.appendChild(html[0])
+      html = [...html]
+
+      for (let i = 0, len = html.length; i < len; i++) {
+        let element = html[i]
+        if (getType(element) === 'string') {
+          element = document.createTextNode(element)
+        }
+        fragment.appendChild(element)
       }
 
       node.appendChild(fragment)
