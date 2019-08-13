@@ -418,7 +418,7 @@ export default class {
       insertData(node, html)
 
       if (old !== content) {
-        dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'click', data: {...rowData}, key, content }])
+        dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'click', data: {...rowData}, key, old }])
       } else {
         dispatchEvent.apply(this.tableInstance, ['editCancel', { type: 'click', data: {...rowData}, key }])
       }

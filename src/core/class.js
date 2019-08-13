@@ -1,6 +1,8 @@
 import Renderer from './render'
 import { registerEvent, unregisterEvent } from './events'
 
+import '../style/itable.scss'
+
 export default class FlexTable {
   static defaultColumnWidth = 100
   static plugins = []

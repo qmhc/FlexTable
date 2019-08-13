@@ -65,7 +65,10 @@
   "private": false,
   "scripts": {
     "serve": "webpack-dev-server --inline --config ./config/webpack.dev.js",
-    "build": "webpack --config ./config/webpack.prod.js"
+    "build:core": "webpack --config ./config/webpack.prod.core.js",
+    "build:plugin": "webpack --config ./config/webpack.prod.plugin.js",
+    "build:prod": "webpack --config ./config/webpack.prod.js",
+    "build": "npm run build:prod && npm run build:core && npm run build:plugin"
   },
   "repository": {
     "type": "git",

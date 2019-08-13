@@ -7,9 +7,21 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const common = require('./webpack.base.js')
 const path = require('path')
 
+const readDir = require('fs').readdirSync
+const files = readDir('./src/plugin')
+
+const entry = {}
+const jsFileReg = /\.js$/
+
+files.forEach(file => {
+	if (!jsFileReg.test(file)) {
+		entry[file] = `./src/plugin/${file}/index.js`
+	}
+})
+
 const miniCssExtract = new MiniCssExtractPlugin({
-	filename: 'flex-table.css',
-	chunkFilename: 'flex-table.css',
+	filename: '[name].css',
+	chunkFilename: '[name].css',
 	disable: process.env.NODE_ENV === 'development'
 })
 
@@ -17,13 +29,12 @@ const uglify = new UglifyJSPlugin({ sourceMap: false })
 
 module.exports = merge(common, {
 	mode: 'production',
-	entry: {
-		app: './src/build.js'
-	},
+	entry,
 	output: {
-		filename: 'flex-table.js',
-		path: path.resolve(__dirname, '..', 'dist'),
-		library: 'FlexTable',
+		filename: '[name].js',
+		path: path.resolve(__dirname, '..', 'dist', 'plugin'),
+		publicPath: '/dist/plugin/',
+		library: ['FlexTable', '[name]'],
 		libraryExport: 'default',
 		libraryTarget: 'umd',
 		globalObject: 'this',

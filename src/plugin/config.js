@@ -1,10 +1,10 @@
 export default [
-	'layer',
-	'selector',
-	'filter',
-	'sorter',		
-	'pager',
-	'scroller',
-	'editor',
-	'resizer'
+	'Layer',
+	'Selector',
+	'Filter',
+	'Sorter',		
+	'Pager',
+	'Scroller',
+	'Editor',
+	'Resizer'
 ]

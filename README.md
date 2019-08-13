@@ -21,6 +21,16 @@ import FlexTable from '@qmhc/flex-table'
 import '@qmhc/flex-table/dist/flex-table.css'
 ```
 
+按需引入
+
+```js
+import FlexTable from '@qmhc/flex-table/dist/flex-table.core'
+import Sorter from '@qmhc/flex-table/dist/plugin/sorter'
+
+import '@qmhc/flex-table/dist/core/flex-table.core.css'
+import '@qmhc/flex-table/dist/plugin/sorter.css'
+```
+
 使用标签引入
 
 ```html
@@ -29,6 +39,18 @@ import '@qmhc/flex-table/dist/flex-table.css'
 
 <!-- css -->
 <link rel="stylesheet" href="./dist/flex-table.css">
+```
+
+按需引入
+
+```html
+<!-- js -->
+<script src="../dist/core/flex-table.core.js"></script>
+<script src="../dist/plugin/sorter.js"></script>
+
+<!-- css -->
+<link rel="stylesheet" href="../dist/core/flex-table.core.css">
+<link rel="stylesheet" href="../dist/plugin/sorter.css">
 ```
 
 创建一个表格
@@ -43,6 +65,15 @@ const flexTable = new FlexTable({
       // ...
   }
 })
+```
+
+按需引入时, 需手动注册插件
+
+```js
+FlexTable.registerPlugin('sorter', Sorter)
+
+// 使用标签引入时
+FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 ```
 
 ## 例子 (Example)

@@ -8,8 +8,8 @@ const common = require('./webpack.base.js')
 const path = require('path')
 
 const miniCssExtract = new MiniCssExtractPlugin({
-	filename: 'flex-table.css',
-	chunkFilename: 'flex-table.css',
+	filename: 'flex-table.core.css',
+	chunkFilename: 'flex-table.core.css',
 	disable: process.env.NODE_ENV === 'development'
 })
 
@@ -18,11 +18,12 @@ const uglify = new UglifyJSPlugin({ sourceMap: false })
 module.exports = merge(common, {
 	mode: 'production',
 	entry: {
-		app: './src/build.js'
+		app: './src/core/class.js'
 	},
 	output: {
-		filename: 'flex-table.js',
-		path: path.resolve(__dirname, '..', 'dist'),
+		filename: 'flex-table.core.js',
+    path: path.resolve(__dirname, '..', 'dist'),
+    // publicPath: '/dist/core/',
 		library: 'FlexTable',
 		libraryExport: 'default',
 		libraryTarget: 'umd',

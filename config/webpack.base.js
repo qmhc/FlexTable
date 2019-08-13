@@ -1,7 +1,8 @@
 'use strict'
 
 const path = require('path')
-const CleanWebpackPlugin= require('clean-webpack-plugin')
+const webpack = require('webpack')
+// const CleanWebpackPlugin= require('clean-webpack-plugin')
 
 module.exports = {
 	module: {
@@ -32,7 +33,7 @@ module.exports = {
 				test: /\.scss$/,
 				include: path.resolve(__dirname, '..', 'src'),
 				use: [
-					{ loader: 'style-loader' },
+					'style-loader',
 					{
 						loader: 'css-loader',
 						options: {
@@ -73,9 +74,10 @@ module.exports = {
 		]
 	},
 	plugins: [
-		new CleanWebpackPlugin(['dist'], {
-			root: path.resolve(__dirname, '..')
-		})
+		// new CleanWebpackPlugin(['dist'], {
+		// 	root: path.resolve(__dirname, '..')
+		// })
+		new webpack.optimize.ModuleConcatenationPlugin()
 	],
 	resolve: {
 		extensions: ['.js', '.json'],
