@@ -16,6 +16,17 @@ module.exports = {
 				}
 			},
 			{
+				test: /\.js$/,
+				enforce: 'pre',
+				include: path.resolve(__dirname, '..', 'src'),
+				use: {
+					loader: 'eslint-loader',
+					options: {
+						formatter: require('eslint-friendly-formatter')
+					}
+				}
+			},
+			{
 				test: /\.css$/,
 				include: path.resolve(__dirname, '..', 'src'),
 				use: [

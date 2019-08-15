@@ -22,9 +22,18 @@
     "@babel/plugin-transform-runtime": "^7.4.4",
     "@babel/preset-env": "^7.5.5",
     "autoprefixer": "^9.3.1",
+    "babel-eslint": "^10.0.2",
     "babel-loader": "^8.0.4",
     "clean-webpack-plugin": "^0.1.19",
     "css-loader": "^3.0.0",
+    "eslint": "^6.1.0",
+    "eslint-config-standard": "^13.0.1",
+    "eslint-friendly-formatter": "^4.0.1",
+    "eslint-loader": "^2.2.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^2.0.0",
     "fstream": "^1.0.12",
@@ -68,7 +77,8 @@
     "build:core": "webpack --config ./config/webpack.prod.core.js",
     "build:plugin": "webpack --config ./config/webpack.prod.plugin.js",
     "build:prod": "webpack --config ./config/webpack.prod.js",
-    "build": "npm run build:prod && npm run build:core && npm run build:plugin"
+    "build": "npm run build:prod && npm run build:core && npm run build:plugin",
+    "lint": "eslint --fix --ext .js src"
   },
   "repository": {
     "type": "git",

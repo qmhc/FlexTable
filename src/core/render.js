@@ -11,14 +11,14 @@ import {
 } from './temps'
 
 // 渲染主函数
-export default function render(options) {
+export default function render (options) {
   const plugins = [...this.constructor.plugins]
   const { id, className, rowClassName } = options
 
   this.state = {}
   this.plugins = []
 
-  switch(getType(rowClassName)) {
+  switch (getType(rowClassName)) {
     case 'string':
     case 'array':
     case 'object': {
@@ -42,8 +42,8 @@ export default function render(options) {
   // 插件实例化
   // constructor 钩子 (实例化)
   for (let i = 0, len = plugins.length; i < len; i++) {
-    const { name, construct } = plugins[i]
-    const instance = new construct(this, options.plugins || {})
+    const { name, construct: Constructer } = plugins[i]
+    const instance = new Constructer(this, options.plugins || {})
     this.plugins.push({
       name,
       instance
@@ -121,7 +121,7 @@ export default function render(options) {
   for (let i = 0, len = this.plugins.length; i < len; i++) {
     const plugin = this.plugins[i].instance
     const disabled = !plugin.shouldUse()
-    
+
     if (disabled) {
       continue
     }
@@ -143,7 +143,7 @@ export default function render(options) {
 }
 
 // 头部列渲染
-function renderColumn(column) {
+function renderColumn (column) {
   column.id = column.id || getUuid()
 
   const { id, name, className, accessor, footer, defaultWidth, children, key } = column
@@ -151,7 +151,7 @@ function renderColumn(column) {
 
   const content = temp.cloneNode()
   content.className = 'it-head-content'
-  
+
   renderElement(content, name)
 
   th.appendChild(content)
@@ -164,10 +164,11 @@ function renderColumn(column) {
   }
 
   let _accessor
-  
-  switch(getType(accessor)) {
+
+  switch (getType(accessor)) {
     case 'undefined': {
       _accessor = rowData => rowData[key]
+      break
     }
     case 'string': {
       _accessor = rowData => rowData[accessor]
@@ -186,25 +187,25 @@ function renderColumn(column) {
     ...column,
     id,
     key,
-    footer: footer? (getType(footer) === 'function' ? footer : () => footer) : () => '',
+    footer: footer ? (getType(footer) === 'function' ? footer : () => footer) : () => '',
     accessor: _accessor,
     width,
     target: th,
     parent: !!(children && children.length),
-    hasFooter: !!footer,
+    hasFooter: !!footer
   }
 }
 
 // 表头渲染
-function renderHeader() {
+function renderHeader () {
   const columns = this.columns
   let columnProps = []
-  let groupTr = trTemp.cloneNode()
-  let childTr = trTemp.cloneNode()
+  const groupTr = trTemp.cloneNode()
+  const childTr = trTemp.cloneNode()
 
   let hasChilds = false
   let useFooter = false
-  
+
   for (let i = 0, len = columns.length; i < len; i++) {
     const column = columns[i]
     const props = renderColumn.call(this, column)
@@ -251,11 +252,11 @@ function renderHeader() {
   this.columnProps = columnProps
   this.state.useFooter = useFooter
 
-  return { groupTr, childTr: hasChilds? childTr: null }
+  return { groupTr, childTr: hasChilds ? childTr : null }
 }
 
 // 表格主体渲染
-function renderBodyStruct() {
+function renderBodyStruct () {
   const { table, data, plugins, columnProps } = this
   const fragment = document.createDocumentFragment()
 
@@ -289,7 +290,7 @@ function renderBodyStruct() {
       const groupTemp = tbody.querySelector('.it-tr-group:first-child')
 
       for (let i = 0; i < count; i++) {
-        const group = groupTemp.cloneNode(true);
+        const group = groupTemp.cloneNode(true)
         group.rowIndex = currentLength + parseInt(i)
         fragment.appendChild(group)
       }
@@ -300,8 +301,8 @@ function renderBodyStruct() {
       const deleteTrGroups = tbody.querySelectorAll(`.it-tr-group:nth-child(n+${length + 1})`)
 
       for (let i = 0, len = deleteTrGroups.length; i < len; i++) {
-        const trGroup = deleteTrGroups[i];
-        tbody.removeChild(trGroup);
+        const trGroup = deleteTrGroups[i]
+        tbody.removeChild(trGroup)
       }
     }
   } else {
@@ -320,7 +321,7 @@ function renderBodyStruct() {
 
         const width = parseFloat(th.style.width)
         td.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
-        
+
         td.rowIndex = parseInt(i)
         td.columnIndex = parseInt(j)
 
@@ -348,7 +349,7 @@ function renderBodyStruct() {
 }
 
 // 渲染数据方法
-function renderBodyData() {
+function renderBodyData () {
   const { table, plugins, columnProps } = this
 
   const afterHookFns = []
@@ -419,7 +420,7 @@ function renderBodyData() {
 }
 
 // 表格脚部渲染
-function renderFooter() {
+function renderFooter () {
   const { data, columnProps, state } = this
 
   const columnData = new Map()
@@ -435,7 +436,7 @@ function renderFooter() {
       columnData.get(j).push(accessor(rowData))
     }
   }
-  
+
   const tr = trTemp.cloneNode()
 
   for (let i = 0, len = columnProps.length; i < len; i++) {
@@ -460,38 +461,30 @@ function renderFooter() {
 
 // 为 node 设置类名
 function setClassName (node, className) {
-  let type = getType(className)
+  const type = getType(className)
 
   switch (type) {
     case 'string': {
-      if (className.startsWith('it-')) {
-        return false
-      }
       node.classList.add(className)
+
       return true
     }
     case 'array': {
       for (let i = 0, len = className.length; i < len; i++) {
-        if (className[i].startsWith('it-')) {
-          continue
-        }
-
         node.classList.add(className[i])
       }
+
       return true
     }
     case 'object': {
-      for (let name in className) {
-        if (name.startsWith('it-')) {
-          continue
-        }
-
+      for (const name in className) {
         if (className[name]) {
           node.classList.add(name)
         } else {
           node.classList.remove(name)
         }
       }
+
       return true
     }
   }

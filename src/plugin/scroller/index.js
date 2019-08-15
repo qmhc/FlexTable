@@ -1,250 +1,240 @@
 /**
- *	@name scroller
- *	@description 表格滚动条
+ * @name scroller
+ * @description 表格滚动条
  */
 
-import { getType } from '@/utils'
+import { getType, checkPathByClass } from '@/utils'
 
 import './style.scss'
 
 export default class Scroller {
-	constructor (tableInstance, options = {}) {
-		this.tableInstance = tableInstance
+  constructor (tableInstance, options = {}) {
+    this.tableInstance = tableInstance
 
-		const { state } = this.tableInstance
+    const { state } = this.tableInstance
 
-		const scrollable = getType(options.scroller) === 'object'
+    const scrollable = getType(options.scroller) === 'object'
 
-		if (scrollable) {
-			const { height, mouse, wheel, wheelDistance } = options.scroller
+    if (scrollable) {
+      const { height, mouse, wheel, wheelDistance } = options.scroller
 
-			state.scroller = {
-				scrollable,
-				height: height || 300,
-				mouse: mouse !== false,
-				wheel: wheel === true,
-				wheelDistance: wheelDistance || 20,
-				scrolling: false
-			}
-		} else {
-			state.scroller = {
-				scrollable
-			}
-		}
+      state.scroller = {
+        scrollable,
+        height: height || 300,
+        mouse: mouse !== false,
+        wheel: wheel === true,
+        wheelDistance: wheelDistance || 20,
+        scrolling: false
+      }
+    } else {
+      state.scroller = {
+        scrollable
+      }
+    }
 
-		this.state = state.scroller
-	}
+    this.state = state.scroller
+  }
 
-	afterContruct () {
-		this.globalState = this.tableInstance.state
-	}
+  afterContruct () {
+    this.globalState = this.tableInstance.state
+  }
 
-	shouldUse() {
-		if (this.state.native) {
-			return false
-		}
-		return this.state.scrollable
-	}
-	
-	beforeCreate () {
-		const { table } = this.tableInstance
-		const MutationObserver = MutationObserver || WebKitMutationObserver;
+  shouldUse () {
+    if (this.state.native) {
+      return false
+    }
+    return this.state.scrollable
+  }
 
-		if (MutationObserver) {
-			const observer = new MutationObserver(mutationList => {
-				for (let mutation of mutationList) {
-					if (
-						mutation.type === 'childList'
-						&&
-						mutation.addedNodes
-						&&
-						mutation.addedNodes.length
-					) {
-						const addedNodes = [...mutation.addedNodes]
+  beforeCreate () {
+    const { table } = this.tableInstance
+    const MutationObserver = window.MutationObserver || window.WebKitMutationObserver
 
-						if (addedNodes.includes(table)) {
-							const { height } = this.state
-							const scroller = table.querySelector('.it-tbody-group')
-							const tbody = scroller.querySelector('.it-tbody')
+    if (MutationObserver) {
+      const observer = new MutationObserver(mutationList => {
+        for (const mutation of mutationList) {
+          if (mutation.type === 'childList' && mutation.addedNodes && mutation.addedNodes.length) {
+            const addedNodes = [...mutation.addedNodes]
 
-							setTimeout(() => {
-								const tbodyHeight = tbody.getBoundingClientRect().height
+            if (addedNodes.includes(table)) {
+              const { height } = this.state
+              const scroller = table.querySelector('.it-tbody-group')
+              const tbody = scroller.querySelector('.it-tbody')
 
-								if (tbodyHeight < height) {
-									tbody.style.transition = ''
-									scroller.style.height = `${tbodyHeight}px`
-									tbody.style.transform = 'translateY(0)'
-									this.scroll = false
-									this.start = 0
-									this.distance = 0
-									this.current = 0
-								} else {
-									tbody.style.transition = 'transform .2s ease-out'
-									this.scroll = true
-								}
-							}, 100)
-						}
-					}
-				}
-			})
+              setTimeout(() => {
+                const tbodyHeight = tbody.getBoundingClientRect().height
 
-			observer.observe(document, { childList: true, subtree: true })
-		}
-	}
+                if (tbodyHeight < height) {
+                  tbody.style.transition = ''
+                  scroller.style.height = `${tbodyHeight}px`
+                  tbody.style.transform = 'translateY(0)'
+                  this.scroll = false
+                  this.start = 0
+                  this.distance = 0
+                  this.current = 0
+                } else {
+                  tbody.style.transition = 'transform .2s ease-out'
+                  this.scroll = true
+                }
+              }, 100)
+            }
+          }
+        }
+      })
 
-	create () {
-		const { height } = this.state
-		const { table } = this.tableInstance
-		const scroller = table.querySelector('.it-tbody-group')
-		const tbody = scroller.querySelector('.it-tbody')
+      observer.observe(document, { childList: true, subtree: true })
+    }
+  }
 
-		scroller.style.height = `${height}px`
-		tbody.style.position = 'absolute'
-		tbody.style.overflow = 'hidden'
+  create () {
+    const { height } = this.state
+    const { table } = this.tableInstance
+    const scroller = table.querySelector('.it-tbody-group')
+    const tbody = scroller.querySelector('.it-tbody')
 
-		this.created = true
-		this.scroll = true
-	}
+    scroller.style.height = `${height}px`
+    tbody.style.position = 'absolute'
+    tbody.style.overflow = 'hidden'
 
-	bindEvent () {
-		this.start = 0
-		this.distance = 0
-		this.current = 0
+    this.created = true
+    this.scroll = true
+  }
 
-		if (this.state.wheel) {
-			this.bindWheelEvent()
-		}
-		
-		if (this.state.mouse) {
-			this.bindMoveEvent()
-		}
-	}
+  bindEvent () {
+    this.start = 0
+    this.distance = 0
+    this.current = 0
 
-	afterRenderBody () {
-		const { table } = this.tableInstance
-		const { height } = this.state
-		const scroller = table.querySelector('.it-tbody-group')
-		const tbody = scroller.querySelector('.it-tbody')
-		const tbodyHeight = tbody.getBoundingClientRect().height
-	
-		if (tbodyHeight < height) {
-			tbody.style.transition = ''
-			scroller.style.height = `${tbodyHeight}px`
-			tbody.style.transform = 'translateY(0)'
-			this.scroll = false
-			this.start = 0
-			this.distance = 0
-			this.current = 0
-		} else {
-			tbody.style.transition = 'transform .2s ease-out'
-			scroller.style.height = `${height}px`
-			this.scroll = true
-		}
-	}
+    if (this.state.wheel) {
+      this.bindWheelEvent()
+    }
 
-	bindMoveEvent () {
-		const { table } = this.tableInstance
-		const scroller = table.querySelector('.it-tbody-group')
-		const tbody = scroller.querySelector('.it-tbody')
+    if (this.state.mouse) {
+      this.bindMoveEvent()
+    }
+  }
 
-		const MoveScroller = ev => {
-			const evt = ev || event
+  afterRenderBody () {
+    const { table } = this.tableInstance
+    const { height } = this.state
+    const scroller = table.querySelector('.it-tbody-group')
+    const tbody = scroller.querySelector('.it-tbody')
+    const tbodyHeight = tbody.getBoundingClientRect().height
 
-			this.distance = evt.clientY - this.start
+    if (tbodyHeight < height) {
+      tbody.style.transition = ''
+      scroller.style.height = `${tbodyHeight}px`
+      tbody.style.transform = 'translateY(0)'
+      this.scroll = false
+      this.start = 0
+      this.distance = 0
+      this.current = 0
+    } else {
+      tbody.style.transition = 'transform .2s ease-out'
+      scroller.style.height = `${height}px`
+      this.scroll = true
+    }
+  }
 
-			if (!this.state.scrolling && Math.abs(this.distance) >= 10) {
-				this.state.scrolling = true
-			}
+  bindMoveEvent () {
+    const { table } = this.tableInstance
+    const scroller = table.querySelector('.it-tbody-group')
+    const tbody = scroller.querySelector('.it-tbody')
 
-			tbody.style.transform = `translateY(${this.current + this.distance}px)`
-			return false
-		}
+    const MoveScroller = evt => {
+      this.distance = evt.clientY - this.start
 
-		const finishMoving = () => {
-			this.current += this.distance
-			this.positionCorrect()
+      if (!this.state.scrolling && Math.abs(this.distance) >= 10) {
+        this.state.scrolling = true
+      }
 
-			tbody.style.userSelect = ''
-			tbody.style.transition = 'none'
+      tbody.style.transform = `translateY(${this.current + this.distance}px)`
+      return false
+    }
 
-			if (this.state.scrolling) {
-				setTimeout(() => {
-					this.state.scrolling = false
-				}, 200)
-			}
+    const finishMoving = () => {
+      this.current += this.distance
+      this.positionCorrect()
 
-			document.removeEventListener('mousemove', MoveScroller)
-			document.removeEventListener('mouseup', finishMoving)
-		}
+      tbody.style.userSelect = ''
+      tbody.style.transition = 'none'
 
-		table.addEventListener('mousedown', ev => {
-			// console.log(this.scroll);
-			if (this.scroll === false) {
-				return false
-			}
-			const evt = ev || event
+      if (this.state.scrolling) {
+        setTimeout(() => {
+          this.state.scrolling = false
+        }, 200)
+      }
 
-			const path = evt.path
-			let target = null
-			if (path) {
-				target = path.find(value => value.classList && value.classList.contains('it-tbody'))
-			} else {
-				target = evt.target || evt.srcElement
-				target = checkPathByClass(target, 'it-tbody')
-			}
+      document.removeEventListener('mousemove', MoveScroller)
+      document.removeEventListener('mouseup', finishMoving)
+    }
 
-			if (target) {
-				this.start = evt.clientY
-				tbody.style.userSelect = 'none'
-				tbody.style.transition = 'none'
+    table.addEventListener('mousedown', evt => {
+      // console.log(this.scroll)
+      if (this.scroll === false) {
+        return false
+      }
 
-				document.addEventListener('mousemove', MoveScroller)
-				document.addEventListener('mouseup', finishMoving)
-			}
-		})
-	}
+      const path = evt.path
+      let target = null
+      if (path) {
+        target = path.find(value => value.classList && value.classList.contains('it-tbody'))
+      } else {
+        target = evt.target || evt.srcElement
+        target = checkPathByClass(target, 'it-tbody')
+      }
 
-	bindWheelEvent () {
-		const { table } = this.tableInstance
-		const scroller = table.querySelector('.it-tbody-group')
-		const tbody = scroller.querySelector('.it-tbody')
+      if (target) {
+        this.start = evt.clientY
+        tbody.style.userSelect = 'none'
+        tbody.style.transition = 'none'
 
-		scroller.addEventListener('wheel', ev => {
-			if (this.scroll === false) {
-				return false
-			}
+        document.addEventListener('mousemove', MoveScroller)
+        document.addEventListener('mouseup', finishMoving)
+      }
+    })
+  }
 
-			const evt = ev || event
-			const { wheelDeltaY } = evt
-			const { wheelDistance } = this.state
-			const direction = wheelDeltaY / Math.abs(wheelDeltaY) + 1
+  bindWheelEvent () {
+    const { table } = this.tableInstance
+    const scroller = table.querySelector('.it-tbody-group')
+    const tbody = scroller.querySelector('.it-tbody')
 
-			if (direction) {
-				// 向上滚动
-				this.current += wheelDistance
-			} else {
-				// 向下滚动
-				this.current -= wheelDistance
-			}
+    scroller.addEventListener('wheel', evt => {
+      if (this.scroll === false) {
+        return false
+      }
 
-			tbody.style.transform = `translateY(${this.current}px)`
-			this.positionCorrect()
-		})
-	}
+      const { wheelDeltaY } = evt
+      const { wheelDistance } = this.state
+      const direction = wheelDeltaY / Math.abs(wheelDeltaY) + 1
 
-	positionCorrect () {
-		const { table } = this.tableInstance
-		const { height } = this.state
-		const tbody = table.querySelector('.it-tbody');
-		const tbodyRect = tbody.getBoundingClientRect()
-		const bottom = -(tbodyRect.height - height)
+      if (direction) {
+        // 向上滚动
+        this.current += wheelDistance
+      } else {
+        // 向下滚动
+        this.current -= wheelDistance
+      }
 
-		if (this.current > 0) {
-			tbody.style.transform = 'translateY(0)'
-			this.current = 0
-		} else if (this.current < bottom) {
-			tbody.style.transform = `translateY(${bottom}px)`
-			this.current = bottom
-		}
-	}
+      tbody.style.transform = `translateY(${this.current}px)`
+      this.positionCorrect()
+    })
+  }
+
+  positionCorrect () {
+    const { table } = this.tableInstance
+    const { height } = this.state
+    const tbody = table.querySelector('.it-tbody')
+    const tbodyRect = tbody.getBoundingClientRect()
+    const bottom = -(tbodyRect.height - height)
+
+    if (this.current > 0) {
+      tbody.style.transform = 'translateY(0)'
+      this.current = 0
+    } else if (this.current < bottom) {
+      tbody.style.transform = `translateY(${bottom}px)`
+      this.current = bottom
+    }
+  }
 }

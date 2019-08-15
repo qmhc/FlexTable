@@ -1,6 +1,6 @@
 /**
- *	@name resizer
- *	@description 调整表格大小插件
+ * @name resizer
+ * @description 调整表格大小插件
  */
 
 import { temp } from 'core/temps'
@@ -10,249 +10,239 @@ import { getType } from '@/utils'
 import './style.scss'
 
 // 控制列宽代理控制器
-function getProxyHandler() {
-	const _this = this
-	return {
-		set (obj, prop, value) {
-			const old = obj[prop]
+function getProxyHandler () {
+  const _this = this
+  return {
+    set (obj, prop, value) {
+      const old = obj[prop]
 
-			if (typeof old !== 'undefined' && old !== value) {
-				// console.log(
-				// 	`%cResizer%c >> column %c${prop}%c width change from %c${old}%c to %c${value}`,
-				// 	'color: #fff; font-weight: 700; background: #2d8cf0; padding: 0 .3em',
-				// 	'font-weight: 700',
-				// 	'color: #fff; font-weight: 700; background: #ed4014; padding: 0 .3em',
-				// 	'font-weight: 700',
-				// 	'color: #fff; font-weight: 700; background: #ff9900; padding: 0 .3em',
-				// 	'font-weight: 700',
-				// 	'color: #fff; font-weight: 700; background: #19be6b; padding: 0 .3em',
-				// );
-				obj[prop] = value
-				renderResize.apply(_this, [parseInt(prop)])
-				dispatchEvent.apply(_this.tableInstance, ['columnResize', { index: parseInt(prop), oldWidth: old, newWidth: value }])
-			} else {
-				obj[prop] = value
-			}
+      if (typeof old !== 'undefined' && old !== value) {
+        obj[prop] = value
+        renderResize.apply(_this, [parseInt(prop)])
+        dispatchEvent.apply(_this.tableInstance, ['columnResize', { index: parseInt(prop), oldWidth: old, newWidth: value }])
+      } else {
+        obj[prop] = value
+      }
 
-			return true
-		}
-	}
+      return true
+    }
+  }
 }
 
-function renderResize(index) {
-	const { table, columnProps } = this.tableInstance
-	const nthOfType = index + 1
-	const columnWidth = this.state.columnWidth
-	const targetWidth = columnWidth[index]
-	const props = columnProps[index]
-	props.width = targetWidth
+function renderResize (index) {
+  const { table, columnProps } = this.tableInstance
+  const nthOfType = index + 1
+  const columnWidth = this.state.columnWidth
+  const targetWidth = columnWidth[index]
+  const props = columnProps[index]
+  props.width = targetWidth
 
-	const theads = table.querySelectorAll('.it-thead, .it-tbody-group, .it-tfoot')
-	const childThs = table.querySelectorAll(`.it-thead.resize .it-th:nth-of-type(${nthOfType})`)
-	const tbodyTds = table.querySelectorAll(`
-		.it-tbody .it-tr>.it-td:nth-of-type(${nthOfType}),
-		.it-tfoot .it-tr>.it-td:nth-of-type(${nthOfType})
-	`);
-	const groupTh = props.parentTarget
+  const theads = table.querySelectorAll('.it-thead, .it-tbody-group, .it-tfoot')
+  const childThs = table.querySelectorAll(`.it-thead.resize .it-th:nth-of-type(${nthOfType})`)
+  const tbodyTds = table.querySelectorAll(`
+    .it-tbody .it-tr>.it-td:nth-of-type(${nthOfType}),
+    .it-tfoot .it-tr>.it-td:nth-of-type(${nthOfType})
+  `)
+  const groupTh = props.parentTarget
 
-	let tableWidth = 0
+  let tableWidth = 0
 
-	for (let key in columnWidth) {
-		const width = columnWidth[key]
-		tableWidth += width
-	}
+  for (const key in columnWidth) {
+    const width = columnWidth[key]
+    tableWidth += width
+  }
 
-	for (let i = 0, len = theads.length; i < len; i++) {
-		const thead = theads[i]
-		thead.style.minWidth = `${tableWidth}px`
-	}
+  for (let i = 0, len = theads.length; i < len; i++) {
+    const thead = theads[i]
+    thead.style.minWidth = `${tableWidth}px`
+  }
 
-	// 用于保持两层表头结构 (flex布局) 一致性
-	if (!childThs[0].itResize) {
-		childThs[0].itResize = true
+  // 用于保持两层表头结构 (flex布局) 一致性
+  if (!childThs[0].itResize) {
+    childThs[0].itResize = true
 
-		if (groupTh) {
-			groupTh.itChildrenSize--
-		}
-	}
+    if (groupTh) {
+      groupTh.itChildrenSize--
+    }
+  }
 
-	if (groupTh) {
-		const { itChildrenIds, itChildrenSize } = groupTh
-		let width = 0
+  if (groupTh) {
+    const { itChildrenIds, itChildrenSize } = groupTh
+    let width = 0
 
-		for (let id of itChildrenIds) {
-			width += columnProps.find(props => props.id === id).width
-		}
+    for (const id of itChildrenIds) {
+      width += columnProps.find(props => props.id === id).width
+    }
 
-		groupTh.style.cssText = `flex: ${itChildrenSize * 100} 0 auto; width: ${width}px`
-	}
+    groupTh.style.cssText = `flex: ${itChildrenSize * 100} 0 auto; width: ${width}px`
+  }
 
-	for (let i = 0, len = childThs.length; i < len; i++) {
-		childThs[i].style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`
-	}
-	
-	for (let i = 0, len = tbodyTds.length; i < len; i++) {
-		const td = tbodyTds[i]
-		td.style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`
-	}
+  for (let i = 0, len = childThs.length; i < len; i++) {
+    childThs[i].style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`
+  }
+
+  for (let i = 0, len = tbodyTds.length; i < len; i++) {
+    const td = tbodyTds[i]
+    td.style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`
+  }
 }
 
 export default class Resizer {
-	constructor(tableInstance, options) {
-		this.tableInstance = tableInstance
-		this.defaultColumnWidth = this.tableInstance.constructor.defaultColumnWidth
+  constructor (tableInstance, options) {
+    this.tableInstance = tableInstance
+    this.defaultColumnWidth = this.tableInstance.constructor.defaultColumnWidth
 
-		const { state } = this.tableInstance
+    const { state } = this.tableInstance
 
-		const resizable = getType(options.resizer) === 'object'
+    const resizable = getType(options.resizer) === 'object'
 
-		if (resizable) {
-			this.force = false
+    if (resizable) {
+      this.force = false
 
-			state.resizer = {
-				resizable,
-				columnWidth: new Proxy({}, getProxyHandler.call(this)),
-				resizing: false
-			}
+      state.resizer = {
+        resizable,
+        columnWidth: new Proxy({}, getProxyHandler.call(this)),
+        resizing: false
+      }
 
-			addEventWhiteList.apply(this.tableInstance, ['columnResize'])
-		} else {
-			state.resizer = {
-				resizable
-			}
-		}
+      addEventWhiteList.apply(this.tableInstance, ['columnResize'])
+    } else {
+      state.resizer = {
+        resizable
+      }
+    }
 
-		this.state = state.resizer
-	}
+    this.state = state.resizer
+  }
 
-	afterContruct () {
-		this.globalState = this.tableInstance.state
-	}
+  afterContruct () {
+    this.globalState = this.tableInstance.state
+  }
 
-	shouldUse () {
-		return this.state.resizable
-	}
+  shouldUse () {
+    return this.state.resizable
+  }
 
-	beforeRenderBody (count) {
-		if (count === 0) {
-			this.force = true
-		}
-	}
+  beforeRenderBody (count) {
+    if (count === 0) {
+      this.force = true
+    }
+  }
 
-	create() {
-		const { table, columnProps } = this.tableInstance
-		const { columnWidth } = this.state
+  create () {
+    const { table, columnProps } = this.tableInstance
+    const { columnWidth } = this.state
 
-		const thead = table.querySelector('.it-thead.shadow')
-		thead.classList.add('resize')
+    const thead = table.querySelector('.it-thead.shadow')
+    thead.classList.add('resize')
 
-		const ths = thead.querySelectorAll('.it-thead.shadow .it-th')
+    const ths = thead.querySelectorAll('.it-thead.shadow .it-th')
 
-		for (let i = 0, len = ths.length; i < len; i++) {
-			const th = ths[i]
-			const id = th.itColumnId
+    for (let i = 0, len = ths.length; i < len; i++) {
+      const th = ths[i]
+      const id = th.itColumnId
 
-			if (!id) {
-				return false
-			}
+      if (!id) {
+        return false
+      }
 
-			const props = columnProps.find(value => value.id === id)
+      const props = columnProps.find(value => value.id === id)
 
-			if (props.resizable !== false) {
-				const resizer = temp.cloneNode()
-				resizer.className = 'it-resizer'
-				resizer.itColumnIndex = i
-				th.classList.add('it-resize')
-				th.appendChild(resizer)
-				th.itResize = false
-			} else {
-				columnWidth[i.toString()] = 0
-			}
+      if (props.resizable !== false) {
+        const resizer = temp.cloneNode()
+        resizer.className = 'it-resizer'
+        resizer.itColumnIndex = i
+        th.classList.add('it-resize')
+        th.appendChild(resizer)
+        th.itResize = false
+      } else {
+        columnWidth[i.toString()] = 0
+      }
 
-			columnWidth[i.toString()] = parseInt(th.style.width) || this.defaultColumnWidth
-		}
+      columnWidth[i.toString()] = parseInt(th.style.width) || this.defaultColumnWidth
+    }
 
-		this.created = true
-	}
+    this.created = true
+  }
 
-	bindEvent () {
-		const table = this.tableInstance.table
-		const handler = temp.cloneNode()
-		handler.className = 'it-resize-handler'
+  bindEvent () {
+    const table = this.tableInstance.table
+    const handler = temp.cloneNode()
+    handler.className = 'it-resize-handler'
 
-		let index = 0
-		let start = 0
-		let end = 0
+    let index = 0
+    let start = 0
+    let end = 0
 
-		const handlerMove = ev => {
-			const evt = ev || event
-			const tableRect = table.getBoundingClientRect()
-			end = evt.clientX - tableRect.left
-			handler.style.left = `${end}px`
-			return false
-		}
+    const handlerMove = ev => {
+      const evt = ev || event
+      const tableRect = table.getBoundingClientRect()
+      end = evt.clientX - tableRect.left
+      handler.style.left = `${end}px`
+      return false
+    }
 
-		const resizeFinish = () => {
-			const column = table.querySelectorAll('.it-thead.shadow .it-th')[index]
-			const columnRect = column.getBoundingClientRect()
+    const resizeFinish = () => {
+      const column = table.querySelectorAll('.it-thead.shadow .it-th')[index]
+      const columnRect = column.getBoundingClientRect()
 
-			const currentWidth = columnRect.width
-			const targetWidth = (currentWidth + end - start)
+      const currentWidth = columnRect.width
+      const targetWidth = (currentWidth + end - start)
 
-			this.state.columnWidth[index.toString()] = parseInt(targetWidth)
-			table.removeChild(handler)
-			start = 0
-			end = 0
+      this.state.columnWidth[index.toString()] = parseInt(targetWidth)
+      table.removeChild(handler)
+      start = 0
+      end = 0
 
-			document.removeEventListener('mousemove', handlerMove)
-			document.removeEventListener('mouseup', resizeFinish)
+      document.removeEventListener('mousemove', handlerMove)
+      document.removeEventListener('mouseup', resizeFinish)
 
-			// 延迟100ms保证防止触发排序器
-			setTimeout(() => {
-				this.state.resizing = false
-			}, 200)
-		}
+      // 延迟100ms保证防止触发排序器
+      setTimeout(() => {
+        this.state.resizing = false
+      }, 200)
+    }
 
-		table.addEventListener('mousedown', ev => {
-			const evt = ev || event
-			const target = evt.target || evt.srcElement
+    table.addEventListener('mousedown', ev => {
+      const evt = ev || event
+      const target = evt.target || evt.srcElement
 
-			if (target.classList.contains('it-resizer')) {
-				this.state.resizing = true
-				index = target.itColumnIndex
+      if (target.classList.contains('it-resizer')) {
+        this.state.resizing = true
+        index = target.itColumnIndex
 
-				const tableRect = table.getBoundingClientRect()
-				const resizerRect = target.getBoundingClientRect()
+        const tableRect = table.getBoundingClientRect()
+        const resizerRect = target.getBoundingClientRect()
 
-				start = resizerRect.left - tableRect.left + 13
-				end = start
+        start = resizerRect.left - tableRect.left + 13
+        end = start
 
-				handler.style.left = `${start}px`
-				table.appendChild(handler)
+        handler.style.left = `${start}px`
+        table.appendChild(handler)
 
-				document.addEventListener('mousemove', handlerMove)
-				document.addEventListener('mouseup', resizeFinish)
-			}
-		})
-	}
+        document.addEventListener('mousemove', handlerMove)
+        document.addEventListener('mouseup', resizeFinish)
+      }
+    })
+  }
 
-	afterRenderBody () {
-		if (this.created && this.force) {
-			const { table } = this.tableInstance
-			const { columnWidth } = this.state
-			const ths = table.querySelectorAll('.it-thead.shadow .it-th')
+  afterRenderBody () {
+    if (this.created && this.force) {
+      const { table } = this.tableInstance
+      const { columnWidth } = this.state
+      const ths = table.querySelectorAll('.it-thead.shadow .it-th')
 
-			for (let i = 0, len = ths.length; i < len; i++) {
-				const th = ths[i]
-				const { width } = th.getBoundingClientRect()
+      for (let i = 0, len = ths.length; i < len; i++) {
+        const th = ths[i]
+        const { width } = th.getBoundingClientRect()
 
-				if (width) {
-					columnWidth[i.toString()] = 0
-					columnWidth[i.toString()] = parseInt(width)
-				}
-			}
+        if (width) {
+          columnWidth[i.toString()] = 0
+          columnWidth[i.toString()] = parseInt(width)
+        }
+      }
 
-			this.force = false
-		}
-	}
+      this.force = false
+    }
+  }
 }

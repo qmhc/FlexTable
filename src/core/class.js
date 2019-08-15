@@ -1,12 +1,10 @@
 import Renderer from './render'
 import { registerEvent, unregisterEvent } from './events'
+import { deepClone } from '../utils'
 
 import '../style/itable.scss'
 
-export default class FlexTable {
-  static defaultColumnWidth = 100
-  static plugins = []
-
+class FlexTable {
   /**
    * 为 FlexTable 注册插件
    * @param {String} name 插件的名称 (唯一的)
@@ -48,7 +46,7 @@ export default class FlexTable {
     } else {
       index = this.plugins.findIndex(plugin => plugin.name === name)
     }
-    
+
     if (!~index) {
       this.plugins.splice(index, 1)
       return true
@@ -74,23 +72,23 @@ export default class FlexTable {
   }
 
   constructor ({ data = [], columns, container, theme, ...props }) {
-		// 获取容器
-		switch (typeof container) {
-			case 'string': {
+    // 获取容器
+    switch (typeof container) {
+      case 'string': {
         this.container = document.querySelector(container)
-				if (!this.container) {
-					console.error(`Node for selector '${container}' is not defined.`)
-					return false
+        if (!this.container) {
+          console.error(`Node for selector '${container}' is not defined.`)
+          return false
         }
         break
       }
-			case 'object': {
+      case 'object': {
         this.container = container
         break
       }
-			default: {
+      default: {
         console.error(`Parameter 'container' must be a String or a HTMLObject.`)
-				return false
+        return false
       }
     }
 
@@ -104,7 +102,7 @@ export default class FlexTable {
     `
     document.body.appendChild(style)
 
-		// 数据克隆
+    // 数据克隆
     this.data = props.deepClone === true ? deepClone(data) : [...data]
 
     this.columns = columns
@@ -118,31 +116,31 @@ export default class FlexTable {
     // 初始化 this.table
     // 注册 refresh 和 refreshStruch 两个方法
     Renderer.call(this, { ...props })
-    
-		const fragment = document.createDocumentFragment()
 
-		// 设置主题
-		switch (theme) {
-			case 'blue': {
+    const fragment = document.createDocumentFragment()
+
+    // 设置主题
+    switch (theme) {
+      case 'blue': {
         this.table.classList.add('theme-blue')
         break
       }
-			case 'red': {
+      case 'red': {
         this.table.classList.add('theme-red')
         break
       }
-			case 'dark': {
+      case 'dark': {
         this.table.classList.add('theme-dark')
         break
       }
-			default: {
+      default: {
         this.table.classList.add('theme-light')
       }
-		}
+    }
 
-		fragment.appendChild(this.table)
+    fragment.appendChild(this.table)
     this.container.appendChild(fragment)
-    
+
     // 优化首屏渲染效果
     setTimeout(() => {
       this.table.style.visibility = 'visible'
@@ -171,3 +169,9 @@ export default class FlexTable {
     }
   }
 }
+
+FlexTable.defaultColumnWidth = 100
+
+FlexTable.plugins = []
+
+export default FlexTable

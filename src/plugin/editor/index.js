@@ -1,6 +1,6 @@
 /**
- *	@name editor
- *	@description 表格编辑插件
+ * @name editor
+ * @description 表格编辑插件
  */
 
 import { temp, inputTemp, buttonTemp } from 'core/temps'
@@ -75,7 +75,7 @@ function createEditButton (data) {
 
             control.value = data[key]
           }
-          
+
           td.innerHTML = ''
           td.appendChild(control)
         }
@@ -99,7 +99,7 @@ function createSaveButton (data) {
     if (!rowActions) {
       return false
     }
-    
+
     rowActions.classList.remove('editing')
 
     this.editingCount--
@@ -145,7 +145,7 @@ function createSaveButton (data) {
         }
       }
 
-      dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'action', data: {...data} }])
+      dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'action', data: { ...data } }])
     }
 
     return false
@@ -189,7 +189,7 @@ function createCancelButton (data) {
         insertData(td, html)
       }
 
-      dispatchEvent.apply(this.tableInstance, ['editCancel', { type: 'action', data: {...data} }])
+      dispatchEvent.apply(this.tableInstance, ['editCancel', { type: 'action', data: { ...data } }])
     }
 
     return false
@@ -238,11 +238,11 @@ function insertData (cell, data) {
 }
 
 export default class {
-	constructor(tableInstance, options = {}) {
+  constructor (tableInstance, options = {}) {
     this.tableInstance = tableInstance
 
     const { columns, state } = this.tableInstance
-    
+
     const editable = getType(options.editor) === 'object'
 
     if (editable) {
@@ -259,12 +259,12 @@ export default class {
 
       this.trigger = trigger === 'action' ? 1 : 0
       this.verifier = getType(verifier) === 'function' ? verifier : null
-    
-      for (let i in columns) {
+
+      for (const i in columns) {
         const column = columns[i]
 
         if (column.children && column.children.length) {
-          for (let j in column.children) {
+          for (const j in column.children) {
             column.children[j] = {
               editable: true,
               ...column.children[j]
@@ -375,19 +375,19 @@ export default class {
   afterContruct () {
     this.globalState = this.tableInstance.state
   }
-  
-	shouldUse() {
-		return this.state.editable
+
+  shouldUse () {
+    return this.state.editable
   }
-  
-	create() {
+
+  create () {
     // create code
     const { table } = this.tableInstance
     this.topAction = table.querySelector('.it-th.it-editor-item')
-		this.created = true
+    this.created = true
   }
-  
-	bindEvent() {
+
+  bindEvent () {
     // trigger is not click
     if (this.state.trigger) {
       return false
@@ -418,9 +418,9 @@ export default class {
       insertData(node, html)
 
       if (old !== content) {
-        dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'click', data: {...rowData}, key, old }])
+        dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'click', data: { ...rowData }, key, old }])
       } else {
-        dispatchEvent.apply(this.tableInstance, ['editCancel', { type: 'click', data: {...rowData}, key }])
+        dispatchEvent.apply(this.tableInstance, ['editCancel', { type: 'click', data: { ...rowData }, key }])
       }
 
       setTimeout(() => {
@@ -435,7 +435,7 @@ export default class {
       }
 
       const node = checkPathByClass(ev.target, 'it-td')
-      
+
       if (node) {
         if (node.classList.contains('editing')) {
           return false
@@ -454,7 +454,7 @@ export default class {
 
         if (props && editable && rowData) {
           node.classList.add('editing')
-          
+
           this.editingCount++
 
           const { key, accessor, verifier, editType, editOptions } = props
@@ -517,7 +517,7 @@ export default class {
             input.focus()
           }
         }
-        
+
         return false
       }
     })

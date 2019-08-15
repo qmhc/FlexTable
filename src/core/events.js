@@ -6,13 +6,13 @@ const recorder = []
  * @param {Number} code 按键码
  */
 export function getKeyState (code) {
-	const key = recorder.find(item => item.code === code)
+  const key = recorder.find(item => item.code === code)
 
-	if (key) {
-		return key.state
-	}
+  if (key) {
+    return key.state
+  }
 
-	return false
+  return false
 }
 
 /**
@@ -20,53 +20,53 @@ export function getKeyState (code) {
  * @param {Number} code 按键码
  */
 export function registerKey (code) {
-	if (recorder.find(item => item.code === code)) {
-		throw new Error(`The Key coded '${code}' has been registered`)
-	}
+  if (recorder.find(item => item.code === code)) {
+    throw new Error(`The Key coded '${code}' has been registered`)
+  }
 
-	recorder.push({
-		state: false,
-		code: code
-	})
-} 
+  recorder.push({
+    state: false,
+    code: code
+  })
+}
 
 /**
  * 根据按键码判断是否注册了监听
  * @param {Number} code 按键码
  */
 export function isKeyRegistered (code) {
-	return !!~recorder.findIndex(item => item.code === code)
+  return !!~recorder.findIndex(item => item.code === code)
 }
 
 document.addEventListener('keydown', ev => {
-	const code = ev.keyCode
-	const key = recorder.find(item => item.code === code)
-	if (key) {
-		key.state = true
-	}
+  const code = ev.keyCode
+  const key = recorder.find(item => item.code === code)
+  if (key) {
+    key.state = true
+  }
 })
 
 document.addEventListener('keyup', ev => {
-	const code = ev.keyCode
-	const key = recorder.find(item => item.code === code)
-	if (key) {
-		key.state = false
-	}
+  const code = ev.keyCode
+  const key = recorder.find(item => item.code === code)
+  if (key) {
+    key.state = false
+  }
 })
 
- /**
-	* 将事件名注册到白名单
-	* this 须含有 eventWhiteList{Set} 和 events{Array} 属性
-	* @param  {...String} events 
-	*/
+/**
+ * 将事件名注册到白名单
+ * this 须含有 eventWhiteList{Set} 和 events{Array} 属性
+ * @param  {...String} events
+ */
 export function addEventWhiteList (...events) {
-	for (let i = 0, len = events.length; i < len; i++) {
-		const name = events[i]
+  for (let i = 0, len = events.length; i < len; i++) {
+    const name = events[i]
 
-		if (typeof name === 'string') {
-			this.eventWhiteList.add(name.toLowerCase())
-		}
-	}
+    if (typeof name === 'string') {
+      this.eventWhiteList.add(name.toLowerCase())
+    }
+  }
 }
 
 /**
@@ -76,22 +76,22 @@ export function addEventWhiteList (...events) {
  * @param {Function} listener 监听回调函数
  */
 export function registerEvent (name, listener) {
-	name = name.toLowerCase()
-	if (!this.eventWhiteList.has(name)) {
-		return false
-	}
+  name = name.toLowerCase()
+  if (!this.eventWhiteList.has(name)) {
+    return false
+  }
 
-	if (typeof listener === 'function') {
-		if (!this.events[name]) {
-			this.events[name] = []
-		}
+  if (typeof listener === 'function') {
+    if (!this.events[name]) {
+      this.events[name] = []
+    }
 
-		this.events[name].push(listener)
+    this.events[name].push(listener)
 
-		return true
-	}
+    return true
+  }
 
-	return false
+  return false
 }
 
 /**
@@ -101,19 +101,19 @@ export function registerEvent (name, listener) {
  * @param {Function} listener 监听回调函数
  */
 export function unregisterEvent (name, listener) {
-	name = name.toLowerCase()
-	if (this.events[name]) {
-		const events = this.events[name]
+  name = name.toLowerCase()
+  if (this.events[name]) {
+    const events = this.events[name]
 
-		for (let i = 0, len = events.length; i < len; i++) {
-			if (events[i] === listener) {
-				events.splice(i, 1)
-				return true
-			}
-		}
-	}
+    for (let i = 0, len = events.length; i < len; i++) {
+      if (events[i] === listener) {
+        events.splice(i, 1)
+        return true
+      }
+    }
+  }
 
-	return false
+  return false
 }
 
 /**
@@ -123,13 +123,13 @@ export function unregisterEvent (name, listener) {
  * @param {Any} event 事件回调参数, 多参数时应使用 Object 或 Event
  */
 export function dispatchEvent (name, event) {
-	name = name.toLowerCase()
-	if (this.events[name]) {
-		const events = this.events[name]
+  name = name.toLowerCase()
+  if (this.events[name]) {
+    const events = this.events[name]
 
-		for (let i = 0, len = events.length; i < len; i++) {
-			const listener = events[i]
-			listener(event)
-		}
-	}
+    for (let i = 0, len = events.length; i < len; i++) {
+      const listener = events[i]
+      listener(event)
+    }
+  }
 }
