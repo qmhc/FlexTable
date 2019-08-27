@@ -1,5 +1,5 @@
 /**
- * @name selector
+ * @name Selector
  * @description 表格数据选择 (复选框)
  */
 

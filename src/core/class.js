@@ -107,6 +107,7 @@ class FlexTable {
 
     this.columns = columns
 
+    // 事件属性初始化
     this.eventWhiteList = new Set()
     this.events = {}
 

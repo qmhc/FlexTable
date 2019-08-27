@@ -14,229 +14,6 @@ const inputTypeWhiteList = ['text', 'number', 'date', 'week', 'month', 'time', '
 const editInputTemp = inputTemp.cloneNode()
 editInputTemp.classList.add('it-editor-control')
 
-function createEditButton (data) {
-  const editButton = buttonTemp.cloneNode()
-  editButton.classList.add('it-editor-edit')
-  editButton.textContent = this.labels.edit
-
-  editButton.addEventListener('click', () => {
-    const rowActions = editButton.parentNode
-
-    if (!rowActions) {
-      return false
-    }
-
-    rowActions.classList.add('editing')
-
-    this.editingCount++
-
-    const { columnProps } = this.tableInstance
-
-    let tr = null
-
-    try {
-      tr = rowActions.parentNode.parentNode
-    } catch (e) {}
-
-    if (tr) {
-      const tds = tr.querySelectorAll('.it-td')
-
-      for (let i = 0, len = tds.length; i < len; i++) {
-        const td = tds[i]
-        const props = columnProps[i]
-
-        let editable = props.editable
-
-        if (getType(editable) === 'function') {
-          editable = !!editable(data)
-        }
-
-        if (props && editable !== false) {
-          td.classList.add('editing')
-
-          const { key, editType, editOptions } = props
-
-          let control = null
-
-          if (editType === 'select') {
-            control = createSelect(editOptions)
-            control.classList.add('it-editor-control')
-            control.itValue = data[key]
-          } else {
-            control = editInputTemp.cloneNode()
-
-            let inputType = 'text'
-
-            if (inputTypeWhiteList.includes(editType)) {
-              inputType = editType
-            }
-
-            control.setAttribute('type', inputType)
-
-            control.value = data[key]
-          }
-
-          td.innerHTML = ''
-          td.appendChild(control)
-        }
-      }
-    }
-
-    return false
-  })
-
-  return editButton
-}
-
-function createSaveButton (data) {
-  const saveButton = buttonTemp.cloneNode()
-  saveButton.classList.add('it-editor-save')
-  saveButton.textContent = this.labels.save
-
-  saveButton.addEventListener('click', () => {
-    const rowActions = saveButton.parentNode
-
-    if (!rowActions) {
-      return false
-    }
-
-    rowActions.classList.remove('editing')
-
-    this.editingCount--
-
-    const { columnProps } = this.tableInstance
-
-    let tr = null
-
-    try {
-      tr = rowActions.parentNode.parentNode
-    } catch (e) {}
-
-    if (tr) {
-      const tds = tr.querySelectorAll('.it-td')
-
-      for (let i = 0, len = tds.length; i < len; i++) {
-        const td = tds[i]
-
-        if (td.classList.contains('editing')) {
-          const control = td.querySelector('.it-editor-control')
-          if (!control) {
-            continue
-          }
-
-          const { verifier, key, accessor } = columnProps[i]
-          const content = control.value
-
-          if (getType(verifier) === 'function') {
-            if (!verifier(content)) {
-              continue
-            }
-          }
-
-          if (getType(this.verifier) === 'function') {
-            if (!this.verifier(content)) {
-              continue
-            }
-          }
-
-          data[key] = content
-          const html = accessor(data)
-          insertData(td, html)
-        }
-      }
-
-      dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'action', data: { ...data } }])
-    }
-
-    return false
-  })
-
-  return saveButton
-}
-
-function createCancelButton (data) {
-  const cancelButton = buttonTemp.cloneNode()
-  cancelButton.classList.add('it-editor-cancel')
-  cancelButton.textContent = this.labels.cancel
-
-  cancelButton.addEventListener('click', () => {
-    const rowActions = cancelButton.parentNode
-
-    if (!rowActions) {
-      return false
-    }
-
-    rowActions.classList.remove('editing')
-
-    this.editingCount--
-
-    const { columnProps } = this.tableInstance
-
-    let tr = null
-
-    try {
-      tr = rowActions.parentNode.parentNode
-    } catch (e) {}
-
-    if (tr) {
-      const tds = tr.querySelectorAll('.it-td')
-
-      for (let i = 0, len = tds.length; i < len; i++) {
-        const td = tds[i]
-        const { accessor } = columnProps[i]
-
-        const html = accessor(data)
-        insertData(td, html)
-      }
-
-      dispatchEvent.apply(this.tableInstance, ['editCancel', { type: 'action', data: { ...data } }])
-    }
-
-    return false
-  })
-
-  return cancelButton
-}
-
-function insertData (cell, data) {
-  cell.classList.remove('editing')
-
-  if (!data && data !== 0) {
-    data = ''
-  }
-
-  switch (getType(data)) {
-    case 'number':
-    case 'string': {
-      cell.textContent = data
-      break
-    }
-    case 'array':
-    case 'nodelist': {
-      cell.innerHTML = ''
-      const fragment = document.createDocumentFragment()
-
-      data = [...data]
-      for (let i = 0, len = data.length; i < len; i++) {
-        let element = data[i]
-
-        if (getType(element) === 'string') {
-          element = document.createTextNode(element)
-        }
-
-        fragment.appendChild(element)
-      }
-
-      cell.appendChild(fragment)
-      break
-    }
-    default: {
-      cell.innerHTML = ''
-      cell.appendChild(data)
-    }
-  }
-}
-
 export default class {
   constructor (tableInstance, options = {}) {
     this.tableInstance = tableInstance
@@ -311,13 +88,13 @@ export default class {
               this.recorder[uuid] = rowActions
 
               // 编辑按钮
-              const editButton = createEditButton.call(this, data)
+              const editButton = this._createEditButton(data)
 
               // 保存按钮
-              const saveButton = createSaveButton.call(this, data)
+              const saveButton = this._createSaveButton(data)
 
               // 取消按钮
-              const cancelButton = createCancelButton.call(this, data)
+              const cancelButton = this._createCancelButton(data)
 
               rowActions.appendChild(editButton)
               rowActions.appendChild(saveButton)
@@ -415,7 +192,7 @@ export default class {
       rowData[key] = content
 
       const html = accessor(rowData)
-      insertData(node, html)
+      this._insertData(node, html)
 
       if (old !== content) {
         dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'click', data: { ...rowData }, key, old }])
@@ -521,5 +298,228 @@ export default class {
         return false
       }
     })
+  }
+
+  _createEditButton (data) {
+    const editButton = buttonTemp.cloneNode()
+    editButton.classList.add('it-editor-edit')
+    editButton.textContent = this.labels.edit
+
+    editButton.addEventListener('click', () => {
+      const rowActions = editButton.parentNode
+
+      if (!rowActions) {
+        return false
+      }
+
+      rowActions.classList.add('editing')
+
+      this.editingCount++
+
+      const { columnProps } = this.tableInstance
+
+      let tr = null
+
+      try {
+        tr = rowActions.parentNode.parentNode
+      } catch (e) {}
+
+      if (tr) {
+        const tds = tr.querySelectorAll('.it-td')
+
+        for (let i = 0, len = tds.length; i < len; i++) {
+          const td = tds[i]
+          const props = columnProps[i]
+
+          let editable = props.editable
+
+          if (getType(editable) === 'function') {
+            editable = !!editable(data)
+          }
+
+          if (props && editable !== false) {
+            td.classList.add('editing')
+
+            const { key, editType, editOptions } = props
+
+            let control = null
+
+            if (editType === 'select') {
+              control = createSelect(editOptions)
+              control.classList.add('it-editor-control')
+              control.itValue = data[key]
+            } else {
+              control = editInputTemp.cloneNode()
+
+              let inputType = 'text'
+
+              if (inputTypeWhiteList.includes(editType)) {
+                inputType = editType
+              }
+
+              control.setAttribute('type', inputType)
+
+              control.value = data[key]
+            }
+
+            td.innerHTML = ''
+            td.appendChild(control)
+          }
+        }
+      }
+
+      return false
+    })
+
+    return editButton
+  }
+
+  _createSaveButton (data) {
+    const saveButton = buttonTemp.cloneNode()
+    saveButton.classList.add('it-editor-save')
+    saveButton.textContent = this.labels.save
+
+    saveButton.addEventListener('click', () => {
+      const rowActions = saveButton.parentNode
+
+      if (!rowActions) {
+        return false
+      }
+
+      rowActions.classList.remove('editing')
+
+      this.editingCount--
+
+      const { columnProps } = this.tableInstance
+
+      let tr = null
+
+      try {
+        tr = rowActions.parentNode.parentNode
+      } catch (e) {}
+
+      if (tr) {
+        const tds = tr.querySelectorAll('.it-td')
+
+        for (let i = 0, len = tds.length; i < len; i++) {
+          const td = tds[i]
+
+          if (td.classList.contains('editing')) {
+            const control = td.querySelector('.it-editor-control')
+            if (!control) {
+              continue
+            }
+
+            const { verifier, key, accessor } = columnProps[i]
+            const content = control.value
+
+            if (getType(verifier) === 'function') {
+              if (!verifier(content)) {
+                continue
+              }
+            }
+
+            if (getType(this.verifier) === 'function') {
+              if (!this.verifier(content)) {
+                continue
+              }
+            }
+
+            data[key] = content
+            const html = accessor(data)
+            this._insertData(td, html)
+          }
+        }
+
+        dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'action', data: { ...data } }])
+      }
+
+      return false
+    })
+
+    return saveButton
+  }
+
+  _createCancelButton (data) {
+    const cancelButton = buttonTemp.cloneNode()
+    cancelButton.classList.add('it-editor-cancel')
+    cancelButton.textContent = this.labels.cancel
+
+    cancelButton.addEventListener('click', () => {
+      const rowActions = cancelButton.parentNode
+
+      if (!rowActions) {
+        return false
+      }
+
+      rowActions.classList.remove('editing')
+
+      this.editingCount--
+
+      const { columnProps } = this.tableInstance
+
+      let tr = null
+
+      try {
+        tr = rowActions.parentNode.parentNode
+      } catch (e) {}
+
+      if (tr) {
+        const tds = tr.querySelectorAll('.it-td')
+
+        for (let i = 0, len = tds.length; i < len; i++) {
+          const td = tds[i]
+          const { accessor } = columnProps[i]
+
+          const html = accessor(data)
+          this._insertData(td, html)
+        }
+
+        dispatchEvent.apply(this.tableInstance, ['editCancel', { type: 'action', data: { ...data } }])
+      }
+
+      return false
+    })
+
+    return cancelButton
+  }
+
+  _insertData (cell, data) {
+    cell.classList.remove('editing')
+
+    if (!data && data !== 0) {
+      data = ''
+    }
+
+    switch (getType(data)) {
+      case 'number':
+      case 'string': {
+        cell.textContent = data
+        break
+      }
+      case 'array':
+      case 'nodelist': {
+        cell.innerHTML = ''
+        const fragment = document.createDocumentFragment()
+
+        data = [...data]
+        for (let i = 0, len = data.length; i < len; i++) {
+          let element = data[i]
+
+          if (getType(element) === 'string') {
+            element = document.createTextNode(element)
+          }
+
+          fragment.appendChild(element)
+        }
+
+        cell.appendChild(fragment)
+        break
+      }
+      default: {
+        cell.innerHTML = ''
+        cell.appendChild(data)
+      }
+    }
   }
 }

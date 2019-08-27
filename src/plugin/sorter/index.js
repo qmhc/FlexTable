@@ -1,5 +1,5 @@
 /**
- * @name sorter
+ * @name Sorter
  * @description 表格数据排序
  */
 
@@ -8,37 +8,6 @@ import { getKeyState, registerKey, isKeyRegistered } from 'core/events'
 import { getType, sortByProps, checkPathByClass } from '@/utils'
 
 import './style.scss'
-
-function getPluralSortData (data) {
-  const { table, columnProps } = this.tableInstance
-  const { sortBy, types } = this.state
-  const sortHandlers = table.querySelectorAll('.it-sort')
-
-  const optinos = sortBy.map(
-    (value, index) => {
-      const props = columnProps.find(item => item.id === value)
-      const type = types[index] === 1 ? 'asc' : 'desc'
-      const { accessor, sorter, index: key } = props
-
-      switch (types[index]) {
-        case 1: {
-          sortHandlers[key].classList.add('asc')
-          break
-        }
-        case 2: {
-          sortHandlers[key].classList.add('desc')
-          break
-        }
-      }
-
-      return { type, accessor, sorter }
-    }
-  )
-
-  return sortByProps(data, optinos)
-}
-
-const defaultSortMethod = (a, b) => a.toString().localeCompare(b)
 
 const multipleKeyWhiteList = {
   ctrl: 17,
@@ -56,7 +25,6 @@ for (const name in multipleKeyWhiteList) {
 export default class Sorter {
   constructor (tableInstance, options) {
     this.tableInstance = tableInstance
-    this.getSortData = getPluralSortData.bind(this)
 
     const { state } = this.tableInstance
 
@@ -100,7 +68,7 @@ export default class Sorter {
       const { sortable, sortBy } = this.state
 
       if (sortable && typeof sortBy[0] !== 'undefined') {
-        data = this.getSortData(data)
+        data = this._getSortData(data)
       }
 
       return data
@@ -118,7 +86,7 @@ export default class Sorter {
 
       const { sorter, sortable, defaultSort, id } = props
 
-      props.sorter = sorter !== false ? getType(sorter) === 'function' ? sorter : defaultSortMethod : false
+      props.sorter = sorter !== false ? getType(sorter) === 'function' ? sorter : this._defaultSortMethod : false
       props.sortable = !!(sortable !== false && props.sorter)
 
       const th = ths[i]
@@ -236,5 +204,38 @@ export default class Sorter {
         }
       }
     })
+  }
+
+  _getSortData (data) {
+    const { table, columnProps } = this.tableInstance
+    const { sortBy, types } = this.state
+    const sortHandlers = table.querySelectorAll('.it-sort')
+
+    const optinos = sortBy.map(
+      (value, index) => {
+        const props = columnProps.find(item => item.id === value)
+        const type = types[index] === 1 ? 'asc' : 'desc'
+        const { accessor, sorter, index: key } = props
+
+        switch (types[index]) {
+          case 1: {
+            sortHandlers[key].classList.add('asc')
+            break
+          }
+          case 2: {
+            sortHandlers[key].classList.add('desc')
+            break
+          }
+        }
+
+        return { type, accessor, sorter }
+      }
+    )
+
+    return sortByProps(data, optinos)
+  }
+
+  _defaultSortMethod (prev, next) {
+    return prev.toString().localeCompare(next)
   }
 }

@@ -1,5 +1,5 @@
 /**
- * @name scroller
+ * @name Scroller
  * @description 表格滚动条
  */
 

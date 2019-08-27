@@ -1,5 +1,5 @@
 /**
- * @name resizer
+ * @name Resizer
  * @description 调整表格大小插件
  */
 
@@ -8,84 +8,6 @@ import { addEventWhiteList, dispatchEvent } from 'core/events'
 import { getType } from '@/utils'
 
 import './style.scss'
-
-// 控制列宽代理控制器
-function getProxyHandler () {
-  const _this = this
-  return {
-    set (obj, prop, value) {
-      const old = obj[prop]
-
-      if (typeof old !== 'undefined' && old !== value) {
-        obj[prop] = value
-        renderResize.apply(_this, [parseInt(prop)])
-        dispatchEvent.apply(_this.tableInstance, ['columnResize', { index: parseInt(prop), oldWidth: old, newWidth: value }])
-      } else {
-        obj[prop] = value
-      }
-
-      return true
-    }
-  }
-}
-
-function renderResize (index) {
-  const { table, columnProps } = this.tableInstance
-  const nthOfType = index + 1
-  const columnWidth = this.state.columnWidth
-  const targetWidth = columnWidth[index]
-  const props = columnProps[index]
-  props.width = targetWidth
-
-  const theads = table.querySelectorAll('.it-thead, .it-tbody-group, .it-tfoot')
-  const childThs = table.querySelectorAll(`.it-thead.resize .it-th:nth-of-type(${nthOfType})`)
-  const tbodyTds = table.querySelectorAll(`
-    .it-tbody .it-tr>.it-td:nth-of-type(${nthOfType}),
-    .it-tfoot .it-tr>.it-td:nth-of-type(${nthOfType})
-  `)
-  const groupTh = props.parentTarget
-
-  let tableWidth = 0
-
-  for (const key in columnWidth) {
-    const width = columnWidth[key]
-    tableWidth += width
-  }
-
-  for (let i = 0, len = theads.length; i < len; i++) {
-    const thead = theads[i]
-    thead.style.minWidth = `${tableWidth}px`
-  }
-
-  // 用于保持两层表头结构 (flex布局) 一致性
-  if (!childThs[0].itResize) {
-    childThs[0].itResize = true
-
-    if (groupTh) {
-      groupTh.itChildrenSize--
-    }
-  }
-
-  if (groupTh) {
-    const { itChildrenIds, itChildrenSize } = groupTh
-    let width = 0
-
-    for (const id of itChildrenIds) {
-      width += columnProps.find(props => props.id === id).width
-    }
-
-    groupTh.style.cssText = `flex: ${itChildrenSize * 100} 0 auto; width: ${width}px`
-  }
-
-  for (let i = 0, len = childThs.length; i < len; i++) {
-    childThs[i].style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`
-  }
-
-  for (let i = 0, len = tbodyTds.length; i < len; i++) {
-    const td = tbodyTds[i]
-    td.style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`
-  }
-}
 
 export default class Resizer {
   constructor (tableInstance, options) {
@@ -101,7 +23,7 @@ export default class Resizer {
 
       state.resizer = {
         resizable,
-        columnWidth: new Proxy({}, getProxyHandler.call(this)),
+        columnWidth: new Proxy({}, this._getProxyHandler()),
         resizing: false
       }
 
@@ -124,6 +46,7 @@ export default class Resizer {
   }
 
   beforeRenderBody (count) {
+    console.log(count)
     if (count === 0) {
       this.force = true
     }
@@ -228,21 +151,102 @@ export default class Resizer {
 
   afterRenderBody () {
     if (this.created && this.force) {
-      const { table } = this.tableInstance
-      const { columnWidth } = this.state
-      const ths = table.querySelectorAll('.it-thead.shadow .it-th')
+      this.refresh()
+      this.force = false
+    }
+  }
 
-      for (let i = 0, len = ths.length; i < len; i++) {
-        const th = ths[i]
-        const { width } = th.getBoundingClientRect()
+  refresh () {
+    const { table } = this.tableInstance
+    const { columnWidth } = this.state
+    const ths = table.querySelectorAll('.it-thead.shadow .it-th')
 
-        if (width) {
-          columnWidth[i.toString()] = 0
-          columnWidth[i.toString()] = parseInt(width)
+    for (let i = 0, len = ths.length; i < len; i++) {
+      const th = ths[i]
+      const { width } = th.getBoundingClientRect()
+
+      if (width) {
+        columnWidth[i.toString()] = 0
+        columnWidth[i.toString()] = parseInt(width)
+      }
+    }
+  }
+
+  // 控制列宽代理控制器
+  _getProxyHandler () {
+    const _this = this
+    return {
+      set (obj, prop, value) {
+        const old = obj[prop]
+
+        if (typeof old !== 'undefined' && old !== value) {
+          obj[prop] = value
+          _this._renderResize(parseInt(prop))
+          dispatchEvent.apply(_this.tableInstance, ['columnResize', { index: parseInt(prop), oldWidth: old, newWidth: value }])
+        } else {
+          obj[prop] = value
         }
+
+        return true
+      }
+    }
+  }
+
+  _renderResize (index) {
+    const { table, columnProps } = this.tableInstance
+    const nthOfType = index + 1
+    const columnWidth = this.state.columnWidth
+    const targetWidth = columnWidth[index]
+    const props = columnProps[index]
+    props.width = targetWidth
+
+    const theads = table.querySelectorAll('.it-thead, .it-tbody-group, .it-tfoot')
+    const childThs = table.querySelectorAll(`.it-thead.resize .it-th:nth-of-type(${nthOfType})`)
+    const tbodyTds = table.querySelectorAll(`
+      .it-tbody .it-tr>.it-td:nth-of-type(${nthOfType}),
+      .it-tfoot .it-tr>.it-td:nth-of-type(${nthOfType})
+    `)
+    const groupTh = props.parentTarget
+
+    let tableWidth = 0
+
+    for (const key in columnWidth) {
+      const width = columnWidth[key]
+      tableWidth += width
+    }
+
+    for (let i = 0, len = theads.length; i < len; i++) {
+      const thead = theads[i]
+      thead.style.minWidth = `${tableWidth}px`
+    }
+
+    // 用于保持两层表头结构 (flex布局) 一致性
+    if (!childThs[0].itResize) {
+      childThs[0].itResize = true
+
+      if (groupTh) {
+        groupTh.itChildrenSize--
+      }
+    }
+
+    if (groupTh) {
+      const { itChildrenIds, itChildrenSize } = groupTh
+      let width = 0
+
+      for (const id of itChildrenIds) {
+        width += columnProps.find(props => props.id === id).width
       }
 
-      this.force = false
+      groupTh.style.cssText = `flex: ${itChildrenSize * 100} 0 auto; width: ${width}px`
+    }
+
+    for (let i = 0, len = childThs.length; i < len; i++) {
+      childThs[i].style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`
+    }
+
+    for (let i = 0, len = tbodyTds.length; i < len; i++) {
+      const td = tbodyTds[i]
+      td.style.cssText = `flex: ${targetWidth} 0 auto; width: ${targetWidth}px; max-width: ${targetWidth}px`
     }
   }
 }

@@ -1,5 +1,5 @@
 /**
- * @name layer
+ * @name Layer
  * @description 表格提示遮罩层
  */
 

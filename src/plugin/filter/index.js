@@ -1,5 +1,5 @@
 /**
- * @name filter
+ * @name Filter
  * @description 表格数据过滤
  */
 
@@ -15,189 +15,9 @@ import { getType, createSelect, html2Element } from '@/utils'
 
 import './style.scss'
 
-const defaultTextFilter = (value, filter) => {
-  const keyWords = filter.trim().toLowerCase().split(/\s+/g)
-  value = value.toString().toLowerCase()
-
-  for (const word of keyWords) {
-    if (!value.includes(word)) return false
-  }
-
-  return true
-}
-
-const defaultNumberFilter = (value, filter) => {
-  value = +value
-
-  if (Number.isNaN(value)) {
-    return false
-  }
-
-  const res = (typeof filter[0] !== 'number' || value >= filter[0]) && (typeof filter[1] !== 'number' || value <= filter[1])
-
-  return res
-}
-
-function getProps (id) {
-  const { columnProps } = this.tableInstance
-  return columnProps.find(props => props.id === id)
-}
-
-function renderTextControl (id) {
-  const props = getProps.call(this, id)
-
-  const control = temp.cloneNode()
-  control.className = 'it-filter'
-
-  const textInput = inputTemp.cloneNode()
-  textInput.setAttribute('type', 'text')
-
-  textInput.addEventListener('input', () => {
-    const value = textInput.value
-    props.filterValue = value
-
-    this.filterValueChange = true
-    this.tableInstance.refresh()
-  })
-
-  control.appendChild(textInput)
-  return control
-}
-
-function renderDateControl (id) {
-  const props = getProps.call(this, id)
-
-  const { dateType } = props.filterOptions
-
-  const control = temp.cloneNode()
-  control.className = 'it-filter'
-
-  const dateInput = inputTemp.cloneNode()
-  dateInput.setAttribute('type', dateType || 'date')
-
-  dateInput.addEventListener('change', () => {
-    const value = dateInput.value
-    props.filterValue = value
-
-    this.filterValueChange = true
-    this.tableInstance.refresh()
-  })
-
-  control.appendChild(dateInput)
-  return control
-}
-
-function renderNumberControl (id) {
-  const props = getProps.call(this, id)
-
-  props.filterValue = new Array(2)
-
-  const control = temp.cloneNode()
-  control.className = 'it-filter'
-
-  const minNumberInput = inputTemp.cloneNode()
-  minNumberInput.setAttribute('type', 'number')
-  minNumberInput.setAttribute('placeholder', 'min')
-
-  minNumberInput.addEventListener('input', () => {
-    const value = minNumberInput.value
-    props.filterValue[0] = value !== '' ? +value : undefined
-    this.filterValueChange = true
-    this.tableInstance.refresh()
-  })
-
-  const maxNumberInput = inputTemp.cloneNode()
-  maxNumberInput.setAttribute('type', 'number')
-  maxNumberInput.setAttribute('placeholder', 'max')
-
-  maxNumberInput.addEventListener('input', () => {
-    const value = maxNumberInput.value
-    props.filterValue[1] = value !== '' ? +value : undefined
-    this.filterValueChange = true
-    this.tableInstance.refresh()
-  })
-
-  control.appendChild(minNumberInput)
-  control.appendChild(maxNumberInput)
-
-  return control
-}
-
-function renderSelectControl (id) {
-  const props = getProps.call(this, id)
-
-  const { options } = props.filterOptions
-  options.unshift('')
-
-  const control = temp.cloneNode()
-  control.className = 'it-filter'
-
-  const select = createSelect(options)
-
-  select.addEventListener('change', ev => {
-    const value = ev.newValue
-    props.filterValue = value
-
-    this.filterValueChange = true
-    this.tableInstance.refresh()
-  })
-
-  control.appendChild(select)
-
-  return control
-}
-
-function renderCheckControl (id) {
-  const props = getProps.call(this, id)
-
-  const control = temp.cloneNode()
-  control.className = 'it-filter'
-
-  const checkbox = inputTemp.cloneNode()
-  checkbox.setAttribute('type', 'checkbox')
-  checkbox.addEventListener('change', () => {
-    const checked = checkbox.checked
-    props.filterValue = checked
-    this.filterValueChange = true
-    this.tableInstance.refresh()
-  })
-
-  control.appendChild(checkbox)
-  return control
-}
-
-function getPorxyAccessor (accessor, filterValue) {
-  switch (typeof filterValue) {
-    case 'object': return (rowData) => {
-      const value = accessor(rowData)
-      const html = (value === 0 || value) ? `<span class="it-highlight">${value}</span>` : '&nbsp;'
-      return html2Element(html)
-    }
-    case 'boolean': return accessor
-  }
-
-  const keyWords = '(' + filterValue.trim().toLowerCase().split(/\s+/g).sort(
-    (prev, next) => next.length - prev.length
-  ).join('|') + ')'
-
-  return (rowData) => {
-    const value = accessor(rowData)
-    if (typeof value === 'object') return value
-    const html = (value === 0 || value) ? value.toString().replace(new RegExp(keyWords, 'ig'), `<span class="it-highlight">$1</span>`) : '&nbsp;'
-    const element = html2Element(html)
-    return element || ''
-  }
-}
-
 export default class Filter {
   constructor (tableInstance, options) {
     this.tableInstance = tableInstance
-
-    this.renderTextControl = renderTextControl.bind(this)
-    this.renderNumberControl = renderNumberControl.bind(this)
-    this.renderSelectControl = renderSelectControl.bind(this)
-    this.renderDateControl = renderDateControl.bind(this)
-    this.renderCheckControl = renderCheckControl.bind(this)
 
     const { state } = this.tableInstance
 
@@ -242,7 +62,7 @@ export default class Filter {
           props.filter = filter
           props.filterable = true
         } else if ((filterAll && filterable !== false) || filterable === true) {
-          props.filter = (filterOptions && filterOptions.type === 'number') ? defaultNumberFilter : defaultTextFilter
+          props.filter = (filterOptions && filterOptions.type === 'number') ? this._defaultNumberFilter : this._defaultTextFilter
           props.filterable = true
         } else {
           props.filter = null
@@ -278,23 +98,23 @@ export default class Filter {
 
         switch (options.type) {
           case 'text': {
-            filterControl = this.renderTextControl(id)
+            filterControl = this._renderTextControl(id)
             break
           }
           case 'number': {
-            filterControl = this.renderNumberControl(id)
+            filterControl = this._renderNumberControl(id)
             break
           }
           case 'select': {
-            filterControl = this.renderSelectControl(id)
+            filterControl = this._renderSelectControl(id)
             break
           }
           case 'date': {
-            filterControl = this.renderDateControl(id)
+            filterControl = this._renderDateControl(id)
             break
           }
           case 'check': {
-            filterControl = this.renderCheckControl(id)
+            filterControl = this._renderCheckControl(id)
             break
           }
           default: {
@@ -388,7 +208,7 @@ export default class Filter {
         filterData = resultData
 
         if (resultCount) {
-          props.accessor = getPorxyAccessor(reflectAccessor, filterValue)
+          props.accessor = this._getPorxyAccessor(reflectAccessor, filterValue)
         }
       }
     }
@@ -401,5 +221,182 @@ export default class Filter {
 
   dispatchChange () {
     this.filterValueChange = true
+  }
+
+  _defaultTextFilter (value, filter) {
+    const keyWords = filter.trim().toLowerCase().split(/\s+/g)
+    value = value.toString().toLowerCase()
+
+    for (const word of keyWords) {
+      if (!value.includes(word)) return false
+    }
+
+    return true
+  }
+
+  _defaultNumberFilter (value, filter) {
+    // 不合法数字全部转换为0
+    // value = ~~value
+
+    value = +value
+
+    if (Number.isNaN(value)) {
+      return false
+    }
+
+    const res = (typeof filter[0] !== 'number' || value >= filter[0]) && (typeof filter[1] !== 'number' || value <= filter[1])
+
+    return res
+  }
+
+  _getProps (id) {
+    const { columnProps } = this.tableInstance
+    return columnProps.find(props => props.id === id)
+  }
+
+  _renderTextControl (id) {
+    const props = this._getProps(id)
+
+    const control = temp.cloneNode()
+    control.className = 'it-filter'
+
+    const textInput = inputTemp.cloneNode()
+    textInput.setAttribute('type', 'text')
+
+    textInput.addEventListener('input', () => {
+      const value = textInput.value
+      props.filterValue = value
+
+      this.filterValueChange = true
+      this.tableInstance.refresh()
+    })
+
+    control.appendChild(textInput)
+    return control
+  }
+
+  _renderDateControl (id) {
+    const props = this._getProps(id)
+
+    const { dateType } = props.filterOptions
+
+    const control = temp.cloneNode()
+    control.className = 'it-filter'
+
+    const dateInput = inputTemp.cloneNode()
+    dateInput.setAttribute('type', dateType || 'date')
+
+    dateInput.addEventListener('change', () => {
+      const value = dateInput.value
+      props.filterValue = value
+
+      this.filterValueChange = true
+      this.tableInstance.refresh()
+    })
+
+    control.appendChild(dateInput)
+    return control
+  }
+
+  _renderNumberControl (id) {
+    const props = this._getProps(id)
+
+    props.filterValue = new Array(2)
+
+    const control = temp.cloneNode()
+    control.className = 'it-filter'
+
+    const minNumberInput = inputTemp.cloneNode()
+    minNumberInput.setAttribute('type', 'number')
+    minNumberInput.setAttribute('placeholder', 'min')
+
+    minNumberInput.addEventListener('input', () => {
+      const value = minNumberInput.value
+      props.filterValue[0] = value !== '' ? +value : undefined
+      this.filterValueChange = true
+      this.tableInstance.refresh()
+    })
+
+    const maxNumberInput = inputTemp.cloneNode()
+    maxNumberInput.setAttribute('type', 'number')
+    maxNumberInput.setAttribute('placeholder', 'max')
+
+    maxNumberInput.addEventListener('input', () => {
+      const value = maxNumberInput.value
+      props.filterValue[1] = value !== '' ? +value : undefined
+      this.filterValueChange = true
+      this.tableInstance.refresh()
+    })
+
+    control.appendChild(minNumberInput)
+    control.appendChild(maxNumberInput)
+
+    return control
+  }
+
+  _renderSelectControl (id) {
+    const props = this._getProps(id)
+
+    const { options } = props.filterOptions
+    options.unshift('')
+
+    const control = temp.cloneNode()
+    control.className = 'it-filter'
+
+    const select = createSelect(options)
+
+    select.addEventListener('change', ev => {
+      const value = ev.newValue
+      props.filterValue = value
+
+      this.filterValueChange = true
+      this.tableInstance.refresh()
+    })
+
+    control.appendChild(select)
+
+    return control
+  }
+
+  _renderCheckControl (id) {
+    const props = this._getProps(id)
+
+    const control = temp.cloneNode()
+    control.className = 'it-filter'
+
+    const checkbox = inputTemp.cloneNode()
+    checkbox.setAttribute('type', 'checkbox')
+    checkbox.addEventListener('change', () => {
+      const checked = checkbox.checked
+      props.filterValue = checked
+      this.filterValueChange = true
+      this.tableInstance.refresh()
+    })
+
+    control.appendChild(checkbox)
+    return control
+  }
+
+  _getPorxyAccessor (accessor, filterValue) {
+    switch (typeof filterValue) {
+      case 'object': return (rowData) => {
+        const value = accessor(rowData)
+        const html = (value === 0 || value) ? `<span class="it-highlight">${value}</span>` : '&nbsp;'
+        return html2Element(html)
+      }
+      case 'boolean': return accessor
+    }
+
+    const keyWords = '(' + filterValue.trim().toLowerCase().split(/\s+/g).sort(
+      (prev, next) => next.length - prev.length
+    ).join('|') + ')'
+
+    return (rowData) => {
+      const value = accessor(rowData)
+      if (typeof value === 'object') return value
+      const html = (value === 0 || value) ? value.toString().replace(new RegExp(keyWords, 'ig'), `<span class="it-highlight">$1</span>`) : '&nbsp;'
+      const element = html2Element(html)
+      return element || ''
+    }
   }
 }
