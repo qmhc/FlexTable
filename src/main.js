@@ -137,6 +137,7 @@ const table = new FlexTable({
   className: 'my-flex-table',
   id: 'myTable',
   rowClassName: data => 'my-table-row',
+  stripe: false,
   plugins: {
     selector: {}, // 暂无独立配置项, 只需指定一个空对象
     editor: {
@@ -168,8 +169,8 @@ const table = new FlexTable({
     },
     filter: {
       filterAll: true, // 所有类均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
-      openAction: false, // filter 是否具有开关按钮
-      filterOpen: true // filter 具有开关按钮, 设置是否默认打开 openAction 为 false 时忽略
+      openAction: true, // filter 是否具有开关按钮
+      filterOpen: false // filter 具有开关按钮, 设置是否默认打开 openAction 为 false 时忽略
     },
     // layer: {
     //   loading: true,

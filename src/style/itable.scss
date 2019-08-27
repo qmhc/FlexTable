@@ -104,11 +104,7 @@
 		width: 100%;
 
 		.it-tr-group {
-			&:nth-child(odd) .it-tr {
-				background: rgba(0, 0, 0, .03);
-			}
-
-			&:nth-child(even) .it-tr {
+			.it-tr {
 				background: white;
 			}
 
@@ -119,6 +115,12 @@
 
 		.it-td {
 			cursor:	pointer;
+		}
+	}
+
+	&.stripe {
+		.it-tr-group:nth-child(odd) .it-tr {
+			background: rgba(0, 0, 0, .03);
 		}
 	}
 

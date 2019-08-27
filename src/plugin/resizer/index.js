@@ -46,7 +46,6 @@ export default class Resizer {
   }
 
   beforeRenderBody (count) {
-    console.log(count)
     if (count === 0) {
       this.force = true
     }

@@ -13,7 +13,7 @@ import {
 // 渲染主函数
 export default function render (options) {
   const plugins = [...this.constructor.plugins]
-  const { id, className, rowClassName } = options
+  const { id, className, rowClassName, stripe } = options
 
   this.state = {}
   this.plugins = []
@@ -65,6 +65,10 @@ export default function render (options) {
   wrapper.className = 'flex-table'
   wrapper.style.visibility = 'hidden'
   this.table = wrapper
+
+  if (stripe !== false) {
+    wrapper.classList.add('stripe')
+  }
 
   if (getType(id) === 'string') wrapper.setAttribute('id', id)
   if (getType(className) === 'string') wrapper.classList.add(className)

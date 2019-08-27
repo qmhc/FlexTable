@@ -1,5 +1,5 @@
 import Renderer from './render'
-import { registerEvent, unregisterEvent } from './events'
+import { registerEvent, unregisterEvent, subscribeResize } from './events'
 import { deepClone } from '../utils'
 
 import '../style/itable.scss'
@@ -110,6 +110,8 @@ class FlexTable {
     // 事件属性初始化
     this.eventWhiteList = new Set()
     this.events = {}
+
+    subscribeResize(this)
 
     this.registerMethod('on', registerEvent)
     this.registerMethod('off', unregisterEvent)

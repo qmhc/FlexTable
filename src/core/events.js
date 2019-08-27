@@ -1,59 +1,3 @@
-// 记录按键
-const recorder = []
-
-/**
- * 根据按键码获取按键状态
- * @param {Number} code 按键码
- */
-export function getKeyState (code) {
-  const key = recorder.find(item => item.code === code)
-
-  if (key) {
-    return key.state
-  }
-
-  return false
-}
-
-/**
- * 根据按键码注册按键监听
- * @param {Number} code 按键码
- */
-export function registerKey (code) {
-  if (recorder.find(item => item.code === code)) {
-    throw new Error(`The Key coded '${code}' has been registered`)
-  }
-
-  recorder.push({
-    state: false,
-    code: code
-  })
-}
-
-/**
- * 根据按键码判断是否注册了监听
- * @param {Number} code 按键码
- */
-export function isKeyRegistered (code) {
-  return !!~recorder.findIndex(item => item.code === code)
-}
-
-document.addEventListener('keydown', ev => {
-  const code = ev.keyCode
-  const key = recorder.find(item => item.code === code)
-  if (key) {
-    key.state = true
-  }
-})
-
-document.addEventListener('keyup', ev => {
-  const code = ev.keyCode
-  const key = recorder.find(item => item.code === code)
-  if (key) {
-    key.state = false
-  }
-})
-
 /**
  * 将事件名注册到白名单
  * this 须含有 eventWhiteList{Set} 和 events{Array} 属性
@@ -133,3 +77,83 @@ export function dispatchEvent (name, event) {
     }
   }
 }
+
+// 记录按键
+const recorder = []
+
+/**
+ * 根据按键码获取按键状态
+ * @param {Number} code 按键码
+ */
+export function getKeyState (code) {
+  const key = recorder.find(item => item.code === code)
+
+  if (key) {
+    return key.state
+  }
+
+  return false
+}
+
+/**
+ * 根据按键码注册按键监听
+ * @param {Number} code 按键码
+ */
+export function registerKey (code) {
+  if (recorder.find(item => item.code === code)) {
+    throw new Error(`The Key coded '${code}' has been registered`)
+  }
+
+  recorder.push({
+    state: false,
+    code: code
+  })
+}
+
+/**
+ * 根据按键码判断是否注册了监听
+ * @param {Number} code 按键码
+ */
+export function isKeyRegistered (code) {
+  return !!~recorder.findIndex(item => item.code === code)
+}
+
+// 全局注册 keydown 事件
+document.addEventListener('keydown', ev => {
+  const code = ev.keyCode
+  const key = recorder.find(item => item.code === code)
+  if (key) {
+    key.state = true
+  }
+})
+
+// 全局注册 keyup 事件
+document.addEventListener('keyup', ev => {
+  const code = ev.keyCode
+  const key = recorder.find(item => item.code === code)
+  if (key) {
+    key.state = false
+  }
+})
+
+// 存放缩放订阅
+const resizeSubscribers = new Set()
+
+export function subscribeResize (subscriber) {
+  if (!subscriber.eventWhiteList.has('resize')) {
+    addEventWhiteList.call(subscriber, 'resize')
+  }
+
+  resizeSubscribers.add(subscriber)
+}
+
+export function unsubscribeResize (subscriber) {
+  resizeSubscribers.delete(subscriber)
+}
+
+// 全局注册 resize 事件
+window.addEventListener('resize', () => {
+  resizeSubscribers.forEach(subscriber => {
+    dispatchEvent.call(subscriber, 'resize')
+  })
+})

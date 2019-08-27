@@ -93,6 +93,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   className: '',
   id: '',
   rowClassName: (data, index) => '', // index 为数据渲染在表格的行索引
+  stripe: true, // 为行添加斑马纹样式
   plugins: {
     selector: {}, // 暂无独立配置项, 只需指定一个空对象
     editor: {
@@ -187,7 +188,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   theme: 'dark',
   // theme: 'blue',
   // theme: 'red',
-  // theme: 'light',     // default
+  // theme: 'light', // default
   // ...
 }
 ```

@@ -47,11 +47,7 @@
 
 	.it-tbody {
 		.it-tr-group {
-			&:nth-child(odd) .it-tr {
-				background: rgba($root-color, .3);
-			}
-
-			&:nth-child(even) .it-tr {
+			.it-tr {
 				background: rgba($root-color, .5);
 			}
 
@@ -65,6 +61,12 @@
 		}
 	}
 
+	&.stripe {
+		.it-tr-group:nth-child(odd) .it-tr {
+			background: rgba($root-color, .3);
+		}
+	}
+
 	.it-tfoot {
 		box-shadow: 0 0 15px 0 rgba($root-color, .75);
 		border-bottom: 1px solid rgba($root-color, .2);
@@ -75,6 +77,16 @@
 	.it-tbody, .it-tfoot {
 		.it-td {
 			border-color: rgba(white, .35);
+		}
+	}
+
+	.it-th.it-sort {
+		&.asc {
+			box-shadow: inset 0 3px 0 0 rgba(white, .6);
+		}
+		
+		&.desc {
+			box-shadow: inset 0 -3px 0 0 rgba(white, .6);
 		}
 	}
 
@@ -96,5 +108,9 @@
 				}
 			}
 		}
+	}
+
+	.it-button {
+		color: rgba(black, 0.85);
 	}
 }
