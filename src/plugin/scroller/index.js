@@ -5,7 +5,9 @@
 
 import BScroll from '@better-scroll/core'
 import MouseWheel from '@better-scroll/mouse-wheel'
+import Pullup from '@better-scroll/pull-up'
 import { getType } from '@/utils'
+import { temp, spanTemp } from 'core/temps'
 
 import './style.scss'
 
@@ -18,7 +20,7 @@ export default class Scroller {
     const scrollable = getType(options.scroller) === 'object'
 
     if (scrollable) {
-      const { height, mouse, wheel, wheelDistance } = options.scroller
+      const { height, mouse, wheel, wheelDistance, pullup, pullupThreshold, pullupTip } = options.scroller
 
       state.scroller = {
         scrollable,
@@ -26,6 +28,9 @@ export default class Scroller {
         mouse: mouse !== false,
         wheel: wheel === true,
         wheelDistance: wheelDistance || 20,
+        pullup,
+        pullupThreshold,
+        pullupTip,
         scrolling: false
       }
     } else {
@@ -47,14 +52,14 @@ export default class Scroller {
 
   create () {
     const { table } = this.tableInstance
-    const { height, wheel, mouse, wheelDistance } = this.state
+    const { height, wheel, mouse, wheelDistance, pullup, pullupThreshold, pullupTip } = this.state
 
     const scroller = table.querySelector('.it-tbody-group')
     const tbody = scroller.querySelector('.it-tbody')
 
     scroller.style.height = `${height}px`
     tbody.style.position = 'absolute'
-    tbody.style.overflow = 'hidden'
+    tbody.style.overflow = 'visible'
 
     const options = {}
 
@@ -73,10 +78,36 @@ export default class Scroller {
       options.disableMouse = true
     }
 
+    if (getType(pullup) === 'function') {
+      BScroll.use(Pullup)
+
+      const wrapper = temp.cloneNode()
+      wrapper.classList.add('pullup-wrapper')
+
+      const tip = spanTemp.cloneNode()
+      tip.textContent = pullupTip || 'Loading...'
+
+      wrapper.appendChild(tip)
+      tbody.appendChild(wrapper)
+
+      this.pullupWrapper = wrapper
+
+      options.pullUpLoad = {
+        threshold: parseInt(pullupThreshold) || 10
+      }
+    }
+
     this._scroll = new BScroll(scroller, options)
 
+    if (getType(pullup) === 'function') {
+      this._scroll.on('pullingUp', () => {
+        pullup(this.tableInstance, this.finishPullup.bind(this))
+      })
+    }
+
+    this.tableInstance.registerMethod('scrollTo', this.scrollTo.bind(this), false)
+
     this.created = true
-    this.scroll = true
   }
 
   afterRender () {
@@ -85,5 +116,21 @@ export default class Scroller {
 
   afterRenderBody () {
     this._scroll && this._scroll.refresh()
+  }
+
+  scrollTo (x, y) {
+    this._scroll && this._scroll.scrollTo(x, y)
+  }
+
+  finishPullup () {
+    if (this._scroll) {
+      const { table } = this.tableInstance
+      const tbody = table.querySelector('.it-tbody')
+
+      this._scroll.finishPullUp()
+      this._scroll.refresh()
+
+      tbody.appendChild(this.pullupWrapper)
+    }
   }
 }

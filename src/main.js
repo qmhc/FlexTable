@@ -30,30 +30,31 @@ const getColumns = () => {
   return [
     {
       name: 'Name',
-      children: [{
-        name: 'First Name',
-        accessor: 'firstName',
-        key: 'firstName',
-        filter: true,
-        defaultSort: 1,
-        sorter: (prev, next) => {
-        // console.log(prev, next)
-          return prev.toString().localeCompare(next)
+      children: [
+        {
+          name: 'First Name',
+          accessor: 'firstName',
+          key: 'firstName',
+          filter: true,
+          // defaultSort: 1,
+          sorter: (prev, next) => {
+          // console.log(prev, next)
+            return prev.toString().localeCompare(next)
+          }
+        },
+        {
+          name: 'Last Name',
+          accessor: data => {
+            return data.lastName
+          },
+          key: 'lastName',
+          filterable: false,
+          filterOptions: {
+            type: 'date',
+            dateType: 'datetime-local'
+          },
+          editable: () => false
         }
-      },
-      {
-        name: 'Last Name',
-        accessor: data => {
-          return data.lastName
-        },
-        key: 'lastName',
-        filterable: false,
-        filterOptions: {
-          type: 'date',
-          dateType: 'datetime-local'
-        },
-        editable: () => false
-      }
       ]
     },
     {
@@ -80,7 +81,7 @@ const getColumns = () => {
           footer: data => {
             const span = document.createElement('span')
             span.style.fontWeight = 700
-            span.textContent = `Max: ${Math.min(...data)}`
+            span.textContent = `Total: ${data.reduce((prev, curr) => (prev + curr), 0)}`
             return span
           },
           filterable: true,
@@ -126,7 +127,7 @@ const getColumns = () => {
 }
 
 const columns = getColumns()
-const data = makeData()
+const data = makeData(30)
 
 // const wrapper = document.createElement('div')
 
@@ -158,17 +159,17 @@ const table = new FlexTable({
       multiple: true, // 开启多列排序功能
       multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift
     },
-    pager: {
-      useOptions: true,
-      pageOptions: [10, 15, 20, 25, 30],
-      currentPage: 1,
-      pageSize: 15,
-      labels: {
-        prev: '上一页',
-        next: '下一页',
-        row: '行'
-      }
-    },
+    // pager: {
+    //   useOptions: true,
+    //   pageOptions: [10, 15, 20, 25, 30],
+    //   currentPage: 1,
+    //   pageSize: 15,
+    //   labels: {
+    //     prev: '上一页',
+    //     next: '下一页',
+    //     row: '行'
+    //   }
+    // },
     filter: {
       filterAll: true, // 所有类均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
       openAction: true, // filter 是否具有开关按钮
@@ -184,8 +185,22 @@ const table = new FlexTable({
     scroller: {
       height: 450,
       mouse: true,
-      wheel: false,
-      wheelDistance: 20
+      wheel: true,
+      wheelDistance: 20,
+      pullup: (instance, finish) => {
+        const { data } = instance
+        const newData = [...data, ...makeData(10)]
+
+        setTimeout(() => {
+          instance.data = newData
+          instance.refreshStruct()
+          instance.refresh()
+
+          finish()
+        }, 1000)
+      },
+      pullupThreshold: 10,
+      pullupTip: '加载中...'
     }
   }
   // theme: 'blue'

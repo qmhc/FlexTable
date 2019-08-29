@@ -107,7 +107,9 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
         cancel: '取消'
       }
     },
-    resizer: {}, // 暂无独立配置项, 只需指定一个空对象
+    resizer: {
+      force: false // 设置是否在表格加入 document 后将各列设置为真实宽度
+    },
     sorter: {
       multiple: true, // 开启多列排序功能
       multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift

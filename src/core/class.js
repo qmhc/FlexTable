@@ -201,14 +201,14 @@ class FlexTable {
    * @param {Boolean} bind 是否将 this 绑定为 FlexTable 实例
    * @param  {...any} args 需要传入方法的参数
    */
-  registerMethod (name, method, bind = true, ...args) {
+  registerMethod (name, method, bind = true, ...bindArgs) {
     if (this[name]) {
       throw new Error(`Method '${name}' has been registered`)
     }
     if (bind) {
-      this[name] = method.bind(this, ...args)
+      this[name] = method.bind(this, ...bindArgs)
     } else {
-      this[name] = () => method(...args)
+      this[name] = (...args) => method(...bindArgs, ...args)
     }
   }
 

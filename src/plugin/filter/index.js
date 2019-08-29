@@ -263,12 +263,21 @@ export default class Filter {
     const textInput = inputTemp.cloneNode()
     textInput.setAttribute('type', 'text')
 
+    let timer = 0
     textInput.addEventListener('input', () => {
-      const value = textInput.value
-      props.filterValue = value
+      clearTimeout(timer)
 
-      this.filterValueChange = true
-      this.tableInstance.refresh()
+      timer = setTimeout(() => {
+        const value = textInput.value
+        props.filterValue = value
+
+        this.filterValueChange = true
+        this.tableInstance.refresh()
+
+        if (getType(this.tableInstance.scrollTo) === 'function') {
+          this.tableInstance.scrollTo(0, 0)
+        }
+      }, 300)
     })
 
     control.appendChild(textInput)
@@ -310,7 +319,7 @@ export default class Filter {
     minNumberInput.setAttribute('type', 'number')
     minNumberInput.setAttribute('placeholder', 'min')
 
-    minNumberInput.addEventListener('input', () => {
+    minNumberInput.addEventListener('change', () => {
       const value = minNumberInput.value
       props.filterValue[0] = value !== '' ? +value : undefined
       this.filterValueChange = true
@@ -321,7 +330,7 @@ export default class Filter {
     maxNumberInput.setAttribute('type', 'number')
     maxNumberInput.setAttribute('placeholder', 'max')
 
-    maxNumberInput.addEventListener('input', () => {
+    maxNumberInput.addEventListener('change', () => {
       const value = maxNumberInput.value
       props.filterValue[1] = value !== '' ? +value : undefined
       this.filterValueChange = true
