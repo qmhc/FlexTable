@@ -128,6 +128,8 @@ const getColumns = () => {
 const columns = getColumns()
 const data = makeData()
 
+// const wrapper = document.createElement('div')
+
 console.time('render')
 
 const table = new FlexTable({
@@ -201,9 +203,9 @@ table.on('editCancel', ev => {
   console.log(ev)
 })
 
-table.on('columnResize', ev => {
-  console.log(ev)
-})
+// table.on('columnResize', ev => {
+//   console.log(ev)
+// })
 
 table.on('selectChange', ev => {
   console.log(ev)

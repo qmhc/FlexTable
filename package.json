@@ -10,7 +10,8 @@
   ],
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
-    "@babel/runtime": "^7.4.5"
+    "@babel/runtime": "^7.4.5",
+    "better-scroll": "^2.0.0-beta.2"
   },
   "description": "A native flex table library",
   "devDependencies": {

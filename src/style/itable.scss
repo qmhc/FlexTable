@@ -106,10 +106,10 @@
 		.it-tr-group {
 			.it-tr {
 				background: white;
-			}
 
-			.it-tr:hover {
-				background: rgba(0, 0, 0, .05);
+				&:hover {
+					background: rgba(0, 0, 0, .05);
+				}
 			}
 		}
 

@@ -1,12 +1,14 @@
+/* eslint-disable */
 // import './style.scss'
 
 export default class Plugin {
   constructor (tableInstance, options = {}) {
     this.tableInstance = tableInstance
+
+    const { state } = this.tableInstance
     // 从 options 获取配置项里相关信息, 处理后存入 tableInstance.state
-    // 如果担心存在属性的命名冲突, 可以在 state 中创建插件的命名空间
+    // 存入 state 时, 应在 state 中创建一个插件的命名空间
     // 例如 tableInstance.state.myPlugin = { ...someState }
-    // init core
   }
 
   // 实例化后可基于 FlexTable 的完整 state 进行处理
@@ -51,4 +53,7 @@ export default class Plugin {
   afterRenderData (data) {
     if (this.created) {}
   }
+
+  // 表格添加到 document 后
+  afterRender () {}
 }

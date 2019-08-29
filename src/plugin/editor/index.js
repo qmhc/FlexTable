@@ -1,5 +1,5 @@
 /**
- * @name editor
+ * @name Editor
  * @description 表格编辑插件
  */
 

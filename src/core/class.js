@@ -92,8 +92,6 @@ class FlexTable {
       }
     }
 
-    // this.container.style.visibility = 'hidden'
-
     const style = document.createElement('style')
     style.innerHTML = `
       .flex-table * {
@@ -141,6 +139,48 @@ class FlexTable {
       }
     }
 
+    const MutationObserver = window.MutationObserver
+
+    // 监听 table 是否添加到 document 中
+    if (MutationObserver) {
+      let observer = new MutationObserver(mutationList => {
+        for (const mutation of mutationList) {
+          if (mutation.type === 'childList' && mutation.addedNodes && mutation.addedNodes.length) {
+            const addedNodes = [...mutation.addedNodes]
+
+            const table = addedNodes.find(element => {
+              if (element === this.table) {
+                return true
+              }
+
+              if (element.querySelectorAll) {
+                const tables = element.querySelectorAll('.flex-table')
+
+                for (let i = 0, len = tables.length; i < len; i++) {
+                  if (tables[i] === this.table) {
+                    return true
+                  }
+                }
+              }
+
+              return false
+            })
+
+            if (table) {
+              observer.disconnect()
+              observer = null
+
+              setTimeout(() => {
+                this.handleRendered()
+              }, 100)
+            }
+          }
+        }
+      })
+
+      observer.observe(document, { childList: true, subtree: true })
+    }
+
     fragment.appendChild(this.table)
     this.container.appendChild(fragment)
 
@@ -169,6 +209,19 @@ class FlexTable {
       this[name] = method.bind(this, ...args)
     } else {
       this[name] = () => method(...args)
+    }
+  }
+
+  /**
+   * 通知插件 table 已添加到 document 中
+   */
+  handleRendered () {
+    for (let i = 0, len = this.plugins.length; i < len; i++) {
+      const plugin = this.plugins[i].instance
+
+      if (plugin.afterRender) {
+        plugin.afterRender()
+      }
     }
   }
 }

@@ -151,9 +151,15 @@ export function unsubscribeResize (subscriber) {
   resizeSubscribers.delete(subscriber)
 }
 
+let resizeTimer = 0
+
 // 全局注册 resize 事件
 window.addEventListener('resize', () => {
-  resizeSubscribers.forEach(subscriber => {
-    dispatchEvent.call(subscriber, 'resize')
-  })
+  clearTimeout(resizeTimer)
+
+  resizeTimer = setTimeout(() => {
+    resizeSubscribers.forEach(subscriber => {
+      dispatchEvent.call(subscriber, 'resize')
+    })
+  }, 300)
 })

@@ -51,7 +51,7 @@ export default function render (options) {
   }
 
   // afterContrcut 钩子 (实例化后)
-  // 其作用在于, 如果插件间想基于 FlexTable 的完整 state 进行处理时, 可在此钩子内进行
+  // 其作用在于, 如果插件需要基于 FlexTable 的完整 state 进行处理时, 可在此钩子内进行
   for (let i = 0, len = this.plugins.length; i < len; i++) {
     const plugin = this.plugins[i].instance
 

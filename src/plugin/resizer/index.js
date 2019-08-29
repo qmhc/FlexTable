@@ -19,11 +19,12 @@ export default class Resizer {
     const resizable = getType(options.resizer) === 'object'
 
     if (resizable) {
-      this.force = false
+      const { force } = options.resizer
 
       state.resizer = {
         resizable,
         columnWidth: new Proxy({}, this._getProxyHandler()),
+        force: force === true,
         resizing: false
       }
 
@@ -45,11 +46,11 @@ export default class Resizer {
     return this.state.resizable
   }
 
-  beforeRenderBody (count) {
-    if (count === 0) {
-      this.force = true
-    }
-  }
+  // beforeRenderBody (count) {
+  //   if (count === 0) {
+  //     this.force = true
+  //   }
+  // }
 
   create () {
     const { table, columnProps } = this.tableInstance
@@ -148,10 +149,9 @@ export default class Resizer {
     })
   }
 
-  afterRenderBody () {
-    if (this.created && this.force) {
+  afterRender () {
+    if (this.created && this.state.force) {
       this.refresh()
-      this.force = false
     }
   }
 

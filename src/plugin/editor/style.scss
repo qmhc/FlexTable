@@ -8,14 +8,16 @@
   }
 
   .it-tr-group {
-    &:nth-child(odd) .it-tr:hover {
-      background: rgba(0, 0, 0, .03);
-    }
-
-    &:nth-child(even) .it-tr:hover {
+    .it-tr:hover {
       background: white;
     }
   }
+
+  &.stripe {
+		.it-tr-group:nth-child(odd) .it-tr:hover {
+      background: rgba(0, 0, 0, .03);
+    }
+	}
 
   .it-td {
     min-height: 40px;

@@ -25,10 +25,10 @@ import '@qmhc/flex-table/dist/flex-table.css'
 
 ```js
 import FlexTable from '@qmhc/flex-table/dist/flex-table.core'
-import Sorter from '@qmhc/flex-table/dist/plugin/sorter'
+import Sorter from '@qmhc/flex-table/dist/plugin/Sorter'
 
 import '@qmhc/flex-table/dist/core/flex-table.core.css'
-import '@qmhc/flex-table/dist/plugin/sorter.css'
+import '@qmhc/flex-table/dist/plugin/Sorter.css'
 ```
 
 使用标签引入
@@ -46,11 +46,11 @@ import '@qmhc/flex-table/dist/plugin/sorter.css'
 ```html
 <!-- js -->
 <script src="../dist/core/flex-table.core.js"></script>
-<script src="../dist/plugin/sorter.js"></script>
+<script src="../dist/plugin/Sorter.js"></script>
 
 <!-- css -->
 <link rel="stylesheet" href="../dist/core/flex-table.core.css">
-<link rel="stylesheet" href="../dist/plugin/sorter.css">
+<link rel="stylesheet" href="../dist/plugin/Sorter.css">
 ```
 
 创建一个表格
