@@ -111,11 +111,13 @@ export function createSelect (options, defaultIndex = -1, placement = 'bottom') 
     li.value = value
     li.itValue = value
     li.index = i
+
     if (i.toString() === defaultIndex.toString()) {
       div.itValue = value
       div.value = value
       li.classList.add('current')
     }
+
     ul.itOptions.push(li)
     ul.appendChild(li)
   }
@@ -402,4 +404,46 @@ export function html2Element (html) {
     return children
   }
   return null
+}
+
+/**
+ * 根据不同的 html 类型渲染
+ * @param {HTMLElement} node 需要渲染的 node 对象
+ * @param {Number|String|Array|NodeList|HTMLElement} html 需要渲染的 html
+ * @param {Boolean} dangerous 是否可以直接插入字符串 html
+ */
+export function renderElement (node, html, dangerous = false) {
+  node.innerHTML = ''
+
+  switch (getType(html)) {
+    case 'number':
+    case 'string': {
+      if (dangerous === true) {
+        node.innerHTML = html
+      } else {
+        node.textContent = html
+      }
+      break
+    }
+    case 'array':
+    case 'nodelist': {
+      const fragment = document.createDocumentFragment()
+
+      html = [...html]
+
+      for (let i = 0, len = html.length; i < len; i++) {
+        let element = html[i]
+        if (getType(element) === 'string') {
+          element = document.createTextNode(element)
+        }
+        fragment.appendChild(element)
+      }
+
+      node.appendChild(fragment)
+      break
+    }
+    default: {
+      node.appendChild(html)
+    }
+  }
 }

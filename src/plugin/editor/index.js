@@ -5,7 +5,7 @@
 
 import { temp, inputTemp, buttonTemp } from 'core/temps'
 import { addEventWhiteList, dispatchEvent } from 'core/events'
-import { checkPathByClass, getType, createSelect } from '@/utils'
+import { checkPathByClass, getType, createSelect, renderElement } from '@/utils'
 
 import './style.scss'
 
@@ -485,41 +485,6 @@ export default class {
   }
 
   _insertData (cell, data) {
-    cell.classList.remove('editing')
-
-    if (!data && data !== 0) {
-      data = ''
-    }
-
-    switch (getType(data)) {
-      case 'number':
-      case 'string': {
-        cell.textContent = data
-        break
-      }
-      case 'array':
-      case 'nodelist': {
-        cell.innerHTML = ''
-        const fragment = document.createDocumentFragment()
-
-        data = [...data]
-        for (let i = 0, len = data.length; i < len; i++) {
-          let element = data[i]
-
-          if (getType(element) === 'string') {
-            element = document.createTextNode(element)
-          }
-
-          fragment.appendChild(element)
-        }
-
-        cell.appendChild(fragment)
-        break
-      }
-      default: {
-        cell.innerHTML = ''
-        cell.appendChild(data)
-      }
-    }
+    renderElement(cell, data, this.tableInstance.dangerous)
   }
 }

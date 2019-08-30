@@ -1,0 +1,18 @@
+.flex-table {
+  .it-extender-control {
+    .it-extender-switch {
+      cursor: pointer;
+      transition: all .3s;
+
+      &.extend {
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  .it-extend-wrapper {
+    border-top: 1px solid rgba(black, 0.05);
+    overflow: hidden;
+    transition: height .3s;
+  }
+}

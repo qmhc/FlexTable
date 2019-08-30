@@ -106,15 +106,20 @@ export default class Scroller {
     }
 
     this.tableInstance.registerMethod('scrollTo', this.scrollTo.bind(this), false)
+    this.tableInstance.registerMethod('scrollRefresh', this.refresh.bind(this), false)
 
     this.created = true
   }
 
   afterRender () {
-    this._scroll && this._scroll.refresh()
+    this.refresh()
   }
 
   afterRenderBody () {
+    this.refresh()
+  }
+
+  refresh () {
     this._scroll && this._scroll.refresh()
   }
 

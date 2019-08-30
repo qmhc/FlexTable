@@ -141,6 +141,7 @@ const table = new FlexTable({
   id: 'myTable',
   rowClassName: data => 'my-table-row',
   stripe: false,
+  dangerous: true, // 开启插入字符串 html
   plugins: {
     selector: {}, // 暂无独立配置项, 只需指定一个空对象
     editor: {
@@ -153,6 +154,18 @@ const table = new FlexTable({
         save: '保存',
         cancel: '取消'
       }
+    },
+    extender: {
+      accessor: data => {
+        return (`
+          <ul style="padding: 10px 50px; list-style: none">
+            <li>Full Name: ${data.firstName} ${data.lastName}</li>
+            <li>Age: ${data.age}</li>
+          </ul>
+        `)
+      },
+      accordion: true,
+      transition: true
     },
     resizer: {}, // 暂无独立配置项, 只需指定一个空对象
     sorter: {
@@ -184,21 +197,21 @@ const table = new FlexTable({
     // },
     scroller: {
       height: 450,
-      mouse: true,
+      mouse: false,
       wheel: true,
       wheelDistance: 20,
-      pullup: (instance, finish) => {
-        const { data } = instance
-        const newData = [...data, ...makeData(10)]
+      // pullup: (instance, finish) => {
+      //   const { data } = instance
+      //   const newData = [...data, ...makeData(10)]
 
-        setTimeout(() => {
-          instance.data = newData
-          instance.refreshStruct()
-          instance.refresh()
+      //   setTimeout(() => {
+      //     instance.data = newData
+      //     instance.refreshStruct()
+      //     instance.refresh()
 
-          finish()
-        }, 1000)
-      },
+      //     finish()
+      //   }, 1000)
+      // },
       pullupThreshold: 10,
       pullupTip: '加载中...'
     }

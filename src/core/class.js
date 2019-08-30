@@ -71,7 +71,7 @@ class FlexTable {
     }
   }
 
-  constructor ({ data = [], columns, container, theme, ...props }) {
+  constructor ({ data = [], columns, container, dangerous, theme, ...props }) {
     // 获取容器
     switch (typeof container) {
       case 'string': {
@@ -113,6 +113,8 @@ class FlexTable {
 
     this.registerMethod('on', registerEvent)
     this.registerMethod('off', unregisterEvent)
+
+    this.dangerous = dangerous === true
 
     // 初始化 this.table
     // 注册 refresh 和 refreshStruch 两个方法

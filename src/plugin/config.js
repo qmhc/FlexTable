@@ -1,6 +1,7 @@
 export default [
   'Layer',
   'Selector',
+  'Extender',
   'Filter',
   'Sorter',
   'Pager',

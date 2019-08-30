@@ -1,4 +1,4 @@
-import { getUuid, getType } from '@/utils'
+import { getUuid, getType, renderElement } from '@/utils'
 import {
   temp,
   tableTemp,
@@ -156,7 +156,7 @@ function renderColumn (column) {
   const content = temp.cloneNode()
   content.className = 'it-head-content'
 
-  renderElement(content, name)
+  renderElement(content, name, this.dangerous)
 
   th.appendChild(content)
   th.itColumnId = id
@@ -354,7 +354,7 @@ function renderBodyStruct () {
 
 // 渲染数据方法
 function renderBodyData () {
-  const { table, plugins, columnProps } = this
+  const { table, plugins, columnProps, dangerous } = this
 
   const afterHookFns = []
   // beforeRenderData 钩子
@@ -405,7 +405,7 @@ function renderBodyData () {
         const result = accessor(rowData)
         const html = (result === 0 || result) ? result : ''
 
-        renderElement(td, html)
+        renderElement(td, html, dangerous)
       }
     } else {
       const tds = tr.querySelectorAll('.it-td')
@@ -425,7 +425,7 @@ function renderBodyData () {
 
 // 表格脚部渲染
 function renderFooter () {
-  const { data, columnProps, state } = this
+  const { data, columnProps, state, dangerous } = this
 
   const columnData = new Map()
 
@@ -454,7 +454,7 @@ function renderFooter () {
     const result = footer(columnData.get(i), { ...state })
     const title = result || ''
 
-    renderElement(content, title)
+    renderElement(content, title, dangerous)
 
     td.appendChild(content)
     tr.appendChild(td)
@@ -494,37 +494,4 @@ function setClassName (node, className) {
   }
 
   return false
-}
-
-// 为 node 设置 html
-function renderElement (node, html) {
-  switch (getType(html)) {
-    case 'number':
-    case 'string': {
-      node.textContent = html
-      break
-    }
-    case 'array':
-    case 'nodelist': {
-      node.innerHTML = ''
-      const fragment = document.createDocumentFragment()
-
-      html = [...html]
-
-      for (let i = 0, len = html.length; i < len; i++) {
-        let element = html[i]
-        if (getType(element) === 'string') {
-          element = document.createTextNode(element)
-        }
-        fragment.appendChild(element)
-      }
-
-      node.appendChild(fragment)
-      break
-    }
-    default: {
-      node.innerHTML = ''
-      node.appendChild(html)
-    }
-  }
 }
