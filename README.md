@@ -81,7 +81,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 
 ## 例子 (Example)
 
-简单示例见 `example` 文件夹下的 [`index.html`](./tests/index.html)
+简单示例见 `example` 文件夹下的 [`index.html`](./example/index.html)
 
 
 ## 配置 (Config)
@@ -162,7 +162,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
       notFound: true,
       delay: 500,
       loadingText: '加载中',
-			notFoundText: '无数据'
+      notFoundText: '无数据'
     },
     scroller: {
       height: 450,
@@ -206,7 +206,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 }
 ```
 
-注意: `flex-table` 在解析配置时使用的是严格比较, 即默认开启的属性需要全等于 `false` 才会生效, 反之亦然
+注意: `flex-table` 在解析配置时使用的是严格比较, 即默认开启的属性需要全等于 `false` 才会禁用生效, 反之亦然
 
 <!-- PS: 内置的 `resizer` 插件是基于 `Proxy` 编写的，使用时请注意兼容性 -->
 
