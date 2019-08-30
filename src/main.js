@@ -156,15 +156,25 @@ const table = new FlexTable({
       }
     },
     extender: {
-      accessor: data => {
-        return (`
-          <ul style="padding: 10px 50px; list-style: none">
-            <li>Full Name: ${data.firstName} ${data.lastName}</li>
-            <li>Age: ${data.age}</li>
-          </ul>
-        `)
+      renderer: data => {
+        const ul = document.createElement('ul')
+        ul.style.cssText = `
+          padding: 10px 50px;
+          list-style: none
+        `
+
+        const nameLi = document.createElement('li')
+        nameLi.textContent = `Full Name: ${data.firstName} ${data.lastName}`
+
+        const ageLi = nameLi.cloneNode()
+        ageLi.textContent = `Age: ${data.age}`
+
+        ul.appendChild(nameLi)
+        ul.appendChild(ageLi)
+
+        return ul
       },
-      accordion: true,
+      accordion: false,
       transition: true
     },
     resizer: {}, // 暂无独立配置项, 只需指定一个空对象

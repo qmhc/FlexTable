@@ -9,7 +9,7 @@ import { getType, checkPathByClass, renderElement } from '@/utils'
 
 import './style.scss'
 
-const raf = window.requestAnimationFrame
+const raf = window.requestAnimationFrame || window.setTimeout
 
 export default class Extender {
   constructor (tableInstance, options = {}) {
@@ -20,12 +20,12 @@ export default class Extender {
     const extensible = getType(options.extender) === 'object'
 
     if (extensible) {
-      const { accessor, accordion, transition } = options.extender
+      const { renderer, accordion, transition } = options.extender
 
-      if (getType(accessor) === 'function') {
+      if (getType(renderer) === 'function') {
         state.extender = {
           extensible,
-          accessor,
+          renderer,
           transition: transition !== false,
           accordion: accordion === true
         }
@@ -94,20 +94,20 @@ export default class Extender {
     return this.state.extensible
   }
 
-  // 根据表格行数进行处理, 并返回新行数
-  beforeRenderBody (count) {
-    return count
+  beforeRenderBody () {
+    this._removeAllExtend()
   }
 
-  // 根据表格数据进行处理, 并返回新数据
-  beforeRenderData (data) {
-    return data
+  beforeRenderData () {
+    this._removeAllExtend()
   }
-
-  beforeCreate () {}
 
   create () {
-    // create code
+    if (this.state.extensible) {
+      this.tableInstance.registerMethod('extendRefresh', this._extendRefresh.bind(this), false)
+      this.tableInstance.registerMethod('removeAllExtend', this._removeAllExtend.bind(this), false)
+    }
+
     this.created = true
   }
 
@@ -145,28 +145,17 @@ export default class Extender {
           }
 
           target.classList.remove('extend')
+          trGroup.classList.remove('extend')
         } else {
-          const { accessor, accordion, transition } = this.state
+          const { renderer, accordion, transition } = this.state
           const { data, dangerous } = this.tableInstance
 
           if (accordion) {
-            const _extends = tbody.querySelectorAll('.it-extend-wrapper')
-            const controls = tbody.querySelectorAll('.it-extender-switch.extend')
-
-            for (let i = 0, len = _extends.length; i < len; i++) {
-              if (transition) {
-                this._removeExtend(_extends[i])
-              } else {
-                _extends[i].parentNode.removeChild(_extends[i])
-                this._scrollRefresh()
-              }
-              
-              controls[i].classList.remove('extend')
-            }
+            this._removeAllExtend()
           }
 
           const rowData = data.find(item => item._itId === rowId)
-          const result = accessor(rowData)
+          const result = renderer(rowData)
 
           const extendWrapper = temp.cloneNode()
 
@@ -202,23 +191,38 @@ export default class Extender {
           }
 
           target.classList.add('extend')
+          trGroup.classList.add('extend')
         }
       }
     })
   }
 
-  afterCreate () {
-    if (this.created) {}
-  }
+  _extendRefresh () {
+    const { table, data, dangerous } = this.tableInstance
+    const tbody = table.querySelector('.it-tbody')
 
-  // 根据表格行数进行处理
-  afterRenderBody (count) {
-    if (this.created) {}
-  }
+    const { renderer } = this.state
 
-  // 根据表格数据进行处理
-  afterRenderData (data) {
-    if (this.created) {}
+    const extendRows = tbody.querySelectorAll('.it-tr-group.extend')
+
+    for (let i = 0, len = extendRows.length; i < len; i++) {
+      const extendRow = extendRows[i]
+      const tr = extendRow.querySelector('.it-tr')
+      const wrapper = extendRow.querySelector('.it-extend-wrapper')
+
+      const rowId = tr.itRowId
+
+      if (!rowId) {
+        continue
+      }
+
+      const rowData = data.find(item => item._itId === rowId)
+      const result = renderer(rowData)
+
+      wrapper.innerHTML = ''
+
+      renderElement(wrapper, result, dangerous)
+    }
   }
 
   _createArrow (size = 18, color = 'black') {
@@ -277,5 +281,29 @@ export default class Extender {
       wrapper.parentNode.removeChild(wrapper)
       this._scrollRefresh()
     })
+  }
+
+  _removeAllExtend () {
+    const { table } = this.tableInstance
+    const tbody = table.querySelector('.it-tbody')
+
+    const { transition } = this.state
+
+    const extendRows = tbody.querySelectorAll('.it-tr-group.extend')
+
+    for (let i = 0, len = extendRows.length; i < len; i++) {
+      const extendRow = extendRows[i]
+      const wrapper = extendRow.querySelector('.it-extend-wrapper')
+      const control = extendRow.querySelector('.it-extender-switch')
+
+      if (transition) {
+        this._removeExtend(wrapper)
+      } else {
+        extendRow.removeChild(wrapper)
+        this._scrollRefresh()
+      }
+      
+      control.classList.remove('extend')
+    }
   }
 }

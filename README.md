@@ -94,6 +94,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   id: '',
   rowClassName: (data, index) => '', // index 为数据渲染在表格的行索引
   stripe: true, // 为行添加斑马纹样式
+  dangerous: true, // 开启插入字符串 html
   plugins: {
     selector: {}, // 暂无独立配置项, 只需指定一个空对象
     editor: {
@@ -113,6 +114,29 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
     sorter: {
       multiple: true, // 开启多列排序功能
       multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift
+    },
+    extender: {
+      // 拓展行的渲染函数, 参数为该行数据
+      renderer: data => {
+        const ul = document.createElement('ul')
+        ul.style.cssText = `
+          padding: 10px 50px;
+          list-style: none
+        `
+
+        const nameLi = document.createElement('li')
+        nameLi.textContent = `Full Name: ${data.firstName} ${data.lastName}`
+
+        const ageLi = nameLi.cloneNode()
+        ageLi.textContent = `Age: ${data.age}`
+
+        ul.appendChild(nameLi)
+        ul.appendChild(ageLi)
+
+        return ul
+      },
+      accordion: false, // 设置开启手风琴模式
+      transition: true // 设置禁用过渡效果
     },
     pager: {
       useOptions: true,
@@ -145,7 +169,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
     }
   },
   theme: 'light',
-  deepClone: true
+  deepClone: true // 初始化时是否对 data 进行深度克隆
 }
 ```
 
@@ -178,6 +202,8 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   defaultWidth: 100 // 默认列宽
 }
 ```
+
+注意: `FlexTable` 在解析配置时使用的是严格模式, 即默认开启的属性需要全等于 `false` 才会生效, 反之亦然
 
 <!-- PS: 内置的 `resizer` 插件是基于 `Proxy` 编写的，使用时请注意兼容性 -->
 
