@@ -141,7 +141,7 @@ const table = new FlexTable({
   id: 'myTable',
   rowClassName: data => 'my-table-row',
   stripe: false,
-  dangerous: true, // 开启插入字符串 html
+  dangerous: false, // 开启插入字符串 html
   plugins: {
     selector: {}, // 暂无独立配置项, 只需指定一个空对象
     editor: {

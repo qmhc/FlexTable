@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * @name Extender
  * @description 表格行拓展插件
@@ -35,7 +34,7 @@ export default class Extender {
           className: 'it-extender-control',
           accessor: data => {
             const uuid = data._itId
-  
+
             if (!uuid) {
               return ''
             }
@@ -302,7 +301,7 @@ export default class Extender {
         extendRow.removeChild(wrapper)
         this._scrollRefresh()
       }
-      
+
       control.classList.remove('extend')
     }
   }

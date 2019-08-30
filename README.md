@@ -1,5 +1,8 @@
 # Flex Table
 
+[![version](https://img.shields.io/github/package-json/v/qmhc/FlexTable)](https://github.com/qmhc/FlexTable)
+[![license](https://img.shields.io/github/license/qmhc/FlexTable)](https://github.com/qmhc/FlexTable/blob/master/LICENSE)
+
 `flex-table` 是一款原生的表格工具, 其完全基于flex, 没有任何的table相关的html, 可用于快速生成数据表格
 
 `flex-table` 的核心代码只包含表格的基础渲染功能, 其余的所有功能均由 `plugin` 提供, 用户也可以根据自己的使用替换或添加插件
@@ -94,7 +97,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   id: '',
   rowClassName: (data, index) => '', // index 为数据渲染在表格的行索引
   stripe: true, // 为行添加斑马纹样式
-  dangerous: true, // 开启插入字符串 html
+  dangerous: false, // 开启插入字符串 html
   plugins: {
     selector: {}, // 暂无独立配置项, 只需指定一个空对象
     editor: {
@@ -203,7 +206,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 }
 ```
 
-注意: `FlexTable` 在解析配置时使用的是严格模式, 即默认开启的属性需要全等于 `false` 才会生效, 反之亦然
+注意: `flex-table` 在解析配置时使用的是严格比较, 即默认开启的属性需要全等于 `false` 才会生效, 反之亦然
 
 <!-- PS: 内置的 `resizer` 插件是基于 `Proxy` 编写的，使用时请注意兼容性 -->
 

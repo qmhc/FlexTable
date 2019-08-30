@@ -41,6 +41,28 @@
 				multiple: true, // 开启多列排序功能
 				multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift
 			},
+			extender: {
+				renderer: data => {
+					const ul = document.createElement('ul')
+					ul.style.cssText = `
+						padding: 10px 50px;
+						list-style: none
+					`
+
+					const nameLi = document.createElement('li')
+					nameLi.textContent = `Full Name: ${data.firstName} ${data.lastName}`
+
+					const ageLi = nameLi.cloneNode()
+					ageLi.textContent = `Age: ${data.age}`
+
+					ul.appendChild(nameLi)
+					ul.appendChild(ageLi)
+
+					return ul
+				},
+				accordion: false,
+				transition: true
+			},
 			pager: {
 				useOptions: true,
 				pageOptions: [10, 15, 20, 25, 30],
