@@ -3,16 +3,18 @@
 [![version](https://img.shields.io/github/package-json/v/qmhc/FlexTable)](https://github.com/qmhc/FlexTable)
 [![license](https://img.shields.io/github/license/qmhc/FlexTable)](https://github.com/qmhc/FlexTable/blob/master/LICENSE)
 
-`flex-table` 是一款原生的表格工具, 其完全基于flex, 没有任何的table相关的html, 可用于快速生成数据表格
+**Engilsh** | [中文](./README_CN.md)
 
-`flex-table` 的核心代码只包含表格的基础渲染功能, 其余的所有功能均由 `plugin` 提供, 用户也可以根据自己的使用替换或添加插件
+FlexTable is a library with native javascript that completely based on flex, without any `table` html, it can be used to generate table quickly.
+
+The core code of FlexTable only contains rendering table functions, all the other features are provided by plugins, you can also add or replace plugins according to your own use.
 
 ![视觉](./public/visual.png)
 
 
-## 开始 (Start)
+## Start
 
-使用 npm
+Use npm.
 
 ```bash
 npm install --save @qmhc/flex-table
@@ -24,7 +26,7 @@ import FlexTable from '@qmhc/flex-table'
 import '@qmhc/flex-table/dist/flex-table.css'
 ```
 
-按需引入
+Import on demand.
 
 ```js
 import FlexTable from '@qmhc/flex-table/dist/flex-table.core'
@@ -34,7 +36,7 @@ import '@qmhc/flex-table/dist/core/flex-table.core.css'
 import '@qmhc/flex-table/dist/plugin/Sorter.css'
 ```
 
-使用标签引入
+Use tags.
 
 ```html
 <!-- js -->
@@ -44,7 +46,7 @@ import '@qmhc/flex-table/dist/plugin/Sorter.css'
 <link rel="stylesheet" href="./dist/flex-table.css">
 ```
 
-按需引入
+Import on demand.
 
 ```html
 <!-- js -->
@@ -56,7 +58,7 @@ import '@qmhc/flex-table/dist/plugin/Sorter.css'
 <link rel="stylesheet" href="../dist/plugin/Sorter.css">
 ```
 
-创建一个表格
+Create a table.
 
 ```javascript
 // 创建表格
@@ -70,7 +72,7 @@ const flexTable = new FlexTable({
 })
 ```
 
-按需引入时, 需手动注册插件
+Manually register plugins when import on demand.
 
 ```js
 FlexTable.registerPlugin('sorter', Sorter)
@@ -79,14 +81,14 @@ FlexTable.registerPlugin('sorter', Sorter)
 FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 ```
 
-## 例子 (Example)
+## Example
 
-简单示例见 `example` 文件夹下的 [`index.html`](./example/index.html)
+For a simple example see [`example/index.html`](./example/index.html).
 
 
-## 配置 (Config)
+## Config
 
-一份完整的配置
+A complete configuration.
 
 ```javascript
 {
@@ -95,16 +97,16 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   data,
   className: '',
   id: '',
-  rowClassName: (data, index) => '', // index 为数据渲染在表格的行索引
-  stripe: true, // 为行添加斑马纹样式
-  dangerous: false, // 开启插入字符串 html
+  rowClassName: (data, index) => '', // index is the data rendering in the row index of the table
+  stripe: true,
+  dangerous: false, // insert string as html
   plugins: {
-    selector: {}, // 暂无独立配置项, 只需指定一个空对象
+    selector: {}, // no property, only define an empty object
     editor: {
       trigger: 'action', // or 'click'
-      // verifier: data => data, // 顶层验证方法
+      // verifier: data => data, // global verifier
       columnWidth: 142,
-      columnName: '操作', // editor 列头
+      columnName: '操作', // editor column header
       labels: {
         edit: '编辑',
         save: '保存',
@@ -112,14 +114,14 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
       }
     },
     resizer: {
-      force: false // 设置是否在表格加入 document 后将各列设置为真实宽度
+      force: false // whether to set each column to true width after the table is added to document
     },
     sorter: {
-      multiple: true, // 开启多列排序功能
-      multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift
+      multiple: true, // turn on multi-column sorting
+      multipleKey: 'shift' // multi-column sorting key, optional ctrl, alt, shift
     },
     extender: {
-      // 拓展行的渲染函数, 参数为该行数据
+      // extend row renderer, receiving row data as parameter
       renderer: data => {
         const ul = document.createElement('ul')
         ul.style.cssText = `
@@ -138,8 +140,8 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 
         return ul
       },
-      accordion: false, // 设置开启手风琴模式
-      transition: true // 设置禁用过渡效果
+      accordion: false,
+      transition: true
     },
     pager: {
       useOptions: true,
@@ -153,9 +155,9 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
       }
     },
     filter: {
-      filterAll: true, // 所有类均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
-      openAction: false, // filter 是否具有开关按钮
-      filterOpen: true, // filter 具有开关按钮, 设置是否默认打开 openAction 为 false 时忽略
+      filterAll: true, // all columns defalut filter (if there are separate settings for the column, the column settings are preferred)
+      openAction: false, // filter toggle switch
+      filterOpen: true
     },
     layer: {
       loading: false,
@@ -172,24 +174,24 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
     }
   },
   theme: 'light',
-  deepClone: true // 初始化时是否对 data 进行深度克隆
+  deepClone: true // whether deep clone data during init
 }
 ```
 
-`columns` 的完整配置
+Complete configuration of `columns`.
 
 ```js
 {
-  name: 'First Name', // 表头列名, 可以是 Number String Array<HTMLElemnt> NodeList HTMLElement
-  accessor: data => data.firstName, // 在渲染数据时告诉 FlexTable 该怎么读取数据, 参数为行数据, 返回值参考 name 属性
-  key: 'firstName', // 该列的属性名, 这很重要, 保证 FlexTable 能读取到数据的原始值
-  footer: data => `Total: ${data.length}`, // 脚部渲染方法, 参数为列数据, 返回值参考 name 属性
-  resizable: true, // 是否可以调整列宽
-  sortable: true, // 是否可以排序
-  defaultSort: 1, // 默认排序 1 正序 2 倒序
-  sorter: (prev, next) => prev.toString().localeCompare(next), // 排序的方法
-  filterable: true, // 是否可以过滤
-  // 可以自定义过滤方法, 参数分别为 accessor 读取后的值, 输入的 filter 值, 数据的原始值
+  name: 'First Name', // colunm header, optional Number String Array<HTMLElemnt> NodeList HTMLElement
+  accessor: data => data.firstName, // tell FlexTable how to read the data, parameter is row data, return refers to the name property
+  key: 'firstName', // column key, it is important, ensure that FlexTable can read the original data
+  footer: data => `Total: ${data.length}`, // parameter is columns data
+  resizable: true, // column resize
+  sortable: true, // column sort
+  defaultSort: 1, //  1 for asc, 2 for desc
+  sorter: (prev, next) => prev.toString().localeCompare(next),
+  filterable: true, // column filter
+  // filter method, column value - filter value - original data
   filter: (value, filter, origin) => {
     if (value.includes(filter)) {
       return true
@@ -197,22 +199,22 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   },
   filterOptions: {
     type: 'text',
-    // options: ['prepare', 'process', 'finish'] // type 为 'select' 时使用
+    // options: ['prepare', 'process', 'finish'] // use when type is 'select'
   }
-  editable: true, // 是否可以编辑
-  editType: 'select', // 编辑控件类型
-  editOptions: ['Kegdhi', 'Tshudgh', 'Asihvsit'] // 'select' 时使用
-  defaultWidth: 100 // 默认列宽
+  editable: true, // column edit
+  editType: 'select',
+  editOptions: ['Kegdhi', 'Tshudgh', 'Asihvsit'] // use when type is 'select'
+  defaultWidth: 100 // default column width
 }
 ```
 
-注意: `flex-table` 在解析配置时使用的是严格比较, 即默认开启的属性需要全等于 `false` 才会禁用生效, 反之亦然
+Note: FlexTable uses a strict comparison when parsing the configuration, for example, the default enabled property needs to be `===` to `false` can disable it, vice versa.
 
 <!-- PS: 内置的 `resizer` 插件是基于 `Proxy` 编写的，使用时请注意兼容性 -->
 
-## 主题 (Theme)
+## Theme
 
-`iTable` 内置有四种主题颜色，配置中添加 `theme` 属性可以设置主题
+FlexTable has four theme, configure `theme` property to use them.
 
 ```javascript
 {
@@ -224,13 +226,13 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 }
 ```
 
-如果这不是你想要的主题, 可以参考 `/src/style` 下的 `scss` 文件配置主题
+If this is not you want, you can refer to the `scss` file under `/src/style` to configure your own theme.
 
-## 插件 (Plugin)
+## Plugin
 
-可以根据使用需要 (如实时加载数据) 实现自己的插件, 插件的模版可以参考 [`./src/plugin/temp.js`](././src/plugin/temp.js)
+You can implement your own plugins according to the  [`src/plugin/temp.js`](././src/plugin/temp.js), such as an async loading data plugin.
 
-随后, 在 FlexTable 上注册插件
+Don't forget to register the plugin after complete.
 
 ```js
 import FlexTable from '@qmhc/flex-table'
@@ -239,8 +241,8 @@ import myPlugin from 'my-plugin'
 FlexTable.registerPlugin(name, myPlugin)
 ```
 
-也可以使用 `replacePlugin` 方法替换具体插件
+You can als replace one plugin with `replacePlugin` method.
 
-## 授权 (License)
+## License
 
 [MIT](./LICENSE)
