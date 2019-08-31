@@ -9,7 +9,7 @@ FlexTable 是一款原生的表格工具, 其完全基于flex, 没有任何的 `
 
 FlexTable 的核心代码只包含表格的基础渲染功能, 其余的所有功能均由 `plugin` 提供, 用户也可以根据自己的使用替换或添加插件
 
-![视觉](./public/visual.png)
+![视觉](./public/visual1.png)
 
 
 ## 开始 (Start)
@@ -97,11 +97,16 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   data,
   className: '',
   id: '',
+
   rowClassName: (data, index) => '', // index 为数据渲染在表格的行索引
+
   stripe: true, // 为行添加斑马纹样式
+
   dangerous: false, // 开启插入字符串 html
+
   plugins: {
     selector: {}, // 暂无独立配置项, 只需指定一个空对象
+
     editor: {
       trigger: 'action', // or 'click'
       // verifier: data => data, // 顶层验证方法
@@ -113,13 +118,16 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
         cancel: '取消'
       }
     },
+    
     resizer: {
       force: false // 设置是否在表格加入 document 后将各列设置为真实宽度
     },
+
     sorter: {
       multiple: true, // 开启多列排序功能
       multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift
     },
+
     extender: {
       // 拓展行的渲染函数, 参数为该行数据
       renderer: data => {
@@ -143,6 +151,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
       accordion: false, // 设置开启手风琴模式
       transition: true // 设置禁用过渡效果
     },
+
     pager: {
       useOptions: true,
       pageOptions: [10, 15, 20, 25, 30],
@@ -154,11 +163,13 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
         row: '行'
       }
     },
+
     filter: {
       filterAll: true, // 所有列均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
       openAction: false, // filter 是否具有开关按钮
       filterOpen: true // 设置是否默认打开 filter, openAction 为 false 时忽略
     },
+
     layer: {
       loading: false,
       notFound: true,
@@ -166,6 +177,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
       loadingText: '加载中',
       notFoundText: '无数据'
     },
+
     scroller: {
       height: 450,
       mouse: true,
@@ -173,7 +185,9 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
       wheelDistance: 20
     }
   },
+
   theme: 'light',
+
   deepClone: true // 初始化时是否对 data 进行深度克隆
 }
 ```
@@ -182,28 +196,46 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 
 ```js
 {
-  name: 'First Name', // 表头列名, 可以是 Number String Array<HTMLElemnt> NodeList HTMLElement
-  accessor: data => data.firstName, // 在渲染数据时告诉 FlexTable 该怎么读取数据, 参数为行数据, 返回值参考 name 属性
-  key: 'firstName', // 该列的属性名, 这很重要, 保证 FlexTable 能读取到数据的原始值
-  footer: data => `Total: ${data.length}`, // 脚部渲染方法, 参数为列数据, 返回值参考 name 属性
+  // 表头列名, 可以是 Number String Array<HTMLElemnt> NodeList HTMLElement
+  name: 'First Name',
+
+  // 在渲染数据时告诉 FlexTable 该怎么读取数据, 参数为行数据, 返回值参考 name 属性
+  accessor: data => data.firstName,
+
+  // 该列的属性名, 这很重要, 保证 FlexTable 能读取到数据的原始值
+  key: 'firstName',
+
+  // 脚部渲染方法, 参数为列数据, 返回值参考 name 属性
+  footer: data => `Total: ${data.length}`, 
+
   resizable: true, // 是否可以调整列宽
+
   sortable: true, // 是否可以排序
+
   defaultSort: 1, // 默认排序 1 正序 2 倒序
+
   sorter: (prev, next) => prev.toString().localeCompare(next), // 排序的方法
+
   filterable: true, // 是否可以过滤
+
   // 可以自定义过滤方法, 参数分别为 accessor 读取后的值, 输入的 filter 值, 数据的原始值
   filter: (value, filter, origin) => {
     if (value.includes(filter)) {
       return true
     }
   },
+
   filterOptions: {
     type: 'text',
     // options: ['prepare', 'process', 'finish'] // type 为 'select' 时使用
   }
+
   editable: true, // 是否可以编辑
+
   editType: 'select', // 编辑控件类型
+
   editOptions: ['Kegdhi', 'Tshudgh', 'Asihvsit'] // 'select' 时使用
+
   defaultWidth: 100 // 默认列宽
 }
 ```

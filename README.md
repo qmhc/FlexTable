@@ -9,7 +9,7 @@ FlexTable is a library with native javascript that completely based on flex, wit
 
 The core code of FlexTable only contains rendering table functions, all the other features are provided by plugins, you can also add or replace plugins according to your own use.
 
-![视觉](./public/visual.png)
+![visual](./public/visual2.png)
 
 
 ## Start
@@ -61,7 +61,6 @@ Import on demand.
 Create a table.
 
 ```javascript
-// 创建表格
 const flexTable = new FlexTable({
   container: '#app',
   columns: [{ /*...*/ }],
@@ -77,7 +76,7 @@ Manually register plugins when import on demand.
 ```js
 FlexTable.registerPlugin('sorter', Sorter)
 
-// 使用标签引入时
+// import on demand
 FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 ```
 
@@ -93,33 +92,53 @@ A complete configuration.
 ```javascript
 {
   container: '#app',
+
   columns,
+
   data,
-  className: '',
-  id: '',
-  rowClassName: (data, index) => '', // index is the data rendering in the row index of the table
+
+  className: 'my-table',
+
+  id: 'myTable',
+
+  // index is the data rendering in the row index of the table
+  rowClassName: (data, index) => '',
+
   stripe: true,
+
   dangerous: false, // insert string as html
+
   plugins: {
+
     selector: {}, // no property, only define an empty object
+
     editor: {
       trigger: 'action', // or 'click'
+
       // verifier: data => data, // global verifier
+
       columnWidth: 142,
-      columnName: '操作', // editor column header
+
+      columnName: 'Action', // editor column header
+
       labels: {
-        edit: '编辑',
-        save: '保存',
-        cancel: '取消'
+        edit: 'Edit',
+        save: 'Save',
+        cancel: 'Cancel'
       }
     },
+
     resizer: {
-      force: false // whether to set each column to true width after the table is added to document
+      // whether to set each column to true width after the table is added to document
+      force: false
     },
+
     sorter: {
       multiple: true, // turn on multi-column sorting
+  
       multipleKey: 'shift' // multi-column sorting key, optional ctrl, alt, shift
     },
+
     extender: {
       // extend row renderer, receiving row data as parameter
       renderer: data => {
@@ -140,40 +159,64 @@ A complete configuration.
 
         return ul
       },
+
       accordion: false,
+
       transition: true
     },
+
     pager: {
       useOptions: true,
+
       pageOptions: [10, 15, 20, 25, 30],
+
       currentPage: 1,
+
       pageSize: 15,
+
       labels: {
-        prev: '上一页',
-        next: '下一页',
-        row: '行'
+        prev: 'Prev',
+        next: 'Next',
+        row: 'row'
       }
     },
+
     filter: {
-      filterAll: true, // all columns defalut filter (if there are separate settings for the column, the column settings are preferred)
+      // all columns defalut filter
+      // if there are separate settings for the column, the column settings are preferred
+      filterAll: true,
+
       openAction: false, // filter toggle switch
+
       filterOpen: true
     },
+
     layer: {
       loading: false,
+
       notFound: true,
+
       delay: 500,
-      loadingText: '加载中',
-      notFoundText: '无数据'
+
+      loadingText: 'Loading',
+
+      notFoundText: 'Not Found'
     },
+
     scroller: {
       height: 450,
+
       mouse: true,
+
       wheel: false,
+
       wheelDistance: 20
     }
+
   },
+
   theme: 'light',
+
   deepClone: true // whether deep clone data during init
 }
 ```
@@ -182,28 +225,46 @@ Complete configuration of `columns`.
 
 ```js
 {
-  name: 'First Name', // colunm header, optional Number String Array<HTMLElemnt> NodeList HTMLElement
-  accessor: data => data.firstName, // tell FlexTable how to read the data, parameter is row data, return refers to the name property
-  key: 'firstName', // column key, it is important, ensure that FlexTable can read the original data
+  // colunm header, optional Number String Array<HTMLElemnt> NodeList HTMLElement
+  name: 'First Name',
+
+  // tell FlexTable how to read the data
+  // parameter is row data, return refers to the name property
+  accessor: data => data.firstName,
+
+  // column key, it is important, ensure that FlexTable can read the original data
+  key: 'firstName',
+
   footer: data => `Total: ${data.length}`, // parameter is columns data
+
   resizable: true, // column resize
+
   sortable: true, // column sort
+
   defaultSort: 1, //  1 for asc, 2 for desc
+
   sorter: (prev, next) => prev.toString().localeCompare(next),
+
   filterable: true, // column filter
+
   // filter method, column value - filter value - original data
   filter: (value, filter, origin) => {
     if (value.includes(filter)) {
       return true
     }
   },
+
   filterOptions: {
     type: 'text',
     // options: ['prepare', 'process', 'finish'] // use when type is 'select'
   }
+
   editable: true, // column edit
+
   editType: 'select',
+
   editOptions: ['Kegdhi', 'Tshudgh', 'Asihvsit'] // use when type is 'select'
+
   defaultWidth: 100 // default column width
 }
 ```
