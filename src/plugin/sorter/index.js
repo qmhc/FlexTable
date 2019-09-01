@@ -79,20 +79,58 @@ export default class Sorter {
     const { table, columnProps } = this.tableInstance
     const ths = table.querySelectorAll('.it-thead.shadow .it-th')
 
-    const { sortBy, types } = this.state
+    const { sortable, sortBy, types } = this.state
 
     for (let i = 0, len = ths.length; i < len; i++) {
       const props = columnProps[i]
+      const { sort, id } = props
+      const defaultSort = {
+        able: sortable,
+        type: 0,
+        method: this._defaultSortMethod
+      }
 
-      const { sorter, sortable, defaultSort, id } = props
-
-      props.sorter = sorter !== false ? getType(sorter) === 'function' ? sorter : this._defaultSortMethod : false
-      props.sortable = !!(sortable !== false && props.sorter)
+      switch (getType(sort)) {
+        case 'number':
+        case 'string': {
+          props.sort = {
+            ...defaultSort,
+            type: parseInt(sort)
+          }
+          break
+        }
+        case 'boolean': {
+          props.sort = {
+            ...defaultSort,
+            able: sort
+          }
+          break
+        }
+        case 'function': {
+          props.sort = {
+            ...defaultSort,
+            method: sort
+          }
+          break
+        }
+        case 'object': {
+          props.sort = {
+            ...defaultSort,
+            ...sort
+          }
+          break
+        }
+        default: {
+          props.sort = {
+            ...defaultSort
+          }
+        }
+      }
 
       const th = ths[i]
       th.classList.add('it-sort')
 
-      const type = defaultSort % 3
+      const type = props.sort.type % 3
 
       if (type) {
         sortBy.push(id)
@@ -149,7 +187,7 @@ export default class Sorter {
 
         const props = columnProps.find(value => value.id === id)
 
-        if (props.sortable) {
+        if (props.sort && props.sort.able) {
           let { sortBy, types, multiple, multipleKey } = this.state
 
           let sortIndex = 0
@@ -215,7 +253,7 @@ export default class Sorter {
       (value, index) => {
         const props = columnProps.find(item => item.id === value)
         const type = types[index] === 1 ? 'asc' : 'desc'
-        const { accessor, sorter, index: key } = props
+        const { accessor, sort, index: key } = props
 
         switch (types[index]) {
           case 1: {
@@ -228,7 +266,9 @@ export default class Sorter {
           }
         }
 
-        return { type, accessor, sorter }
+        sort.type = type
+
+        return { type, accessor, sorter: sort.method }
       }
     )
 

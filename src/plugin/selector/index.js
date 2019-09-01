@@ -83,15 +83,15 @@ export default class Selector {
 
           return rowCheck
         },
-        resizable: false,
-        sortable: false,
+        resize: false,
+        sort: false,
         editable: false,
-        filter: (value, filter) => {
-          const selected = this.selection.includes(value._itId)
-          return filter ? selected : true
-        },
-        filterOptions: {
-          type: 'check'
+        filter: {
+          type: 'check',
+          method: (value, filter) => {
+            const selected = this.selection.includes(value._itId)
+            return filter ? selected : true
+          }
         },
         defaultWidth: 32
       }

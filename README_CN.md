@@ -5,9 +5,9 @@
 
 [Engilsh](https://github.com/qmhc/FlexTable) | **中文**
 
-FlexTable 是一款原生的表格工具, 其完全基于flex, 没有任何的 `table` 相关的html, 可用于快速生成数据表格
+`FlexTable` 是一款原生的表格工具, 其完全基于flex, 没有任何的 `table` 相关的html, 可用于快速生成数据表格
 
-FlexTable 的核心代码只包含表格的基础渲染功能, 其余的所有功能均由 `plugin` 提供, 用户也可以根据自己的使用替换或添加插件
+`FlexTable` 的核心代码只包含表格的基础渲染功能, 其余的所有功能均由 `plugin` 提供, 用户也可以根据自己的使用替换或添加插件
 
 ![视觉](./public/visual1.png)
 
@@ -206,47 +206,64 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   key: 'firstName',
 
   // 脚部渲染方法, 参数为列数据, 返回值参考 name 属性
-  footer: data => `Total: ${data.length}`, 
+  footer: data => `Count: ${data.length}`, 
 
-  resizable: true, // 是否可以调整列宽
+  resize: true, // 是否可以调整列宽
 
-  sortable: true, // 是否可以排序
-
-  defaultSort: 1, // 默认排序 1 正序 2 倒序
-
-  sorter: (prev, next) => prev.toString().localeCompare(next), // 排序的方法
-
-  filterable: true, // 是否可以过滤
-
-  // 可以自定义过滤方法, 参数分别为 accessor 读取后的值, 输入的 filter 值, 数据的原始值
-  filter: (value, filter, origin) => {
-    if (value.includes(filter)) {
-      return true
-    }
+  // 排序的配置
+  // sort: true,
+  // sort: 1,
+  // sort: (prev, next) => prev.toString().localeCompare(next),
+  sort: {
+    able: true,
+    type: 0, // 1 -> 升序, 2 -> 降序
+    method: (prev, next) => prev.toString().localeCompare(next)
   },
 
-  filterOptions: {
+  // 过滤的配置
+  // filter: true,
+  // filter: 'Rocket', // 默认字符过滤值, 指定为数字会转换为字符串
+  // filter: [10, 50], // 默认数字类型的范围过滤值
+
+  // 过滤方法, 此时类型默认为 'text'
+  // filter: (value, filter, origin, data) => true,
+
+  filter: {
+    able: true,
     type: 'text',
-    // options: ['prepare', 'process', 'finish'] // type 为 'select' 时使用
+    // options: ['prepare', 'process', 'finish'] // 'select' 类型时使用
+    value: undefined, // 默认过滤值,
+
+    // 参数分别为: 读取的值, 过滤控件的值, 原始值, 行数据
+    method: (value, filter, origin, data) => {
+      if (value.includes(filter)) {
+        return true
+      }
+    },
+  },
+
+  // 编辑的配置
+  // edit: true,
+  // edit: data => true, // 接收行数据
+  // edit: 'text',
+  edit: {
+    // able: true,
+    able: data => true,
+    type: 'select',
+    options: ['Kegdhi', 'Tshudgh', 'Asihvsit'] // 'select' 时使用
   }
-
-  editable: true, // 是否可以编辑
-
-  editType: 'select', // 编辑控件类型
-
-  editOptions: ['Kegdhi', 'Tshudgh', 'Asihvsit'] // 'select' 时使用
 
   defaultWidth: 100 // 默认列宽
 }
 ```
 
-注意: FlexTable 在解析配置时使用的是严格比较, 即默认开启的属性需要全等于 `false` 才会禁用生效, 反之亦然
+注意: `FlexTable` 在解析配置时使用的是严格比较, 即默认开启的属性需要全等于 `false` 才会禁用生效, 反之亦然
 
 <!-- PS: 内置的 `resizer` 插件是基于 `Proxy` 编写的，使用时请注意兼容性 -->
 
 ## 主题 (Theme)
 
-FlexTable 内置有四种主题颜色，配置中添加 `theme` 属性可以设置主题
+`FlexTable` 内置有四种主题颜色，配置中添加 `theme` 属性可以设置主题
 
 ```javascript
 {

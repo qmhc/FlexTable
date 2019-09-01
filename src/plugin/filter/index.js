@@ -39,6 +39,14 @@ export default class Filter {
     }
 
     this.state = state.filter
+
+    // this._defaultFilterOptions = [
+    //   { type: 'text' },
+    //   { type: 'number' },
+    //   { type: 'check' },
+    //   { type: 'date', dateType: 'datetime-local' },
+    //   { type: 'select', options: [] }
+    // ]
   }
 
   afterContruct () {
@@ -49,54 +57,99 @@ export default class Filter {
     return this.state.filterable
   }
 
-  beforeCreate () {
-    const { columnProps } = this.tableInstance
-    const { filterAll } = this.state
-
-    for (const i in columnProps) {
-      const props = columnProps[i]
-      const { filterable, filter, filterOptions } = props
-
-      if (filterAll || filterable) {
-        if (getType(filter) === 'function') {
-          props.filter = filter
-          props.filterable = true
-        } else if ((filterAll && filterable !== false) || filterable === true) {
-          props.filter = (filterOptions && filterOptions.type === 'number') ? this._defaultNumberFilter : this._defaultTextFilter
-          props.filterable = true
-        } else {
-          props.filter = null
-          props.filterable = false
-        }
-      }
-    }
-  }
-
   create () {
-    const { filterAll, filterOpen, openAction } = this.state
+    const { filterable, filterAll, filterOpen, openAction } = this.state
     const { table, columnProps } = this.tableInstance
     const tbodyGroup = table.querySelector('.it-tbody-group')
 
     const filterGroup = theadTemp.cloneNode()
-    filterGroup.classList.add('filter', 'resize')
-
     const tr = trTemp.cloneNode()
+
+    const defaultFilter = {
+      able: filterable && filterAll,
+      type: 'text',
+      vaule: undefined,
+      method: this._defaultTextFilter
+    }
+
+    filterGroup.classList.add('filter', 'resize')
 
     for (const i in columnProps) {
       const props = columnProps[i]
-      const { width, filterable, accessor, id, className } = props
+      const { width, filter, accessor, id, className } = props
       const th = thTemp.cloneNode()
+
       th.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
 
       if (getType(className) === 'string') {
         th.classList.add(className)
       }
 
-      if ((filterAll && filterable !== false) || filterable) {
-        const options = props.filterOptions || { type: 'text' }
+      switch (getType(filter)) {
+        case 'number':
+        case 'string': {
+          props.filter = {
+            ...defaultFilter,
+            value: filter.toString()
+          }
+          break
+        }
+        case 'boolean': {
+          props.filter = {
+            ...defaultFilter,
+            able: filter
+          }
+          break
+        }
+        case 'function': {
+          props.filter = {
+            ...defaultFilter,
+            method: filter
+          }
+          break
+        }
+        case 'array': {
+          const [min, max] = filter
+          props.filter = {
+            ...defaultFilter,
+            value: [~~min, ~~max],
+            method: this._defaultNumberFilter
+          }
+          break
+        }
+        case 'object': {
+          const _default = {
+            ...defaultFilter
+          }
+
+          if (filter.type === 'number') {
+            _default.method = this._defaultNumberFilter
+          }
+
+          if (filter.type === 'select') {
+            _default.options = []
+          }
+
+          props.filter = {
+            ..._default,
+            ...filter
+          }
+
+          break
+        }
+        default: {
+          props.filter = {
+            ...defaultFilter
+          }
+        }
+      }
+
+      const { able, type } = props.filter
+
+      if (able) {
         let filterControl = null
 
-        switch (options.type) {
+        switch (type) {
           case 'text': {
             filterControl = this._renderTextControl(id)
             break
@@ -118,24 +171,29 @@ export default class Filter {
             break
           }
           default: {
-            throw new Error(`You may be lost 'type' in your filterOption.`)
+            throw new Error(`You may be lost 'type' or defined error 'type' in your filter options.`)
           }
         }
 
         th.appendChild(filterControl)
       } else {
-        th.innerHTML = '&nbsp;'
+        th.innerHTML = ''
       }
+
       // 原始读取器
       props.reflectAccessor = accessor
       tr.appendChild(th)
     }
+
     filterGroup.appendChild(tr)
 
     if (openAction) {
       const action = temp.cloneNode()
+
       action.className = 'it-filter-action'
+
       const arrow = spanTemp.cloneNode()
+
       arrow.textContent = '≡'
       arrow.className = 'it-arrow'
       action.appendChild(arrow)
@@ -176,30 +234,45 @@ export default class Filter {
   }
 
   beforeRenderData (data) {
-    if (!this.created) return
-    if (!this.filterValueChange) return this.filterData
+    if (!this.created) {
+      return data
+    }
+
+    if (!this.filterValueChange) {
+      return this.filterData
+    }
 
     const { columnProps } = this.tableInstance
+
     let filterData = data
     let resultCount = 0
 
     for (const props of columnProps) {
-      const { filterable, filter, filterValue, reflectAccessor, key } = props
+      const { filter, reflectAccessor, key } = props
+      const { able, value, method } = filter
+
+      let valueFlag
+
+      if (getType(value) === 'array') {
+        valueFlag = getType(value[0]) === 'number' && getType(value[1]) === 'number'
+      } else {
+        valueFlag = value || value === 0
+      }
+
       props.accessor = reflectAccessor
 
-      if (filterable && filter && filterValue) {
-        if (typeof filterValue === 'object' && typeof filterValue[0] !== 'number' && typeof filterValue[1] !== 'number') {
-          continue
-        }
-
+      if (able && getType(method) === 'function' && valueFlag) {
         const resultData = []
 
         for (const i in filterData) {
           const rowData = filterData[i]
-          const value = reflectAccessor(rowData)
-          const originValue = rowData[key]
+          const reflectValue = reflectAccessor(rowData)
 
-          if (filter(value, filterValue, originValue)) {
+          const originValue = key ? rowData[key] : null
+
+          const result = method(reflectValue, value, originValue, rowData)
+
+          if (result === true) {
             resultData.push(rowData)
             resultCount++
           }
@@ -208,7 +281,7 @@ export default class Filter {
         filterData = resultData
 
         if (resultCount) {
-          props.accessor = this._getPorxyAccessor(reflectAccessor, filterValue)
+          props.accessor = this._getPorxyAccessor(reflectAccessor, value)
         }
       }
     }
@@ -269,7 +342,7 @@ export default class Filter {
 
       timer = setTimeout(() => {
         const value = textInput.value
-        props.filterValue = value
+        props.filter.value = value
 
         this.filterValueChange = true
         this.tableInstance.refresh()
@@ -297,7 +370,7 @@ export default class Filter {
 
     dateInput.addEventListener('change', () => {
       const value = dateInput.value
-      props.filterValue = value
+      props.filter.value = value
 
       this.filterValueChange = true
       this.tableInstance.refresh()
@@ -310,7 +383,7 @@ export default class Filter {
   _renderNumberControl (id) {
     const props = this._getProps(id)
 
-    props.filterValue = new Array(2)
+    props.filter.value = getType(props.filter.value) === 'array' ? props.filter.value : new Array(2)
 
     const control = temp.cloneNode()
     control.className = 'it-filter'
@@ -321,7 +394,7 @@ export default class Filter {
 
     minNumberInput.addEventListener('change', () => {
       const value = minNumberInput.value
-      props.filterValue[0] = value !== '' ? +value : undefined
+      props.filter.value[0] = value !== '' ? +value : undefined
       this.filterValueChange = true
       this.tableInstance.refresh()
     })
@@ -332,7 +405,7 @@ export default class Filter {
 
     maxNumberInput.addEventListener('change', () => {
       const value = maxNumberInput.value
-      props.filterValue[1] = value !== '' ? +value : undefined
+      props.filter.value[1] = value !== '' ? +value : undefined
       this.filterValueChange = true
       this.tableInstance.refresh()
     })
@@ -346,7 +419,7 @@ export default class Filter {
   _renderSelectControl (id) {
     const props = this._getProps(id)
 
-    const { options } = props.filterOptions
+    const options = props.filter.options || []
     options.unshift('')
 
     const control = temp.cloneNode()
@@ -356,7 +429,7 @@ export default class Filter {
 
     select.addEventListener('change', ev => {
       const value = ev.newValue
-      props.filterValue = value
+      props.filter.value = value
 
       this.filterValueChange = true
       this.tableInstance.refresh()
@@ -377,7 +450,7 @@ export default class Filter {
     checkbox.setAttribute('type', 'checkbox')
     checkbox.addEventListener('change', () => {
       const checked = checkbox.checked
-      props.filterValue = checked
+      props.filter.value = checked
       this.filterValueChange = true
       this.tableInstance.refresh()
     })
@@ -386,13 +459,16 @@ export default class Filter {
     return control
   }
 
+  // 未对日期类型进行特殊处理
   _getPorxyAccessor (accessor, filterValue) {
-    switch (typeof filterValue) {
-      case 'object': return (rowData) => {
+    switch (getType(filterValue)) {
+      // 如果是 number 类型则整个高亮
+      case 'array': return (rowData) => {
         const value = accessor(rowData)
         const html = (value === 0 || value) ? `<span class="it-highlight">${value}</span>` : '&nbsp;'
         return html2Element(html)
       }
+      // 如果是 check 类型则不做操作
       case 'boolean': return accessor
     }
 
@@ -402,10 +478,41 @@ export default class Filter {
 
     return (rowData) => {
       const value = accessor(rowData)
-      if (typeof value === 'object') return value
+
+      // 如果是对象, 说明用户进行了额外的自定义处理, 则直接返回
+      if (typeof value === 'object') {
+        return value
+      }
+
       const html = (value === 0 || value) ? value.toString().replace(new RegExp(keyWords, 'ig'), `<span class="it-highlight">$1</span>`) : '&nbsp;'
       const element = html2Element(html)
+
       return element || ''
     }
+  }
+
+  _createFilterIcon (size = 18, color = 'black') {
+    const wrapper = temp.cloneNode()
+
+    wrapper.className = 'it-icon it-icon-filter'
+    wrapper.style.width = `${size}px`
+    wrapper.style.height = `${size}px`
+
+    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+
+    filter.setAttribute('viewBox', '0 0 1024 1024')
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+
+    path.setAttribute('d', 'M237.714286 237.714286v47.177143l214.089143 214.198857A18.285714 18.285714 0 0 1 457.142857 512v208.128l109.714286 54.857143V512a18.285714 18.285714 0 0 1 5.339428-12.909714L786.285714 284.891429V237.714286h-548.571428z m182.857143 281.856L206.482286 305.408a18.285714 18.285714 0 0 1-5.339429-12.909714V219.428571a18.285714 18.285714 0 0 1 18.285714-18.285714h585.142858a18.285714 18.285714 0 0 1 18.285714 18.285714v73.069715a18.285714 18.285714 0 0 1-5.339429 12.909714L603.428571 519.570286V804.571429a18.285714 18.285714 0 0 1-26.477714 16.347428l-146.285714-73.142857A18.285714 18.285714 0 0 1 420.571429 731.428571v-211.858285z')
+    path.setAttribute('fill', color)
+
+    filter.appendChild(path)
+    filter.style.width = `${size}px`
+    filter.style.height = `${size}px`
+
+    wrapper.appendChild(filter)
+
+    return wrapper
   }
 }

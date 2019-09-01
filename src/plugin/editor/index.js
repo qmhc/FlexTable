@@ -49,15 +49,15 @@ export default class {
 
             const truthColumn = column.children[j]
 
-            truthColumn.editable = getType(truthColumn.key) === 'string' ? truthColumn.editable : false
+            truthColumn.edit = getType(truthColumn.key) === 'string' ? truthColumn.edit : false
           }
         } else {
           columns[i] = {
-            editable: true,
+            edit: true,
             ...columns[i]
           }
 
-          columns[i].editable = getType(columns[i].key) === 'string' ? columns[i].editable : false
+          columns[i].edit = getType(columns[i].key) === 'string' ? columns[i].edit : false
         }
       }
 
@@ -105,10 +105,10 @@ export default class {
 
             return rowActions
           },
-          resizable: false,
-          sortable: false,
-          filterable: false,
-          editable: false,
+          resize: false,
+          sort: false,
+          filter: false,
+          edit: false,
           defaultWidth: columnWidth || 142
         }
 
@@ -159,7 +159,55 @@ export default class {
 
   create () {
     // create code
-    const { table } = this.tableInstance
+    const { table, columnProps } = this.tableInstance
+    const { editable } = this.state
+
+    const defaultEdit = {
+      able: editable,
+      type: 'text'
+    }
+
+    for (const props of columnProps) {
+      const { edit } = props
+
+      switch (getType(edit)) {
+        case 'string': {
+          if (inputTypeWhiteList.includes(edit)) {
+            props.edit = {
+              ...defaultEdit,
+              type: edit
+            }
+          } else {
+            props.edit = {
+              ...defaultEdit
+            }
+          }
+
+          break
+        }
+        case 'boolean':
+        case 'function': {
+          props.edit = {
+            ...defaultEdit,
+            able: edit
+          }
+          break
+        }
+        case 'object': {
+          props.edit = {
+            ...defaultEdit,
+            ...edit
+          }
+          break
+        }
+        default: {
+          props.edit = {
+            ...defaultEdit
+          }
+        }
+      }
+    }
+
     this.topAction = table.querySelector('.it-th.it-editor-item')
     this.created = true
   }
@@ -206,12 +254,21 @@ export default class {
       }, 300)
     }
 
-    body.addEventListener('click', ev => {
+    body.addEventListener('click', evt => {
       if (this.globalState.scroller && this.globalState.scroller.scrolling) {
         return false
       }
 
-      const node = checkPathByClass(ev.target, 'it-td')
+      const path = evt.path
+
+      let node = null
+
+      if (path) {
+        node = path.find(value => value.classList && value.classList.contains('it-td'))
+      } else {
+        node = evt.target || evt.srcElement
+        node = checkPathByClass(node, 'it-td')
+      }
 
       if (node) {
         if (node.classList.contains('editing')) {
@@ -223,21 +280,22 @@ export default class {
         const rowData = data.find(item => item._itId === uuid)
         const props = columnProps[index]
 
-        let editable = props.editable
+        let able = props.edit.able
 
-        if (getType(editable) === 'function') {
-          editable = !!editable(rowData)
+        if (getType(able) === 'function') {
+          able = able(rowData)
         }
 
-        if (props && editable && rowData) {
+        if (able === true && rowData) {
           node.classList.add('editing')
 
           this.editingCount++
 
-          const { key, accessor, verifier, editType, editOptions } = props
+          const { key, accessor, verifier, edit } = props
+          const { type, options } = edit
 
-          if (editType === 'select') {
-            const select = createSelect(editOptions)
+          if (type === 'select') {
+            const select = createSelect(options)
             select.classList.add('it-editor-control')
             select.itValue = rowData[key]
 
@@ -277,8 +335,8 @@ export default class {
 
             let inputType = 'text'
 
-            if (inputTypeWhiteList.includes(editType)) {
-              inputType = editType
+            if (inputTypeWhiteList.includes(type)) {
+              inputType = type
             }
 
             input.setAttribute('type', inputType)
@@ -331,7 +389,7 @@ export default class {
           const td = tds[i]
           const props = columnProps[i]
 
-          let editable = props.editable
+          let editable = props.edit.able
 
           if (getType(editable) === 'function') {
             editable = !!editable(data)
@@ -340,12 +398,13 @@ export default class {
           if (props && editable !== false) {
             td.classList.add('editing')
 
-            const { key, editType, editOptions } = props
+            const { key, edit } = props
+            const { type, options } = edit
 
             let control = null
 
-            if (editType === 'select') {
-              control = createSelect(editOptions)
+            if (type === 'select') {
+              control = createSelect(options)
               control.classList.add('it-editor-control')
               control.itValue = data[key]
             } else {
@@ -353,8 +412,8 @@ export default class {
 
               let inputType = 'text'
 
-              if (inputTypeWhiteList.includes(editType)) {
-                inputType = editType
+              if (inputTypeWhiteList.includes(type)) {
+                inputType = type
               }
 
               control.setAttribute('type', inputType)

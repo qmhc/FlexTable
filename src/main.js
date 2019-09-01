@@ -36,10 +36,11 @@ const getColumns = () => {
           accessor: 'firstName',
           key: 'firstName',
           filter: true,
-          // defaultSort: 1,
-          sorter: (prev, next) => {
-          // console.log(prev, next)
-            return prev.toString().localeCompare(next)
+          sort: {
+            type: 1,
+            method: (prev, next) => {
+              return prev.toString().localeCompare(next)
+            }
           }
         },
         {
@@ -48,12 +49,14 @@ const getColumns = () => {
             return data.lastName
           },
           key: 'lastName',
-          filterable: false,
-          filterOptions: {
+          filter: {
+            able: false,
             type: 'date',
             dateType: 'datetime-local'
           },
-          editable: () => false
+          edit: {
+            able: () => false
+          }
         }
       ]
     },
@@ -70,9 +73,11 @@ const getColumns = () => {
             span.textContent = `Max: ${Math.max(...data)}`
             return span
           },
-          resizable: false,
-          editType: 'select',
-          editOptions: range(45, 16)
+          resize: false,
+          edit: {
+            type: 'select',
+            options: range(45, 16)
+          }
         },
         {
           name: 'Visits',
@@ -84,11 +89,12 @@ const getColumns = () => {
             span.textContent = `Total: ${data.reduce((prev, curr) => (prev + curr), 0)}`
             return span
           },
-          filterable: true,
-          filterOptions: {
+          filter: {
             type: 'number'
           },
-          editType: 'number'
+          edit: {
+            type: 'number'
+          }
         },
         {
           name: 'Progress',
@@ -106,19 +112,19 @@ const getColumns = () => {
             span.textContent = `Max: ${Math.round(sum / data.length)}`
             return span
           },
-          filter: (value, filter) => {
-            switch (filter) {
-              case 'process':
-                return value > 0 && value < 100
-              case 'finish':
-                return value === 100
-              default:
-                return value === 0
-            }
-          },
-          filterOptions: {
+          filter: {
             type: 'select',
-            options: ['prepare', 'process', 'finish']
+            options: ['prepare', 'process', 'finish'],
+            method: (value, filter) => {
+              switch (filter) {
+                case 'process':
+                  return value > 0 && value < 100
+                case 'finish':
+                  return value === 100
+                default:
+                  return value === 0
+              }
+            }
           }
         }
       ]

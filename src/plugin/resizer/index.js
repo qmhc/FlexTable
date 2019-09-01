@@ -71,7 +71,7 @@ export default class Resizer {
 
       const props = columnProps.find(value => value.id === id)
 
-      if (props.resizable !== false) {
+      if (props.resize !== false) {
         const resizer = temp.cloneNode()
         resizer.className = 'it-resizer'
         resizer.itColumnIndex = i

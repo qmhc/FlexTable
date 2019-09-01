@@ -39,16 +39,16 @@ export default class Extender {
               return ''
             }
 
-            const arrow = this._createArrow()
+            const arrow = this._createArrowIcon()
 
             arrow.classList.add('it-extender-switch')
 
             return arrow
           },
-          resizable: false,
-          sortable: false,
+          resize: false,
+          sort: false,
           editable: false,
-          filterable: false,
+          filter: false,
           defaultWidth: 32
         }
 
@@ -115,9 +115,16 @@ export default class Extender {
     const tbody = table.querySelector('.it-tbody')
 
     tbody.addEventListener('click', event => {
-      let { target } = event
+      const path = event.path
 
-      target = checkPathByClass(target, 'it-extender-switch')
+      let target = null
+
+      if (path) {
+        target = path.find(value => value.classList && value.classList.contains('it-extender-switch'))
+      } else {
+        target = event.target || event.srcElement
+        target = checkPathByClass(target, 'it-extender-switch')
+      }
 
       if (target) {
         const tr = checkPathByClass(target, 'it-tr')
@@ -224,10 +231,10 @@ export default class Extender {
     }
   }
 
-  _createArrow (size = 18, color = 'black') {
+  _createArrowIcon (size = 18, color = 'black') {
     const wrapper = temp.cloneNode()
 
-    wrapper.className = 'it-arrow'
+    wrapper.className = 'it-icon it-icon-arrow'
     wrapper.style.width = `${size}px`
     wrapper.style.height = `${size}px`
 

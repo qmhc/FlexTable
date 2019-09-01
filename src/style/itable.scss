@@ -81,8 +81,9 @@
 			position: relative;
 			border-right: 1px solid rgba(0, 0, 0, .04);
 			display: inline-flex;
-			flex-direction: column;
+			// flex-direction: column;
 			justify-content: center;
+			align-items: center;
 
 			&:last-child {
 				border-right: none;
@@ -181,6 +182,7 @@
 			filter: drop-shadow(0 21px 15px rgba(0, 0, 0, 0.1));
 		}
 
+		// select 列表
 		.it-option {
 			margin: 0;
 			padding: 0;
@@ -202,6 +204,7 @@
 			}
 		}
 
+		// select 选项
 		.it-item {
 			min-height: 32px;
 			background: #fff;
@@ -251,5 +254,9 @@
 				transform: rotate(90deg);
 			}
 		}
+	}
+
+	.it-icon {
+		display: inline-block;
 	}
 }
