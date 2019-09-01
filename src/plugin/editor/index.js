@@ -255,7 +255,7 @@ export default class {
     }
 
     body.addEventListener('click', evt => {
-      if (this.globalState.scroller && this.globalState.scroller.scrolling) {
+      if (this.tableInstance._lock) {
         return false
       }
 

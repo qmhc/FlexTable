@@ -1,5 +1,5 @@
 import Renderer from './render'
-import { registerEvent, unregisterEvent, subscribeResize } from './events'
+import { addEventWhiteList, registerEvent, unregisterEvent, dispatchEvent, subscribeResize } from './events'
 import { deepClone } from '../utils'
 
 import '../style/itable.scss'
@@ -115,6 +115,29 @@ class FlexTable {
     this.registerMethod('off', unregisterEvent)
 
     this.dangerous = dangerous === true
+
+    // 表格是否处于锁定状态
+    // 有一些插件在运作中, 出于安全需要对表格进行锁定, 防止与其他插件冲突 (例如: Resizer)
+    // 插件在进行工作前, 出于安全, 应该先检查表格的锁定状态
+    let lock = false
+
+    addEventWhiteList.apply(this, ['lock', 'unlock'])
+
+    Reflect.defineProperty(this, '_lock', {
+      get () {
+        return lock
+      },
+      set (value) {
+        lock = value === true
+
+        // 派发锁定或解锁事件
+        if (lock) {
+          dispatchEvent.call(this, 'lock')
+        } else {
+          dispatchEvent.call(this, 'unlock')
+        }
+      }
+    })
 
     // 初始化 this.table
     // 注册 refresh 和 refreshStruch 两个方法

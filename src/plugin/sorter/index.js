@@ -163,7 +163,7 @@ export default class Sorter {
     const { table, columnProps } = this.tableInstance
 
     table.addEventListener('click', evt => {
-      if (this.globalState.resizer && this.globalState.resizer.resizing) {
+      if (this.tableInstance._lock) {
         return false
       }
 

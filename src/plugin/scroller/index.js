@@ -99,6 +99,18 @@ export default class Scroller {
 
     this._scroll = new BScroll(scroller, options)
 
+    this._scroll.on('scrollStart', () => {
+      this.tableInstance._lock = true
+    })
+
+    this._scroll.on('scrollCancel', () => {
+      this.tableInstance._lock = false
+    })
+
+    this._scroll.on('scrollEnd', () => {
+      this.tableInstance._lock = false
+    })
+
     if (getType(pullup) === 'function') {
       this._scroll.on('pullingUp', () => {
         pullup(this.tableInstance, this.finishPullup.bind(this))

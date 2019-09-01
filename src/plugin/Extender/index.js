@@ -115,6 +115,10 @@ export default class Extender {
     const tbody = table.querySelector('.it-tbody')
 
     tbody.addEventListener('click', event => {
+      if (this.tableInstance._lock) {
+        return false
+      }
+
       const path = event.path
 
       let target = null

@@ -123,6 +123,7 @@ export default class Resizer {
       // 延迟100ms保证防止触发排序器
       setTimeout(() => {
         this.state.resizing = false
+        this.tableInstance._lock = false
       }, 200)
     }
 
@@ -132,6 +133,7 @@ export default class Resizer {
 
       if (target.classList.contains('it-resizer')) {
         this.state.resizing = true
+        this.tableInstance._lock = true
         index = target.itColumnIndex
 
         const tableRect = table.getBoundingClientRect()
