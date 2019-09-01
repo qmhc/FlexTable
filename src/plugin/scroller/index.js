@@ -139,15 +139,26 @@ export default class Scroller {
     this._scroll && this._scroll.scrollTo(x, y)
   }
 
-  finishPullup () {
+  finishPullup (refresh) {
     if (this._scroll) {
       const { table } = this.tableInstance
       const tbody = table.querySelector('.it-tbody')
 
       this._scroll.finishPullUp()
-      this._scroll.refresh()
 
-      tbody.appendChild(this.pullupWrapper)
+      if (refresh === true) {
+        this.tableInstance.refresh({
+          data: true,
+          struct: true,
+          callback: () => {
+            this._scroll.refresh()
+            tbody.appendChild(this.pullupWrapper)
+          }
+        })
+      } else {
+        this._scroll.refresh()
+        tbody.appendChild(this.pullupWrapper)
+      }
     }
   }
 }

@@ -210,11 +210,8 @@ export default class Pager {
         this.state.pageSize = targetSize
         this.state.currentPage = computedCurrentPage
 
-        // 调整表格结构
-        this.tableInstance.refreshStruct()
-
-        // 重填数据
-        this.tableInstance.refresh()
+        // 调整表格结构并重填数据
+        this.tableInstance.refresh({ data: true, struct: true })
       })
 
       sizeSelect.appendChild(select)

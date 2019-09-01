@@ -212,7 +212,7 @@ class FlexTable {
     // 优化首屏渲染效果
     setTimeout(() => {
       this.table.style.visibility = 'visible'
-    }, 16)
+    }, 36)
 
     setTimeout(() => {
       document.body.removeChild(style)

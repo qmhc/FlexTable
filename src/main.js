@@ -183,7 +183,9 @@ const table = new FlexTable({
       accordion: false,
       transition: true
     },
-    resizer: {}, // 暂无独立配置项, 只需指定一个空对象
+    resizer: {
+      force: true
+    },
     sorter: {
       multiple: true, // 开启多列排序功能
       multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift
@@ -213,21 +215,20 @@ const table = new FlexTable({
     // },
     scroller: {
       height: 450,
-      mouse: false,
+      mouse: true,
       wheel: true,
       wheelDistance: 20,
-      // pullup: (instance, finish) => {
-      //   const { data } = instance
-      //   const newData = [...data, ...makeData(10)]
+      pullup: (instance, finish) => {
+        const { data } = instance
+        const newData = [...data, ...makeData(10)]
 
-      //   setTimeout(() => {
-      //     instance.data = newData
-      //     instance.refreshStruct()
-      //     instance.refresh()
+        setTimeout(() => {
+          instance.data = newData
+          // instance.refresh({ data: true, struct: true })
 
-      //     finish()
-      //   }, 1000)
-      // },
+          finish(true)
+        }, 1000)
+      },
       pullupThreshold: 10,
       pullupTip: '加载中...'
     }

@@ -1,4 +1,4 @@
-import { getUuid, getType, renderElement } from '@/utils'
+import { getUuid, getType, renderElement, setClassName } from '@/utils'
 import {
   temp,
   tableTemp,
@@ -28,6 +28,9 @@ export default function render (options) {
     case 'function': {
       this.rowClassName = rowClassName
       break
+    }
+    default: {
+      console.warn(`Illegal 'rowClassName' property type.`)
     }
   }
 
@@ -118,8 +121,62 @@ export default function render (options) {
   }
 
   // 暴露表格主体渲染方法
-  this.registerMethod('refreshStruct', renderBodyStruct)
-  this.registerMethod('refresh', renderBodyData)
+  // 使用 setTimeout 方法让表格的 refresh 方法尽量靠后执行, 并防止重复执行
+  let refreshTimer = 0
+  let refreshData = false
+  let refreshStruct = false
+
+  const refreshCallback = []
+  const defaultOptions = {
+    data: true,
+    struct: false
+  }
+
+  this.registerMethod('refresh', (options = {}) => {
+    clearTimeout(refreshTimer)
+
+    options = {
+      ...defaultOptions,
+      ...options
+    }
+
+    const { data, struct, callback } = options
+
+    if (!refreshData && data === true) {
+      refreshData = true
+    }
+
+    if (!refreshStruct && struct === true) {
+      refreshStruct = true
+    }
+
+    if (getType(callback) === 'function') {
+      refreshCallback.push(callback)
+    }
+
+    refreshTimer = setTimeout(() => {
+      if (refreshStruct === true) {
+        renderBodyStruct.apply(this)
+        refreshStruct = false
+      }
+
+      if (refreshData === true) {
+        renderBodyData.apply(this)
+        renderFooter.apply(this, [true])
+        refreshData = false
+      }
+
+      if (refreshCallback.length) {
+        window.requestAnimationFrame(() => {
+          for (let i = 0, len = refreshCallback.length; i < len; i++) {
+            refreshCallback[i]()
+          }
+
+          refreshCallback.length = 0
+        })
+      }
+    }, 0)
+  })
 
   // 加载插件
   for (let i = 0, len = this.plugins.length; i < len; i++) {
@@ -424,8 +481,8 @@ function renderBodyData () {
 }
 
 // 表格脚部渲染
-function renderFooter () {
-  const { data, columnProps, state, dangerous } = this
+function renderFooter (refresh = false) {
+  const { data, columnProps, dangerous } = this
 
   const columnData = new Map()
 
@@ -441,57 +498,38 @@ function renderFooter () {
     }
   }
 
-  const tr = trTemp.cloneNode()
+  let tr
+
+  if (refresh) {
+    tr = this.table.querySelector('.it-tfoot > .it-tr')
+  } else {
+    tr = trTemp.cloneNode()
+  }
 
   for (let i = 0, len = columnProps.length; i < len; i++) {
     const { footer, width } = columnProps[i]
-    const td = tdTemp.cloneNode()
-    td.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
 
-    const content = temp.cloneNode()
-    content.className = 'it-foot-content'
-
-    const result = footer(columnData.get(i), { ...state })
+    const result = footer(columnData.get(i))
     const title = result || ''
 
-    renderElement(content, title, dangerous)
+    let content
 
-    td.appendChild(content)
-    tr.appendChild(td)
+    if (refresh) {
+      content = tr.querySelector(`.it-td:nth-of-type(${i + 1}) .it-foot-content`)
+      renderElement(content, title, dangerous)
+    } else {
+      const td = tdTemp.cloneNode()
+      td.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
+
+      content = temp.cloneNode()
+      content.className = 'it-foot-content'
+
+      renderElement(content, title, dangerous)
+
+      td.appendChild(content)
+      tr.appendChild(td)
+    }
   }
 
   return tr
-}
-
-// 为 node 设置类名
-function setClassName (node, className) {
-  const type = getType(className)
-
-  switch (type) {
-    case 'string': {
-      node.classList.add(className)
-
-      return true
-    }
-    case 'array': {
-      for (let i = 0, len = className.length; i < len; i++) {
-        node.classList.add(className[i])
-      }
-
-      return true
-    }
-    case 'object': {
-      for (const name in className) {
-        if (className[name]) {
-          node.classList.add(name)
-        } else {
-          node.classList.remove(name)
-        }
-      }
-
-      return true
-    }
-  }
-
-  return false
 }

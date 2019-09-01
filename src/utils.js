@@ -447,3 +447,40 @@ export function renderElement (node, html, dangerous = false) {
     }
   }
 }
+
+/**
+ * 为 element 设置类名
+ * @param {HTMLElement} node 需要设置类名的 element
+ * @param {String|Array|Object} className 需要设置的类名
+ */
+export function setClassName (node, className) {
+  const type = getType(className)
+
+  switch (type) {
+    case 'string': {
+      node.classList.add(className)
+
+      return true
+    }
+    case 'array': {
+      for (let i = 0, len = className.length; i < len; i++) {
+        node.classList.add(className[i])
+      }
+
+      return true
+    }
+    case 'object': {
+      for (const name in className) {
+        if (className[name]) {
+          node.classList.add(name)
+        } else {
+          node.classList.remove(name)
+        }
+      }
+
+      return true
+    }
+  }
+
+  return false
+}
