@@ -35,9 +35,9 @@ export function checkPathByClass (node, className) {
  * @param {*} defaultIndex 默认选项的索引值
  */
 export function createSelect (options, defaultIndex = -1, placement = 'bottom') {
-  for (const i in options) {
+  for (let i = 0, len = options.length; i < len; i++) {
     const option = options[i]
-    if (typeof option !== 'object') {
+    if (getType(option) !== 'object') {
       options[i] = {
         title: option.toString(),
         value: option
@@ -271,8 +271,9 @@ export function sortByProps (obj, props) {
           accessor
         } = prop
 
+        const params = prop.params || [] // 传入读取器的额外参数
         const desc = type === 'desc'
-        const result = sorter(accessor(prev), accessor(next))
+        const result = sorter(accessor(prev, ...params), accessor(next, ...params))
 
         results.push(desc ? -result : result)
         // 若不为0则无需进行下一层排序
@@ -483,4 +484,125 @@ export function setClassName (node, className) {
   }
 
   return false
+}
+
+/**
+ * 为 html 对象设置动画效果
+ * @param {HTMLElement} element 需要动画的 html 对象
+ * @param {Object} styles 需要进行动画的样式
+ * @param {Function} callback 动画完成后的回调函数
+ */
+export function animate (element, styles, callback) {
+  if (getType(styles) !== 'object') {
+    return false
+  }
+
+  const raf = window.requestAnimationFrame || window.setTimeout
+
+  const fromStyles = []
+  const toStyles = []
+
+  for (const name in styles) {
+    const value = styles[name]
+
+    let from
+    let to
+
+    switch (getType(value)) {
+      case 'number':
+      case 'string': {
+        from = window.getComputedStyle(element)[name]
+        to = value
+        break
+      }
+      case 'array': {
+        from = value[0]
+        to = value[1]
+        break
+      }
+      case 'object': {
+        from = value.from || window.getComputedStyle(element)[name]
+        to = value.to
+        break
+      }
+      default: {
+        continue
+      }
+    }
+
+    fromStyles.push({
+      name,
+      value: from
+    })
+
+    toStyles.push({
+      name,
+      value: to
+    })
+  }
+
+  raf(() => {
+    for (let i = 0, len = fromStyles.length; i < len; i++) {
+      const { name, value } = fromStyles[i]
+      element.style[name] = value
+    }
+
+    if (getType(callback) === 'function') {
+      // 添加防抖, 防止多属性变化导致多次回调
+      let timer = 0
+      const transitionEnd = () => {
+        clearTimeout(timer)
+
+        timer = setTimeout(() => {
+          element.removeEventListener('transitionend', transitionEnd)
+          callback(element)
+        }, 36)
+      }
+
+      element.addEventListener('transitionend', transitionEnd)
+    }
+
+    raf(() => {
+      for (let i = 0, len = toStyles.length; i < len; i++) {
+        const { name, value } = toStyles[i]
+        element.style[name] = value
+      }
+    })
+  })
+}
+
+/**
+ * 使用钩子函数为 html 添加动画效果
+ * @param {HTMLElement} element 需要动画的 html 对象
+ * @param {Object} hooks 控制动画效果的钩子函数
+ */
+export function animateByHooks (element, hooks) {
+  const raf = window.requestAnimationFrame || window.setTimeout
+
+  const { before, start, finish, after } = hooks
+
+  if (getType(before) === 'function') {
+    before(element)
+  }
+
+  raf(() => {
+    if (getType(start) === 'function') {
+      start(element)
+    }
+
+    if (getType(after) === 'function') {
+      const transitionEnd = () => {
+        element.removeEventListener('transitionend', transitionEnd)
+        after(element)
+      }
+
+      element.addEventListener('transitionend', transitionEnd)
+    }
+
+    raf(() => {
+      if (getType(finish) === 'function') {
+        finish(element)
+      }
+    })
+  })
 }

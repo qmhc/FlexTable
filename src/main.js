@@ -37,7 +37,7 @@ const getColumns = () => {
           key: 'firstName',
           filter: true,
           sort: {
-            type: 1,
+            // type: 1,
             method: (prev, next) => {
               return prev.toString().localeCompare(next)
             }
@@ -50,9 +50,23 @@ const getColumns = () => {
           },
           key: 'lastName',
           filter: {
-            able: false,
-            type: 'date',
-            dateType: 'datetime-local'
+            able: true,
+            // type: 'date',
+            // dateType: 'datetime-local'
+            type: 'check',
+            options: [
+              { title: 'Starts with Y', value: 'Y' },
+              { title: 'Starts with N', value: 'N' },
+              { title: 'Starts with H', value: 'H' }
+            ],
+            method: (value, filter) => {
+              for (let i = 0, len = filter.length; i < len; i++) {
+                if (value.toString().startsWith(filter[i])) {
+                  return true
+                }
+              }
+              return false
+            }
           },
           edit: {
             able: () => false
@@ -109,7 +123,7 @@ const getColumns = () => {
               sum += value
             }
 
-            span.textContent = `Max: ${Math.round(sum / data.length)}`
+            span.textContent = `Avg: ${Math.round(sum / data.length)}`
             return span
           },
           filter: {
@@ -203,8 +217,7 @@ const table = new FlexTable({
     // },
     filter: {
       filterAll: true, // 所有类均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
-      openAction: true, // filter 是否具有开关按钮
-      filterOpen: false // filter 具有开关按钮, 设置是否默认打开 openAction 为 false 时忽略
+      highlight: true // 设置对符合过滤条件的结果进行高亮
     },
     // layer: {
     //   loading: true,
@@ -218,17 +231,17 @@ const table = new FlexTable({
       mouse: true,
       wheel: true,
       wheelDistance: 20,
-      pullup: (instance, finish) => {
-        const { data } = instance
-        const newData = [...data, ...makeData(10)]
+      // pullup: (instance, finish) => {
+      //   const { data } = instance
+      //   const newData = [...data, ...makeData(10)]
 
-        setTimeout(() => {
-          instance.data = newData
-          // instance.refresh({ data: true, struct: true })
+      //   setTimeout(() => {
+      //     instance.data = newData
+      //     // instance.refresh({ data: true, struct: true })
 
-          finish(true)
-        }, 1000)
-      },
+      //     finish(true)
+      //   }, 1000)
+      // },
       pullupThreshold: 10,
       pullupTip: '加载中...'
     }

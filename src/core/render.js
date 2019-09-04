@@ -456,10 +456,11 @@ function renderBodyData () {
       }
 
       for (let j = 0, len = columnProps.length; j < len; j++) {
-        const { accessor } = columnProps[j]
+        const props = columnProps[j]
+        const { accessor } = props
         const td = tds[j]
 
-        const result = accessor(rowData)
+        const result = accessor(rowData, props)
         const html = (result === 0 || result) ? result : ''
 
         renderElement(td, html, dangerous)
@@ -482,7 +483,8 @@ function renderBodyData () {
 
 // 表格脚部渲染
 function renderFooter (refresh = false) {
-  const { data, columnProps, dangerous } = this
+  const { columnProps, dangerous } = this
+  const data = this.state.computedData
 
   const columnData = new Map()
 
@@ -493,8 +495,12 @@ function renderFooter (refresh = false) {
   for (let i = 0, len = data.length; i < len; i++) {
     const rowData = data[i]
     for (let j = 0, len = columnProps.length; j < len; j++) {
-      const { accessor } = columnProps[j]
-      columnData.get(j).push(accessor(rowData))
+      const props = columnProps[j]
+
+      let { accessor, reflectAccessor } = props
+
+      accessor = reflectAccessor || accessor
+      columnData.get(j).push(accessor(rowData, props))
     }
   }
 

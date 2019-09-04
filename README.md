@@ -32,7 +32,7 @@ Import on demand.
 import FlexTable from '@qmhc/flex-table/dist/flex-table.core'
 import Sorter from '@qmhc/flex-table/dist/plugin/Sorter'
 
-import '@qmhc/flex-table/dist/core/flex-table.core.css'
+import '@qmhc/flex-table/dist/flex-table.core.css'
 import '@qmhc/flex-table/dist/plugin/Sorter.css'
 ```
 
@@ -50,11 +50,11 @@ Import on demand.
 
 ```html
 <!-- js -->
-<script src="../dist/core/flex-table.core.js"></script>
+<script src="../dist/flex-table.core.js"></script>
 <script src="../dist/plugin/Sorter.js"></script>
 
 <!-- css -->
-<link rel="stylesheet" href="../dist/core/flex-table.core.css">
+<link rel="stylesheet" href="../dist/flex-table.core.css">
 <link rel="stylesheet" href="../dist/plugin/Sorter.css">
 ```
 
@@ -184,11 +184,9 @@ A complete configuration.
     filter: {
       // all columns defalut filter
       // if there are separate settings for the column, the column settings are preferred
-      filterAll: true,
+      filterAll: false,
 
-      openAction: false, // filter toggle switch
-
-      filterOpen: true
+      highlight: true, // highlight filter results
     },
 
     layer: {
@@ -229,8 +227,8 @@ Complete configuration of `columns`.
   name: 'First Name',
 
   // tell FlexTable how to read the data
-  // parameter is row data, return refers to the name property
-  accessor: data => data.firstName,
+  // parameter are row data and column props, return refers to the name property
+  accessor: (data, props) => data.firstName,
 
   // column key, it is important, ensure that FlexTable can read the original data
   key: 'firstName',
@@ -260,7 +258,7 @@ Complete configuration of `columns`.
   filter: {
     able: true,
     type: 'text',
-    // options: ['prepare', 'process', 'finish'] // use when type is 'select'
+    // options: ['prepare', { title: 'process', value: 'process' }, 'finish'] // use when type is 'select'
     value: undefined, // defualt filter value,
 
     // filter method, column value - filter value - original data - row data

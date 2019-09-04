@@ -163,3 +163,29 @@ window.addEventListener('resize', () => {
     })
   }, 300)
 })
+
+// 注册监听点击了 element 外部的事件
+const outsides = []
+const clickOutsideEvent = new Event('clickoutside')
+
+document.addEventListener('click', event => {
+  const target = event.target
+
+  for (let i = 0, len = outsides.length; i < len; i++) {
+    const element = outsides[i]
+
+    if (element !== target && !element.contains(target)) {
+      element.dispatchEvent && element.dispatchEvent(clickOutsideEvent)
+    }
+  }
+})
+
+export function registerClickOutside (element) {
+  if (element === document.body) {
+    return false
+  }
+
+  outsides.push(element)
+
+  return true
+}

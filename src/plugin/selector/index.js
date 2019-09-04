@@ -85,14 +85,15 @@ export default class Selector {
         },
         resize: false,
         sort: false,
-        editable: false,
-        filter: {
-          type: 'check',
-          method: (value, filter) => {
-            const selected = this.selection.includes(value._itId)
-            return filter ? selected : true
-          }
-        },
+        edit: false,
+        // filter: {
+        //   type: 'check',
+        //   method: (value, filter) => {
+        //     const selected = this.selection.includes(value._itId)
+        //     return filter ? selected : true
+        //   }
+        // },
+        filter: false,
         defaultWidth: 32
       }
 

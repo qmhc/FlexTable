@@ -253,7 +253,7 @@ export default class Sorter {
       (value, index) => {
         const props = columnProps.find(item => item.id === value)
         const type = types[index] === 1 ? 'asc' : 'desc'
-        const { accessor, sort, index: key } = props
+        const { accessor, sort, index: key, reflectAccessor } = props
 
         switch (types[index]) {
           case 1: {
@@ -268,7 +268,12 @@ export default class Sorter {
 
         sort.type = type
 
-        return { type, accessor, sorter: sort.method }
+        return {
+          type,
+          accessor: reflectAccessor || accessor, // 使用原始读取器排序
+          sorter: sort.method,
+          params: [props] // 额外参数
+        }
       }
     )
 

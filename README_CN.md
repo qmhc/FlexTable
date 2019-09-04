@@ -32,7 +32,7 @@ import '@qmhc/flex-table/dist/flex-table.css'
 import FlexTable from '@qmhc/flex-table/dist/flex-table.core'
 import Sorter from '@qmhc/flex-table/dist/plugin/Sorter'
 
-import '@qmhc/flex-table/dist/core/flex-table.core.css'
+import '@qmhc/flex-table/dist/flex-table.core.css'
 import '@qmhc/flex-table/dist/plugin/Sorter.css'
 ```
 
@@ -50,11 +50,11 @@ import '@qmhc/flex-table/dist/plugin/Sorter.css'
 
 ```html
 <!-- js -->
-<script src="../dist/core/flex-table.core.js"></script>
+<script src="../dist/flex-table.core.js"></script>
 <script src="../dist/plugin/Sorter.js"></script>
 
 <!-- css -->
-<link rel="stylesheet" href="../dist/core/flex-table.core.css">
+<link rel="stylesheet" href="../dist/flex-table.core.css">
 <link rel="stylesheet" href="../dist/plugin/Sorter.css">
 ```
 
@@ -165,9 +165,8 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
     },
 
     filter: {
-      filterAll: true, // 所有列均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
-      openAction: false, // filter 是否具有开关按钮
-      filterOpen: true // 设置是否默认打开 filter, openAction 为 false 时忽略
+      filterAll: false, // 所有列均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
+      highlight: true // 设置对符合过滤条件的结果进行高亮
     },
 
     layer: {
@@ -199,8 +198,8 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   // 表头列名, 可以是 Number String Array<HTMLElemnt> NodeList HTMLElement
   name: 'First Name',
 
-  // 在渲染数据时告诉 FlexTable 该怎么读取数据, 参数为行数据, 返回值参考 name 属性
-  accessor: data => data.firstName,
+  // 在渲染数据时告诉 FlexTable 该怎么读取数据, 参数为行数据和列属性, 返回值参考 name 属性
+  accessor: (data, props) => data.firstName,
 
   // 该列的属性名, 这很重要, 保证 FlexTable 能读取到数据的原始值
   key: 'firstName',
@@ -231,7 +230,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   filter: {
     able: true,
     type: 'text',
-    // options: ['prepare', 'process', 'finish'] // 'select' 类型时使用
+    // options: ['prepare', { title: 'process', value: 'process' }, 'finish'] // 'select' 类型时使用
     value: undefined, // 默认过滤值,
 
     // 参数分别为: 读取的值, 过滤控件的值, 原始值, 行数据

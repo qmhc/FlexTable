@@ -4,11 +4,11 @@
  */
 
 import { temp } from 'core/temps'
-import { getType, checkPathByClass, renderElement } from '@/utils'
+import { getType, checkPathByClass, renderElement, animateByHooks } from '@/utils'
 
 import './style.scss'
 
-const raf = window.requestAnimationFrame || window.setTimeout
+// const raf = window.requestAnimationFrame || window.setTimeout
 
 export default class Extender {
   constructor (tableInstance, options = {}) {
@@ -47,7 +47,7 @@ export default class Extender {
           },
           resize: false,
           sort: false,
-          editable: false,
+          edit: false,
           filter: false,
           defaultWidth: 32
         }
@@ -174,25 +174,44 @@ export default class Extender {
           renderElement(extendWrapper, result, dangerous)
 
           if (transition) {
-            extendWrapper.style.height = '0'
-            extendWrapper.style.overflow = 'hidden'
+            // extendWrapper.style.height = '0'
+            // extendWrapper.style.overflow = 'hidden'
 
-            raf(() => {
-              if (extendWrapper.scrollHeight !== 0) {
-                extendWrapper.style.height = `${extendWrapper.scrollHeight}px`
-              } else {
-                extendWrapper.style.height = ''
+            // const transitionEnd = () => {
+            //   this._scrollRefresh()
+            //   extendWrapper.removeEventListener('transitionend', transitionEnd)
+            //   extendWrapper.style.height = ''
+            //   extendWrapper.style.overflow = ''
+            // }
+
+            // extendWrapper.addEventListener('transitionend', transitionEnd)
+
+            // raf(() => {
+            //   if (extendWrapper.scrollHeight !== 0) {
+            //     extendWrapper.style.height = `${extendWrapper.scrollHeight}px`
+            //   } else {
+            //     extendWrapper.style.height = ''
+            //   }
+            // })
+
+            animateByHooks(extendWrapper, {
+              start: el => {
+                el.style.height = '0'
+                el.style.overflow = 'hidden'
+              },
+              finish: el => {
+                if (el.scrollHeight !== 0) {
+                  el.style.height = `${el.scrollHeight}px`
+                } else {
+                  el.style.height = ''
+                }
+              },
+              after: el => {
+                el.style.height = ''
+                el.style.overflow = ''
+                this._scrollRefresh()
               }
             })
-
-            const transitionEnd = () => {
-              this._scrollRefresh()
-              extendWrapper.removeEventListener('transitionend', transitionEnd)
-              extendWrapper.style.height = ''
-              extendWrapper.style.overflow = ''
-            }
-
-            extendWrapper.addEventListener('transitionend', transitionEnd)
 
             trGroup.appendChild(extendWrapper)
           } else {
@@ -278,18 +297,34 @@ export default class Extender {
       return false
     }
 
-    wrapper.style.height = `${wrapper.scrollHeight}px`
-    wrapper.style.overflow = 'hidden'
+    // wrapper.style.height = `${wrapper.scrollHeight}px`
+    // wrapper.style.overflow = 'hidden'
 
-    raf(() => {
-      if (wrapper.scrollHeight !== 0) {
-        wrapper.style.height = '0'
+    // raf(() => {
+    //   if (wrapper.scrollHeight !== 0) {
+    //     wrapper.style.height = '0'
+    //   }
+    // })
+
+    // wrapper.addEventListener('transitionend', () => {
+    //   wrapper.parentNode.removeChild(wrapper)
+    //   this._scrollRefresh()
+    // })
+
+    animateByHooks(wrapper, {
+      start: el => {
+        el.style.height = `${el.scrollHeight}px`
+        el.style.overflow = 'hidden'
+      },
+      finish: el => {
+        if (el.scrollHeight !== 0) {
+          el.style.height = '0'
+        }
+      },
+      after: el => {
+        el.parentNode.removeChild(el)
+        this._scrollRefresh()
       }
-    })
-
-    wrapper.addEventListener('transitionend', () => {
-      wrapper.parentNode.removeChild(wrapper)
-      this._scrollRefresh()
     })
   }
 

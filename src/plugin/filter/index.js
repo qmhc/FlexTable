@@ -6,12 +6,11 @@
 import {
   temp,
   theadTemp,
-  trTemp,
-  thTemp,
   spanTemp,
   inputTemp
 } from 'core/temps'
-import { getType, createSelect, html2Element } from '@/utils'
+import { registerClickOutside } from 'core/events'
+import { getType, checkPathByClass, html2Element, animate } from '@/utils'
 
 import './style.scss'
 
@@ -24,12 +23,11 @@ export default class Filter {
     const filterable = getType(options.filter) === 'object'
 
     if (filterable) {
-      const { filterAll, filterOpen, openAction } = options.filter
+      const { filterAll, highlight } = options.filter
 
       state.filter = {
         filterAll: filterAll === true, // 设置是否默认所有列都添加筛选
-        filterOpen: filterOpen === true,
-        openAction: openAction !== false,
+        highlight: highlight !== false,
         filterable
       }
     } else {
@@ -38,15 +36,8 @@ export default class Filter {
       }
     }
 
+    this.controls = []
     this.state = state.filter
-
-    // this._defaultFilterOptions = [
-    //   { type: 'text' },
-    //   { type: 'number' },
-    //   { type: 'check' },
-    //   { type: 'date', dateType: 'datetime-local' },
-    //   { type: 'select', options: [] }
-    // ]
   }
 
   afterContruct () {
@@ -58,12 +49,10 @@ export default class Filter {
   }
 
   create () {
-    const { filterable, filterAll, filterOpen, openAction } = this.state
+    const { filterable, filterAll } = this.state
     const { table, columnProps } = this.tableInstance
-    const tbodyGroup = table.querySelector('.it-tbody-group')
-
+    const theadItems = table.querySelectorAll('.it-thead.shadow > .it-tr .it-th')
     const filterGroup = theadTemp.cloneNode()
-    const tr = trTemp.cloneNode()
 
     const defaultFilter = {
       able: filterable && filterAll,
@@ -74,16 +63,9 @@ export default class Filter {
 
     filterGroup.classList.add('filter', 'resize')
 
-    for (const i in columnProps) {
+    for (let i = 0, len = theadItems.length; i < len; i++) {
       const props = columnProps[i]
-      const { width, filter, accessor, id, className } = props
-      const th = thTemp.cloneNode()
-
-      th.style.cssText = `flex: ${width} 0 auto; width: ${width}px`
-
-      if (getType(className) === 'string') {
-        th.classList.add(className)
-      }
+      const { filter, id, accessor, reflectAccessor } = props
 
       switch (getType(filter)) {
         case 'number':
@@ -109,11 +91,11 @@ export default class Filter {
           break
         }
         case 'array': {
-          const [min, max] = filter
           props.filter = {
             ...defaultFilter,
-            value: [~~min, ~~max],
-            method: this._defaultNumberFilter
+            value: [],
+            method: this._defaultCheckFilter,
+            options: filter
           }
           break
         }
@@ -128,6 +110,11 @@ export default class Filter {
 
           if (filter.type === 'select') {
             _default.options = []
+          }
+
+          if (filter.type === 'check') {
+            _default.options = []
+            _default.method = this._defaultCheckFilter
           }
 
           props.filter = {
@@ -147,27 +134,104 @@ export default class Filter {
       const { able, type } = props.filter
 
       if (able) {
+        const wrapper = temp.cloneNode()
+        const icon = this._createFilterIcon(16, '')
+
+        wrapper.className = 'it-filter-wrapper'
+        wrapper.appendChild(icon)
+
+        const container = temp.cloneNode()
+        container.className = 'it-filter-container'
+
+        const content = temp.cloneNode()
+        content.className = 'it-filter-content'
+
+        const arrow = temp.cloneNode()
+        arrow.className = 'it-filter-arrow'
+
+        const inner = temp.cloneNode()
+        inner.className = 'it-filter-inner'
+
+        content.appendChild(arrow)
+        content.appendChild(inner)
+        container.appendChild(content)
+
+        wrapper.appendChild(container)
+
+        registerClickOutside(wrapper)
+
+        const instance = this._createControlInstance(wrapper)
+
+        this.controls.push(instance)
+
+        wrapper.addEventListener('click', event => {
+          event.stopPropagation()
+
+          this._hideAllControls()
+
+          if (instance.active) {
+            instance.hide()
+          } else {
+            instance.show()
+          }
+        })
+
+        wrapper.addEventListener('clickoutside', () => {
+          if (instance.active) {
+            instance.hide()
+          }
+        })
+
+        container.addEventListener('click', event => {
+          event.stopPropagation()
+        })
+
+        const afterFilter = params => {
+          const { value } = params
+
+          let valueFlag
+
+          if (getType(value) === 'array') {
+            valueFlag = !!value.filter(item => (item || item === 0)).length
+          } else {
+            valueFlag = value || value === 0
+          }
+
+          if (valueFlag) {
+            wrapper.classList.add('filter')
+          } else {
+            wrapper.classList.remove('filter')
+          }
+
+          this.filterValueChange = true
+          this.tableInstance.refresh()
+
+          if (getType(this.tableInstance.scrollTo) === 'function') {
+            this.tableInstance.scrollTo(0, 0)
+          }
+        }
+
         let filterControl = null
 
         switch (type) {
           case 'text': {
-            filterControl = this._renderTextControl(id)
+            filterControl = this._renderTextControl(id, afterFilter)
             break
           }
           case 'number': {
-            filterControl = this._renderNumberControl(id)
+            filterControl = this._renderNumberControl(id, afterFilter)
             break
           }
           case 'select': {
-            filterControl = this._renderSelectControl(id)
+            filterControl = this._renderSelectControl(id, afterFilter)
             break
           }
           case 'date': {
-            filterControl = this._renderDateControl(id)
+            filterControl = this._renderDateControl(id, afterFilter)
             break
           }
           case 'check': {
-            filterControl = this._renderCheckControl(id)
+            filterControl = this._renderCheckControl(id, afterFilter)
             break
           }
           default: {
@@ -175,61 +239,15 @@ export default class Filter {
           }
         }
 
-        th.appendChild(filterControl)
-      } else {
-        th.innerHTML = ''
+        inner.appendChild(filterControl)
+        theadItems[i].appendChild(wrapper)
       }
 
-      // 原始读取器
-      props.reflectAccessor = accessor
-      tr.appendChild(th)
+      props.reflectAccessor = reflectAccessor || accessor
+
+      props.accessor = this._getPorxyAccessor(props.accessor)
     }
 
-    filterGroup.appendChild(tr)
-
-    if (openAction) {
-      const action = temp.cloneNode()
-
-      action.className = 'it-filter-action'
-
-      const arrow = spanTemp.cloneNode()
-
-      arrow.textContent = '≡'
-      arrow.className = 'it-arrow'
-      action.appendChild(arrow)
-
-      if (filterOpen) {
-        action.classList.add('open')
-        tr.classList.add('open')
-        filterGroup.style.zIndex = 1
-      }
-
-      action.addEventListener('click', () => {
-        if (action.classList.contains('open')) {
-          action.classList.remove('open')
-          tr.classList.remove('open')
-          filterGroup.style.zIndex = ''
-
-          this.state.filterOpen = false
-        } else {
-          action.classList.add('open')
-          tr.classList.add('open')
-
-          setTimeout(() => {
-            filterGroup.style.zIndex = 1
-          }, 300)
-
-          this.state.filterOpen = true
-        }
-      })
-
-      filterGroup.appendChild(action)
-    } else {
-      tr.classList.add('no-action')
-      filterGroup.style.zIndex = 1
-    }
-
-    tbodyGroup.parentNode.insertBefore(filterGroup, tbodyGroup)
     this.created = true
   }
 
@@ -243,30 +261,32 @@ export default class Filter {
     }
 
     const { columnProps } = this.tableInstance
+    // const { highlight } = this.state
 
     let filterData = data
-    let resultCount = 0
+    // let resultCount = 0
 
     for (const props of columnProps) {
-      const { filter, reflectAccessor, key } = props
+      const { accessor, filter, reflectAccessor, key } = props
       const { able, value, method } = filter
 
       let valueFlag
 
       if (getType(value) === 'array') {
-        valueFlag = getType(value[0]) === 'number' && getType(value[1]) === 'number'
+        valueFlag = !!value.filter(item => (item || item === 0)).length
       } else {
         valueFlag = value || value === 0
       }
 
-      props.accessor = reflectAccessor
+      // 记录原始的读取器
+      const _accessor = reflectAccessor || accessor
 
       if (able && getType(method) === 'function' && valueFlag) {
         const resultData = []
 
         for (const i in filterData) {
           const rowData = filterData[i]
-          const reflectValue = reflectAccessor(rowData)
+          const reflectValue = _accessor(rowData)
 
           const originValue = key ? rowData[key] : null
 
@@ -274,15 +294,21 @@ export default class Filter {
 
           if (result === true) {
             resultData.push(rowData)
-            resultCount++
+            // resultCount++
           }
         }
 
         filterData = resultData
 
-        if (resultCount) {
-          props.accessor = this._getPorxyAccessor(reflectAccessor, value)
-        }
+        // if (highlight && resultCount) {
+        //   // 保存原始读取器
+        //   props.reflectAccessor = _accessor
+        //   // 对现读取器进行代理
+        //   props.accessor = this._getPorxyAccessor(accessor, value)
+        // } else {
+        //   // 取消读取器代理
+        //   props.accessor = accessor
+        // }
       }
     }
 
@@ -294,6 +320,41 @@ export default class Filter {
 
   dispatchChange () {
     this.filterValueChange = true
+  }
+
+  _createControlInstance (element) {
+    const container = element.querySelector('.it-filter-container')
+
+    return {
+      el: element,
+      active: false,
+      hide () {
+        element.classList.remove('active')
+
+        animate(container, { opacity: 0 }, () => {
+          container.style.display = ''
+          this.active = false
+        })
+      },
+      show () {
+        element.classList.add('active')
+        container.style.display = 'block'
+
+        animate(container, { opacity: 1 })
+
+        this.active = true
+      }
+    }
+  }
+
+  _hideAllControls () {
+    for (let i = 0, len = this.controls.length; i < len; i++) {
+      const instance = this.controls[i]
+
+      if (instance.active) {
+        instance.hide()
+      }
+    }
   }
 
   _defaultTextFilter (value, filter) {
@@ -322,176 +383,347 @@ export default class Filter {
     return res
   }
 
+  _defaultCheckFilter (value, filter) {
+    return filter.includes(value)
+  }
+
   _getProps (id) {
     const { columnProps } = this.tableInstance
     return columnProps.find(props => props.id === id)
   }
 
-  _renderTextControl (id) {
+  _renderTextControl (id, callback) {
     const props = this._getProps(id)
+    const labelText = props.filter.label || props.name
 
     const control = temp.cloneNode()
-    control.className = 'it-filter'
+    control.className = 'it-filter-control'
 
-    const textInput = inputTemp.cloneNode()
-    textInput.setAttribute('type', 'text')
+    const input = inputTemp.cloneNode()
+    input.setAttribute('type', 'text')
+
+    const label = spanTemp.cloneNode()
+    label.className = 'it-filter-label left'
+    label.textContent = labelText
 
     let timer = 0
-    textInput.addEventListener('input', () => {
+    input.addEventListener('input', () => {
       clearTimeout(timer)
 
       timer = setTimeout(() => {
-        const value = textInput.value
+        const value = input.value
         props.filter.value = value
 
-        this.filterValueChange = true
-        this.tableInstance.refresh()
-
-        if (getType(this.tableInstance.scrollTo) === 'function') {
-          this.tableInstance.scrollTo(0, 0)
+        if (getType(callback) === 'function') {
+          callback(props.filter)
         }
       }, 300)
     })
 
-    control.appendChild(textInput)
+    control.appendChild(label)
+    control.appendChild(input)
     return control
   }
 
-  _renderDateControl (id) {
+  _renderDateControl (id, callback) {
     const props = this._getProps(id)
+    const labelText = props.filter.label || props.name
 
-    const { dateType } = props.filterOptions
+    const { dateType } = props.filter
 
     const control = temp.cloneNode()
-    control.className = 'it-filter'
+    control.className = 'it-filter-control'
 
     const dateInput = inputTemp.cloneNode()
     dateInput.setAttribute('type', dateType || 'date')
+
+    const label = spanTemp.cloneNode()
+    label.className = 'it-filter-label left'
+    label.textContent = labelText
 
     dateInput.addEventListener('change', () => {
       const value = dateInput.value
       props.filter.value = value
 
-      this.filterValueChange = true
-      this.tableInstance.refresh()
+      if (getType(callback) === 'function') {
+        callback(props.filter)
+      }
     })
 
+    control.appendChild(label)
     control.appendChild(dateInput)
     return control
   }
 
-  _renderNumberControl (id) {
+  _renderNumberControl (id, callback) {
     const props = this._getProps(id)
+
+    let minText = 'Min'
+    let maxText = 'Max'
+
+    if (getType(props.filter.label) === 'array') {
+      minText = props.filter.label[0] || minText
+      maxText = props.filter.label[1] || maxText
+    }
 
     props.filter.value = getType(props.filter.value) === 'array' ? props.filter.value : new Array(2)
 
     const control = temp.cloneNode()
-    control.className = 'it-filter'
+    control.className = 'it-filter-control'
 
-    const minNumberInput = inputTemp.cloneNode()
-    minNumberInput.setAttribute('type', 'number')
-    minNumberInput.setAttribute('placeholder', 'min')
+    const minInput = inputTemp.cloneNode()
+    minInput.setAttribute('type', 'number')
+    minInput.setAttribute('placeholder', 'min')
+    minInput.style.marginBottom = '1em'
 
-    minNumberInput.addEventListener('change', () => {
-      const value = minNumberInput.value
+    const minLabel = spanTemp.cloneNode()
+    minLabel.className = 'it-filter-label left'
+    minLabel.textContent = minText
+
+    minInput.addEventListener('change', () => {
+      const value = minInput.value
+
       props.filter.value[0] = value !== '' ? +value : undefined
-      this.filterValueChange = true
-      this.tableInstance.refresh()
+
+      if (getType(callback) === 'function') {
+        callback(props.filter)
+      }
     })
 
-    const maxNumberInput = inputTemp.cloneNode()
-    maxNumberInput.setAttribute('type', 'number')
-    maxNumberInput.setAttribute('placeholder', 'max')
+    const maxInput = inputTemp.cloneNode()
+    maxInput.setAttribute('type', 'number')
+    maxInput.setAttribute('placeholder', 'max')
 
-    maxNumberInput.addEventListener('change', () => {
-      const value = maxNumberInput.value
+    const maxLabel = spanTemp.cloneNode()
+    maxLabel.className = 'it-filter-label left'
+    maxLabel.textContent = maxText
+
+    maxInput.addEventListener('change', () => {
+      const value = maxInput.value
+
       props.filter.value[1] = value !== '' ? +value : undefined
-      this.filterValueChange = true
-      this.tableInstance.refresh()
+
+      if (getType(callback) === 'function') {
+        callback(props.filter)
+      }
     })
 
-    control.appendChild(minNumberInput)
-    control.appendChild(maxNumberInput)
+    control.appendChild(minLabel)
+    control.appendChild(minInput)
+    control.appendChild(maxLabel)
+    control.appendChild(maxInput)
 
     return control
   }
 
-  _renderSelectControl (id) {
+  _renderSelectControl (id, callback) {
     const props = this._getProps(id)
 
     const options = props.filter.options || []
-    options.unshift('')
 
     const control = temp.cloneNode()
-    control.className = 'it-filter'
+    control.className = 'it-filter-control'
+    control.style.padding = '.5em 0'
 
-    const select = createSelect(options)
+    const ul = document.createElement('ul')
+    ul.className = 'it-option static show'
 
-    select.addEventListener('change', ev => {
-      const value = ev.newValue
-      props.filter.value = value
+    const liTemp = document.createElement('li')
+    liTemp.className = 'it-item'
 
-      this.filterValueChange = true
-      this.tableInstance.refresh()
+    const reset = liTemp.cloneNode()
+    reset.classList.add('current')
+    reset.index = -1
+    reset.textContent = '重置'
+    reset.itValue = ''
+
+    ul.appendChild(reset)
+
+    for (let i = 0, len = options.length; i < len; i++) {
+      let option = options[i]
+
+      if (getType(option) !== 'object') {
+        option = {
+          title: option.toString(),
+          value: option
+        }
+      }
+
+      const { title, value } = option
+
+      const li = liTemp.cloneNode()
+
+      li.index = i
+      li.textContent = title
+      li.itValue = value
+
+      ul.appendChild(li)
+    }
+
+    ul.addEventListener('click', event => {
+      const path = event.path
+
+      let target = null
+
+      if (path) {
+        target = path.find(value => value.classList && value.classList.contains('it-item'))
+      } else {
+        target = event.target || event.srcElement
+        target = checkPathByClass(target, 'it-item')
+      }
+
+      if (target) {
+        const current = ul.querySelector('.it-item.current')
+
+        if (current) {
+          current.classList.remove('current')
+        }
+
+        const value = target.itValue
+
+        props.filter.value = value
+        target.classList.add('current')
+
+        if (getType(callback) === 'function') {
+          callback(props.filter)
+        }
+      }
+
+      return false
     })
 
-    control.appendChild(select)
+    control.appendChild(ul)
 
     return control
   }
 
-  _renderCheckControl (id) {
+  _renderCheckControl (id, callback) {
     const props = this._getProps(id)
 
-    const control = temp.cloneNode()
-    control.className = 'it-filter'
+    const options = props.filter.options || []
 
-    const checkbox = inputTemp.cloneNode()
-    checkbox.setAttribute('type', 'checkbox')
-    checkbox.addEventListener('change', () => {
-      const checked = checkbox.checked
-      props.filter.value = checked
-      this.filterValueChange = true
-      this.tableInstance.refresh()
+    const control = temp.cloneNode()
+    control.className = 'it-filter-control'
+
+    const reset = temp.cloneNode()
+    reset.className = 'it-filter-action'
+    reset.textContent = '重置'
+
+    const divide = temp.cloneNode()
+    divide.className = 'it-divide'
+
+    control.appendChild(reset)
+    control.appendChild(divide)
+
+    const labelTemp = document.createElement('label')
+
+    for (let i = 0, len = options.length; i < len; i++) {
+      let option = options[i]
+
+      if (getType(option) !== 'object') {
+        option = {
+          title: option.toString(),
+          value: option
+        }
+      }
+
+      const { title, value } = option
+
+      const wrapper = labelTemp.cloneNode()
+      wrapper.className = 'it-filter-checkbox'
+
+      const checkbox = inputTemp.cloneNode()
+      checkbox.setAttribute('type', 'checkbox')
+
+      const label = spanTemp.cloneNode()
+      label.textContent = title
+
+      wrapper.appendChild(checkbox)
+      wrapper.appendChild(label)
+
+      checkbox.addEventListener('change', () => {
+        const checked = checkbox.checked
+
+        if (!props.filter.value) {
+          props.filter.value = []
+        }
+
+        if (checked) {
+          props.filter.value.push(value)
+        } else {
+          const index = props.filter.value.findIndex(item => item === value)
+
+          if (~index) {
+            props.filter.value.splice(index, 1)
+          }
+        }
+
+        if (getType(callback) === 'function') {
+          callback(props.filter)
+        }
+      })
+
+      control.appendChild(wrapper)
+    }
+
+    reset.addEventListener('click', () => {
+      const checkboxes = control.querySelectorAll('.it-filter-checkbox input[type=checkbox]')
+
+      for (let i = 0, len = checkboxes.length; i < len; i++) {
+        const checkbox = checkboxes[i]
+        checkbox.checked = false
+      }
+
+      props.filter.value = []
+
+      if (getType(callback) === 'function') {
+        callback(props.filter)
+      }
     })
 
-    control.appendChild(checkbox)
     return control
   }
 
   // 未对日期类型进行特殊处理
-  _getPorxyAccessor (accessor, filterValue) {
-    switch (getType(filterValue)) {
-      // 如果是 number 类型则整个高亮
-      case 'array': return (rowData) => {
-        const value = accessor(rowData)
-        const html = (value === 0 || value) ? `<span class="it-highlight">${value}</span>` : '&nbsp;'
-        return html2Element(html)
-      }
-      // 如果是 check 类型则不做操作
-      case 'boolean': return accessor
-    }
-
-    const keyWords = '(' + filterValue.trim().toLowerCase().split(/\s+/g).sort(
-      (prev, next) => next.length - prev.length
-    ).join('|') + ')'
-
-    return (rowData) => {
+  _getPorxyAccessor (accessor) {
+    return (rowData, props) => {
       const value = accessor(rowData)
+      const filterValue = props.filter.value
 
-      // 如果是对象, 说明用户进行了额外的自定义处理, 则直接返回
-      if (typeof value === 'object') {
-        return value
+      switch (getType(filterValue)) {
+        case 'number':
+        case 'string': {
+          const keyWords = '(' + filterValue.toString().trim().toLowerCase().split(/\s+/g).sort(
+            (prev, next) => next.length - prev.length
+          ).join('|') + ')'
+
+          // 如果是对象, 说明用户进行了额外的自定义处理, 则直接返回
+          if (typeof value === 'object') {
+            return value
+          }
+
+          const html = (value === 0 || value) ? value.toString().replace(new RegExp(keyWords, 'ig'), `<span class="it-highlight">$1</span>`) : '&nbsp;'
+          const element = html2Element(html)
+
+          return element || ''
+        }
+        // 如果是数组类型则整个高亮
+        case 'array': {
+          if (filterValue.filter(item => (item || item === 0)).length) {
+            const html = (value === 0 || value) ? `<span class="it-highlight">${value}</span>` : '&nbsp;'
+            return html2Element(html)
+          }
+
+          return value
+        }
+        default: {
+          return value
+        }
       }
-
-      const html = (value === 0 || value) ? value.toString().replace(new RegExp(keyWords, 'ig'), `<span class="it-highlight">$1</span>`) : '&nbsp;'
-      const element = html2Element(html)
-
-      return element || ''
     }
   }
 
-  _createFilterIcon (size = 18, color = 'black') {
+  _createFilterIcon (size = 16, color = 'black') {
     const wrapper = temp.cloneNode()
 
     wrapper.className = 'it-icon it-icon-filter'
@@ -504,7 +736,7 @@ export default class Filter {
 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
 
-    path.setAttribute('d', 'M237.714286 237.714286v47.177143l214.089143 214.198857A18.285714 18.285714 0 0 1 457.142857 512v208.128l109.714286 54.857143V512a18.285714 18.285714 0 0 1 5.339428-12.909714L786.285714 284.891429V237.714286h-548.571428z m182.857143 281.856L206.482286 305.408a18.285714 18.285714 0 0 1-5.339429-12.909714V219.428571a18.285714 18.285714 0 0 1 18.285714-18.285714h585.142858a18.285714 18.285714 0 0 1 18.285714 18.285714v73.069715a18.285714 18.285714 0 0 1-5.339429 12.909714L603.428571 519.570286V804.571429a18.285714 18.285714 0 0 1-26.477714 16.347428l-146.285714-73.142857A18.285714 18.285714 0 0 1 420.571429 731.428571v-211.858285z')
+    path.setAttribute('d', 'M788.48 204.8H215.04c-19.456 0-28.672 21.504-16.384 35.84l247.808 292.864c8.192 9.216 11.264 21.504 11.264 33.792v232.448c0 10.24 10.24 19.456 20.48 19.456h45.056c10.24 0 18.432-9.216 18.432-19.456V568.32c0-13.312 5.12-24.576 14.336-33.792l248.832-292.864c12.288-14.336 3.072-36.864-16.384-36.864z')
     path.setAttribute('fill', color)
 
     filter.appendChild(path)
