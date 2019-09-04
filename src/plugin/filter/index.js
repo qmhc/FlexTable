@@ -690,6 +690,10 @@ export default class Filter {
       const value = accessor(rowData)
       const filterValue = props.filter.value
 
+      if (!filterValue) {
+        return value
+      }
+
       switch (getType(filterValue)) {
         case 'number':
         case 'string': {
