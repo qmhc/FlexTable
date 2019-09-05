@@ -84,6 +84,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 
 For a simple example see [`example/index.html`](./example/index.html).
 
+Online example [`click me`](https://qmhc.github.io/FlexTable/).
 
 ## Config
 
