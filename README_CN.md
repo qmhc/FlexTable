@@ -83,7 +83,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
 
 ## 例子 (Example)
 
-简单示例见 `docs` 文件夹下的 [`index.html`](https://qmhc.github.io/docs/index.html)
+简单示例见 `example` 文件夹下的 [`index.html`](./example/index.html)
 
 
 ## 配置 (Config)
