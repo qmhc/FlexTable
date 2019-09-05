@@ -1,6 +1,6 @@
 import Renderer from './render'
 import { addEventWhiteList, registerEvent, unregisterEvent, dispatchEvent, subscribeResize } from './events'
-import { deepClone } from '../utils'
+import { deepClone, getClickEventName } from '../utils'
 
 import '../style/itable.scss'
 
@@ -254,5 +254,7 @@ class FlexTable {
 FlexTable.defaultColumnWidth = 100
 
 FlexTable.plugins = []
+
+FlexTable._clickEventName = getClickEventName()
 
 export default FlexTable

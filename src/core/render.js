@@ -19,6 +19,10 @@ export default function render (options) {
   this.plugins = []
 
   switch (getType(rowClassName)) {
+    case 'undefined':
+    case 'null': {
+      break
+    }
     case 'string':
     case 'array':
     case 'object': {
@@ -92,8 +96,11 @@ export default function render (options) {
 
   const column = this.columnProps.length
   const tableMinWidth = column * this.constructor.defaultColumnWidth
+
   theadGroup.appendChild(groupTr)
   theadGroup.style.minWidth = `${tableMinWidth}px`
+
+  table.style.minWidth = `${tableMinWidth}px`
   table.appendChild(theadGroup)
 
   if (childTr) {

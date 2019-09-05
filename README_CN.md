@@ -249,7 +249,8 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
     // able: true,
     able: data => true,
     type: 'select',
-    options: ['Kegdhi', 'Tshudgh', 'Asihvsit'] // 'select' 时使用
+    options: ['Kegdhi', 'Tshudgh', 'Asihvsit'], // 'select' 时使用
+    verifier: value => true
   }
 
   defaultWidth: 100 // 默认列宽

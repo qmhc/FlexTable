@@ -1,3 +1,5 @@
+import { getClickEventName } from '../utils'
+
 /**
  * 将事件名注册到白名单
  * this 须含有 eventWhiteList{Set} 和 events{Array} 属性
@@ -167,8 +169,9 @@ window.addEventListener('resize', () => {
 // 注册监听点击了 element 外部的事件
 const outsides = []
 const clickOutsideEvent = new Event('clickoutside')
+const clickEventName = getClickEventName()
 
-document.addEventListener('click', event => {
+document.addEventListener(clickEventName, event => {
   const target = event.target
 
   for (let i = 0, len = outsides.length; i < len; i++) {

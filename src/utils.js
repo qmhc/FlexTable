@@ -1,3 +1,16 @@
+/**
+ * 根据环境判断该使用点击事件还是触摸事件
+ */
+export function getClickEventName () {
+  const hasWindow = (typeof window !== 'undefined')
+  const hasNavigator = (typeof navigator !== 'undefined')
+  const useTouch = hasWindow && ('ontouchstart' in window || (hasNavigator && navigator.msMaxTouchPoints > 0))
+
+  return useTouch ? 'touchstart' : 'click'
+}
+
+const clickEventName = getClickEventName()
+
 export function prependChild (target, child) {
   target.insertBefore(child, target.firstChild)
 }
@@ -125,7 +138,7 @@ export function createSelect (options, defaultIndex = -1, placement = 'bottom') 
   down.appendChild(ul)
   div.appendChild(down)
 
-  down.addEventListener('click', evt => {
+  down.addEventListener(clickEventName, evt => {
     const target = evt.target || evt.srcElement
 
     if (target.classList.contains('it-item')) {
@@ -203,7 +216,7 @@ export function createSelect (options, defaultIndex = -1, placement = 'bottom') 
     }, 10)
   }
 
-  div.addEventListener('click', () => {
+  div.addEventListener(clickEventName, () => {
     if (showOption) {
       div.closeOptions()
     } else {

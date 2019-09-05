@@ -697,9 +697,11 @@ export default class Filter {
       switch (getType(filterValue)) {
         case 'number':
         case 'string': {
-          const keyWords = '(' + filterValue.toString().trim().toLowerCase().split(/\s+/g).sort(
-            (prev, next) => next.length - prev.length
-          ).join('|') + ')'
+          const keyWords = `(${
+            filterValue.toString().trim().toLowerCase().split(/\s+/g).sort(
+              (prev, next) => next.length - prev.length
+            ).join('|')
+          })`
 
           // 如果是对象, 说明用户进行了额外的自定义处理, 则直接返回
           if (typeof value === 'object') {

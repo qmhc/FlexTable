@@ -277,7 +277,8 @@ Complete configuration of `columns`.
     // able: true,
     able: data => true, // row data
     type: 'select',
-    options: ['Kegdhi', 'Tshudgh', 'Asihvsit'] // use when type is 'select'
+    options: ['Kegdhi', 'Tshudgh', 'Asihvsit'], // use when type is 'select'
+    verifier: value => true
   }
 
   defaultWidth: 100 // default column width

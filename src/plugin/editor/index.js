@@ -146,6 +146,7 @@ export default class {
       }
     }
 
+    this._clickEventName = this.tableInstance.constructor._clickEventName || 'click'
     this.state = state.editor
   }
 
@@ -164,7 +165,8 @@ export default class {
 
     const defaultEdit = {
       able: editable,
-      type: 'text'
+      type: 'text',
+      verifier: null
     }
 
     for (const props of columnProps) {
@@ -221,8 +223,10 @@ export default class {
     const { table, data, columnProps } = this.tableInstance
     const body = table.querySelector('.it-tbody')
 
-    const updateData = (node, control, accessor, verifier, rowData, key) => {
+    const updateData = (node, control, rowData, props) => {
       const content = control.value
+      const { accessor, key } = props
+      const { verifier } = props.edit
 
       if (getType(verifier) === 'function') {
         if (!verifier(content)) {
@@ -239,7 +243,7 @@ export default class {
       const old = rowData[key]
       rowData[key] = content
 
-      const html = accessor(rowData)
+      const html = accessor(rowData, props)
       this._insertData(node, html)
 
       if (old !== content) {
@@ -254,7 +258,7 @@ export default class {
       }, 300)
     }
 
-    body.addEventListener('click', evt => {
+    body.addEventListener(this._clickEventName, evt => {
       if (this.tableInstance._lock) {
         return false
       }
@@ -291,7 +295,7 @@ export default class {
 
           this.editingCount++
 
-          const { key, accessor, verifier, edit } = props
+          const { key, edit } = props
           const { type, options } = edit
 
           if (type === 'select') {
@@ -306,16 +310,16 @@ export default class {
                 if (select.isOptionsOpen) {
                   let timer = 0
                   select.addEventListener('transitionend', () => {
-                    document.removeEventListener('click', clickOutside)
+                    document.removeEventListener(this._clickEventName, clickOutside)
                     clearTimeout(timer)
                     timer = setTimeout(() => {
-                      updateData(node, select, accessor, verifier, rowData, key)
+                      updateData(node, select, rowData, props)
                     }, 20)
                   })
                   select.closeOptions()
                 } else {
-                  document.removeEventListener('click', clickOutside)
-                  updateData(node, select, accessor, verifier, rowData, key)
+                  document.removeEventListener(this._clickEventName, clickOutside)
+                  updateData(node, select, rowData, props)
                 }
               }
 
@@ -327,7 +331,7 @@ export default class {
             node.appendChild(select)
 
             setTimeout(() => {
-              document.addEventListener('click', clickOutside)
+              document.addEventListener(this._clickEventName, clickOutside)
             }, 200)
           } else {
             const input = editInputTemp.cloneNode()
@@ -342,7 +346,7 @@ export default class {
             input.setAttribute('type', inputType)
 
             input.addEventListener('blur', () => {
-              updateData(node, input, accessor, verifier, rowData, key)
+              updateData(node, input, rowData, props)
               return false
             })
 
@@ -363,7 +367,7 @@ export default class {
     editButton.classList.add('it-editor-edit')
     editButton.textContent = this.labels.edit
 
-    editButton.addEventListener('click', () => {
+    editButton.addEventListener(this._clickEventName, () => {
       const rowActions = editButton.parentNode
 
       if (!rowActions) {
@@ -438,7 +442,7 @@ export default class {
     saveButton.classList.add('it-editor-save')
     saveButton.textContent = this.labels.save
 
-    saveButton.addEventListener('click', () => {
+    saveButton.addEventListener(this._clickEventName, () => {
       const rowActions = saveButton.parentNode
 
       if (!rowActions) {
@@ -469,7 +473,9 @@ export default class {
               continue
             }
 
-            const { verifier, key, accessor } = columnProps[i]
+            const props = columnProps[i]
+            const { key, accessor } = props
+            const { verifier } = props.edit
             const content = control.value
 
             if (getType(verifier) === 'function') {
@@ -485,7 +491,7 @@ export default class {
             }
 
             data[key] = content
-            const html = accessor(data)
+            const html = accessor(data, props)
             this._insertData(td, html)
           }
         }
@@ -504,7 +510,7 @@ export default class {
     cancelButton.classList.add('it-editor-cancel')
     cancelButton.textContent = this.labels.cancel
 
-    cancelButton.addEventListener('click', () => {
+    cancelButton.addEventListener(this._clickEventName, () => {
       const rowActions = cancelButton.parentNode
 
       if (!rowActions) {
@@ -528,9 +534,10 @@ export default class {
 
         for (let i = 0, len = tds.length; i < len; i++) {
           const td = tds[i]
-          const { accessor } = columnProps[i]
+          const props = columnProps[i]
+          const { accessor } = props
 
-          const html = accessor(data)
+          const html = accessor(data, props)
           this._insertData(td, html)
         }
 

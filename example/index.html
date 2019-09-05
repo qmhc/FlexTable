@@ -15,7 +15,7 @@
 <script type="text/javascript" src="./utils.js"></script>
 <script type="text/javascript">
 	const columns = getColumns()
-	const data = makeData()
+	const data = makeData(30)
 
 	console.time('render')
 
@@ -23,20 +23,27 @@
 		container: '#app',
 		data,
 		columns,
+    className: 'my-flex-table',
+    id: 'myTable',
+    rowClassName: data => 'my-table-row',
+    stripe: false,
+    dangerous: false,
 		plugins: {
 			selector: {}, // 暂无独立配置项, 只需指定一个空对象
 			editor: {
 				trigger: 'action', // or 'click'
 				// verifier: data => data, // 顶层验证方法
 				columnWidth: 142,
-				columnName: '操作',
+				columnName: 'Action',
 				labels: {
-					edit: '编辑',
-					save: '保存',
-					cancel: '取消'
+					edit: 'Edit',
+					save: 'Save',
+					cancel: 'Cancel'
 				}
 			},
-			resizer: {}, // 暂无独立配置项, 只需指定一个空对象
+			resizer: {
+				force: true
+			}, // 暂无独立配置项, 只需指定一个空对象
 			sorter: {
 				multiple: true, // 开启多列排序功能
 				multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift
@@ -63,21 +70,20 @@
 				accordion: false,
 				transition: true
 			},
-			pager: {
-				useOptions: true,
-				pageOptions: [10, 15, 20, 25, 30],
-				currentPage: 1,
-				pageSize: 15,
-				labels: {
-					prev: '上一页',
-					next: '下一页',
-					row: '行'
-				}
-			},
+			// pager: {
+			// 	useOptions: true,
+			// 	pageOptions: [10, 15, 20, 25, 30],
+			// 	currentPage: 1,
+			// 	pageSize: 15,
+			// 	labels: {
+			// 		prev: '上一页',
+			// 		next: '下一页',
+			// 		row: '行'
+			// 	}
+			// },
 			filter: {
 				filterAll: true, // 所有类均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
-				openAction: false, // filter 是否具有开关按钮
-				filterOpen: true, // filter 具有开关按钮, 设置是否默认打开 openAction 为 false 时忽略
+				highlight: true // 设置对符合过滤条件的结果进行高亮
 			},
 			// layer: {
 			// 	loading: true,
@@ -86,9 +92,22 @@
 			// },
 			scroller: {
 				height: 450,
-				mouse: true,
-				wheel: false,
-				wheelDistance: 20
+				mouse: false,
+				wheel: true,
+				wheelDistance: 20,
+				// pullup: (instance, finish) => {
+      //   const { data } = instance
+      //   const newData = [...data, ...makeData(10)]
+
+      //   setTimeout(() => {
+      //     instance.data = newData
+      //     // instance.refresh({ data: true, struct: true })
+
+      //     finish(true)
+      //   }, 1000)
+      // },
+      // pullupThreshold: 10,
+      // pullupTip: '加载中...'
 			}
 		}
 		// theme: 'blue',

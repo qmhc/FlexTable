@@ -13,10 +13,15 @@ export default class Resizer {
   constructor (tableInstance, options) {
     this.tableInstance = tableInstance
     this.defaultColumnWidth = this.tableInstance.constructor.defaultColumnWidth
+    this._clickEventName = this.tableInstance.constructor._clickEventName
 
     const { state } = this.tableInstance
 
-    const resizable = getType(options.resizer) === 'object'
+    let resizable = getType(options.resizer) === 'object'
+
+    if (this._clickEventName === 'touchstart') {
+      resizable = false
+    }
 
     if (resizable) {
       const { force } = options.resizer
@@ -45,12 +50,6 @@ export default class Resizer {
   shouldUse () {
     return this.state.resizable
   }
-
-  // beforeRenderBody (count) {
-  //   if (count === 0) {
-  //     this.force = true
-  //   }
-  // }
 
   create () {
     const { table, columnProps } = this.tableInstance
@@ -90,6 +89,17 @@ export default class Resizer {
 
   bindEvent () {
     const table = this.tableInstance.table
+
+    let mouseDown = 'mousedown'
+    let mouseMove = 'mousemove'
+    let mouseUp = 'mouseup'
+
+    if (this._clickEventName === 'touchstart') {
+      mouseDown = 'touchstart'
+      mouseMove = 'touchmove'
+      mouseUp = 'touchend'
+    }
+
     const handler = temp.cloneNode()
     handler.className = 'it-resize-handler'
 
@@ -97,15 +107,20 @@ export default class Resizer {
     let start = 0
     let end = 0
 
-    const handlerMove = ev => {
-      const evt = ev || event
+    const handlerMove = evt => {
+      evt.stopPropagation()
+
       const tableRect = table.getBoundingClientRect()
+
       end = evt.clientX - tableRect.left
       handler.style.left = `${end}px`
+
       return false
     }
 
-    const resizeFinish = () => {
+    const resizeFinish = evt => {
+      evt.stopPropagation()
+
       const column = table.querySelectorAll('.it-thead.shadow .it-th')[index]
       const columnRect = column.getBoundingClientRect()
 
@@ -117,21 +132,24 @@ export default class Resizer {
       start = 0
       end = 0
 
-      document.removeEventListener('mousemove', handlerMove)
-      document.removeEventListener('mouseup', resizeFinish)
+      document.removeEventListener(mouseMove, handlerMove)
+      document.removeEventListener(mouseUp, resizeFinish)
 
       // 延迟100ms保证防止触发排序器
       setTimeout(() => {
         this.state.resizing = false
         this.tableInstance._lock = false
       }, 200)
+
+      return false
     }
 
-    table.addEventListener('mousedown', ev => {
-      const evt = ev || event
+    table.addEventListener(mouseDown, evt => {
       const target = evt.target || evt.srcElement
 
       if (target.classList.contains('it-resizer')) {
+        evt.stopPropagation()
+
         this.state.resizing = true
         this.tableInstance._lock = true
         index = target.itColumnIndex
@@ -145,9 +163,11 @@ export default class Resizer {
         handler.style.left = `${start}px`
         table.appendChild(handler)
 
-        document.addEventListener('mousemove', handlerMove)
-        document.addEventListener('mouseup', resizeFinish)
+        document.addEventListener(mouseMove, handlerMove)
+        document.addEventListener(mouseUp, resizeFinish)
       }
+
+      return false
     })
   }
 
@@ -220,6 +240,8 @@ export default class Resizer {
       const thead = theads[i]
       thead.style.minWidth = `${tableWidth}px`
     }
+
+    table.style.minWidth = `${tableWidth}px`
 
     // 用于保持两层表头结构 (flex布局) 一致性
     if (!childThs[0].itResize) {

@@ -113,8 +113,9 @@ export default class Extender {
   bindEvent () {
     const { table } = this.tableInstance
     const tbody = table.querySelector('.it-tbody')
+    const clickEventName = this.tableInstance.constructor._clickEventName || 'click'
 
-    tbody.addEventListener('click', event => {
+    tbody.addEventListener(clickEventName, event => {
       if (this.tableInstance._lock) {
         return false
       }
@@ -174,28 +175,8 @@ export default class Extender {
           renderElement(extendWrapper, result, dangerous)
 
           if (transition) {
-            // extendWrapper.style.height = '0'
-            // extendWrapper.style.overflow = 'hidden'
-
-            // const transitionEnd = () => {
-            //   this._scrollRefresh()
-            //   extendWrapper.removeEventListener('transitionend', transitionEnd)
-            //   extendWrapper.style.height = ''
-            //   extendWrapper.style.overflow = ''
-            // }
-
-            // extendWrapper.addEventListener('transitionend', transitionEnd)
-
-            // raf(() => {
-            //   if (extendWrapper.scrollHeight !== 0) {
-            //     extendWrapper.style.height = `${extendWrapper.scrollHeight}px`
-            //   } else {
-            //     extendWrapper.style.height = ''
-            //   }
-            // })
-
             animateByHooks(extendWrapper, {
-              start: el => {
+              before: el => {
                 el.style.height = '0'
                 el.style.overflow = 'hidden'
               },
@@ -297,22 +278,8 @@ export default class Extender {
       return false
     }
 
-    // wrapper.style.height = `${wrapper.scrollHeight}px`
-    // wrapper.style.overflow = 'hidden'
-
-    // raf(() => {
-    //   if (wrapper.scrollHeight !== 0) {
-    //     wrapper.style.height = '0'
-    //   }
-    // })
-
-    // wrapper.addEventListener('transitionend', () => {
-    //   wrapper.parentNode.removeChild(wrapper)
-    //   this._scrollRefresh()
-    // })
-
     animateByHooks(wrapper, {
-      start: el => {
+      before: el => {
         el.style.height = `${el.scrollHeight}px`
         el.style.overflow = 'hidden'
       },

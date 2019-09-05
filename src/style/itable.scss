@@ -21,7 +21,8 @@
 		align-items: stretch;
 		width: 100%;
 		border-collapse: collapse;
-		overflow: auto;
+		overflow-x: auto;
+		overflow-y: hidden;
 	}
 
 	.it-tr-group {
