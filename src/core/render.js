@@ -19,8 +19,8 @@ export default function render (options) {
   this.plugins = []
 
   switch (getType(rowClassName)) {
-    case 'undefined':
-    case 'null': {
+    case 'null':
+    case 'undefined': {
       break
     }
     case 'string':
