@@ -89,7 +89,8 @@
   .it-filter-control {
     display: flex;
     flex-direction: column;
-    max-width: 150px;
+		// max-width: 150px;
+		min-width: 150px;
     padding: 1em;
 
     .it-filter-label {
@@ -146,13 +147,8 @@
       }
     }
 
-    .it-filter-checkbox {
-      display: block;
-      margin-right: 8px;
-      white-space: nowrap;
-      text-align: left;
-      line-height: 1.5;
-      cursor: pointer;
+    .it-checkbox {
+      padding: 4px;
     }
 
     .it-filter-action {

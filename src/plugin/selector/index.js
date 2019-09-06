@@ -3,9 +3,8 @@
  * @description 表格数据选择 (复选框)
  */
 
-import { getType } from '@/utils'
 import { addEventWhiteList, dispatchEvent } from 'core/events'
-import { inputTemp } from 'core/temps'
+import { getType, createCheckbox } from '@/utils'
 
 import './style.scss'
 
@@ -18,10 +17,7 @@ function getSelectedDataList () {
   return selectedDataList
 }
 
-const checkboxTemp = inputTemp.cloneNode()
-checkboxTemp.setAttribute('type', 'checkbox')
-checkboxTemp.className = 'it-check'
-
+// TODO: 添加点击行选取的模式
 export default class Selector {
   constructor (tableInstance, options = {}) {
     this.tableInstance = tableInstance
@@ -36,7 +32,7 @@ export default class Selector {
       this.selection = []
       this.recorder = {}
 
-      const headCheck = checkboxTemp.cloneNode()
+      const headCheck = createCheckbox()
 
       const selector = {
         name: headCheck,
@@ -53,22 +49,24 @@ export default class Selector {
           if (this.recorder[uuid]) {
             rowCheck = this.recorder[uuid].target
           } else {
-            rowCheck = checkboxTemp.cloneNode()
+            rowCheck = createCheckbox()
 
             this.recorder[uuid] = {
               target: rowCheck,
               rowData: data
             }
 
-            rowCheck.addEventListener('change', () => {
+            rowCheck.addEventListener('change', event => {
+              event.stopPropagation()
+
               let type = 'select'
 
               if (rowCheck.checked) {
                 this.selection.push(uuid)
               } else {
-                const index = this.selection.indexOf(uuid)
+                const index = this.selection.findIndex(item => item === uuid)
 
-                if (index !== -1) {
+                if (~index) {
                   this.selection.splice(index, 1)
                 }
 
@@ -76,6 +74,15 @@ export default class Selector {
               }
 
               dispatchEvent.apply(this.tableInstance, ['selectChange', { type, id: uuid, data: { ...data }, selection: [...this.selection] }])
+            })
+
+            // 问题仅存在移动端使用 touchstart 事件
+            // 冒泡后会导致被 better-scroll 拦截从而无法触发内部 input 的 change 事件, 原因不明
+            // 阻止冒泡会导致以 checkbox 为触点则无法触发 better-scroll 的滚动
+            const clickEventName = this.tableInstance.constructor._clickEventName
+
+            rowCheck.addEventListener(clickEventName, event => {
+              event.stopPropagation()
             })
 
             rowCheck._itId = uuid
@@ -86,13 +93,6 @@ export default class Selector {
         resize: false,
         sort: false,
         edit: false,
-        // filter: {
-        //   type: 'check',
-        //   method: (value, filter) => {
-        //     const selected = this.selection.includes(value._itId)
-        //     return filter ? selected : true
-        //   }
-        // },
         filter: false,
         defaultWidth: 32
       }
@@ -147,7 +147,7 @@ export default class Selector {
 
   bindEvent () {
     const table = this.tableInstance.table
-    const headCheck = table.querySelector('.it-thead.shadow .it-check')
+    const headCheck = table.querySelector('.it-thead.shadow .it-checkbox')
 
     let type = 0
 

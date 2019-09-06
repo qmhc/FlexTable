@@ -8,8 +8,6 @@ import { getType, checkPathByClass, renderElement, animateByHooks } from '@/util
 
 import './style.scss'
 
-// const raf = window.requestAnimationFrame || window.setTimeout
-
 export default class Extender {
   constructor (tableInstance, options = {}) {
     this.tableInstance = tableInstance

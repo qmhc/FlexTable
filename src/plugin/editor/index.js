@@ -14,6 +14,7 @@ const inputTypeWhiteList = ['text', 'number', 'date', 'week', 'month', 'time', '
 const editInputTemp = inputTemp.cloneNode()
 editInputTemp.classList.add('it-editor-control')
 
+// TODO: 添加 check, radio 类型编辑控件, 美化按钮
 export default class {
   constructor (tableInstance, options = {}) {
     this.tableInstance = tableInstance

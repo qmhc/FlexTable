@@ -230,6 +230,71 @@ export function createSelect (options, defaultIndex = -1, placement = 'bottom') 
 }
 
 /**
+ * 创建一个自定义的 checkbox
+ * @param {String} label 复选框的 label
+ * @param {Boolean} value 复选框的值
+ */
+export function createCheckbox (title = undefined, value = false) {
+  const wrapper = document.createElement('label')
+  wrapper.className = 'it-checkbox'
+
+  const input = document.createElement('input')
+  input.setAttribute('type', 'checkbox')
+  input.className = 'it-checkbox-input'
+  input.checked = value === true
+
+  const checkbox = document.createElement('span')
+  checkbox.className = 'it-checkbox-switch'
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  svg.setAttribute('viewBox', '0 0 12 10')
+
+  const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline')
+  polyline.setAttribute('points', '1.5 6 4.5 9 10.5 1')
+
+  svg.appendChild(polyline)
+  checkbox.appendChild(svg)
+  checkbox.appendChild(input)
+  wrapper.appendChild(checkbox)
+
+  Reflect.defineProperty(wrapper, 'checked', {
+    get () {
+      return input.checked
+    },
+    set (val) {
+      if (val === true) {
+        input.checked = true
+        wrapper.classList.add('checked')
+      } else {
+        input.checked = false
+        wrapper.classList.remove('checked')
+      }
+    }
+  })
+
+  input.addEventListener('change', evt => {
+    // 由于外层也派送 change 事件, 不阻止冒泡则会派送两次
+    evt.stopPropagation()
+
+    const event = new Event('change')
+
+    wrapper.checked = input.checked
+    event.checked = input.checked
+
+    wrapper.dispatchEvent(event)
+  })
+
+  if (title) {
+    const label = document.createElement('span')
+    label.className = 'it-checkbox-label'
+    label.textContent = title
+    wrapper.appendChild(label)
+  }
+
+  return wrapper
+}
+
+/**
  * 获取变量类型
  * @param {any} any 任意变量
  */

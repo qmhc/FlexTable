@@ -1,5 +1,9 @@
 .flex-table {
   .it-extender-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     .it-extender-switch {
       cursor: pointer;
       transition: all .3s;

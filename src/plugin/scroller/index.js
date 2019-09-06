@@ -11,6 +11,7 @@ import { temp, spanTemp } from 'core/temps'
 
 import './style.scss'
 
+// TODO: 更多 better-scroll 的 api 代理
 export default class Scroller {
   constructor (tableInstance, options = {}) {
     this.tableInstance = tableInstance

@@ -10,10 +10,11 @@ import {
   inputTemp
 } from 'core/temps'
 import { registerClickOutside } from 'core/events'
-import { getType, checkPathByClass, html2Element, animate } from '@/utils'
+import { getType, checkPathByClass, html2Element, animate, createCheckbox } from '@/utils'
 
 import './style.scss'
 
+// FIXME: 分离 Control 对象
 export default class Filter {
   constructor (tableInstance, options) {
     this.tableInstance = tableInstance
@@ -261,10 +262,8 @@ export default class Filter {
     }
 
     const { columnProps } = this.tableInstance
-    // const { highlight } = this.state
 
     let filterData = data
-    // let resultCount = 0
 
     for (const props of columnProps) {
       const { accessor, filter, reflectAccessor, key } = props
@@ -299,16 +298,6 @@ export default class Filter {
         }
 
         filterData = resultData
-
-        // if (highlight && resultCount) {
-        //   // 保存原始读取器
-        //   props.reflectAccessor = _accessor
-        //   // 对现读取器进行代理
-        //   props.accessor = this._getPorxyAccessor(accessor, value)
-        // } else {
-        //   // 取消读取器代理
-        //   props.accessor = accessor
-        // }
       }
     }
 
@@ -615,8 +604,6 @@ export default class Filter {
     control.appendChild(reset)
     control.appendChild(divide)
 
-    const labelTemp = document.createElement('label')
-
     for (let i = 0, len = options.length; i < len; i++) {
       let option = options[i]
 
@@ -629,17 +616,7 @@ export default class Filter {
 
       const { title, value } = option
 
-      const wrapper = labelTemp.cloneNode()
-      wrapper.className = 'it-filter-checkbox'
-
-      const checkbox = inputTemp.cloneNode()
-      checkbox.setAttribute('type', 'checkbox')
-
-      const label = spanTemp.cloneNode()
-      label.textContent = title
-
-      wrapper.appendChild(checkbox)
-      wrapper.appendChild(label)
+      const checkbox = createCheckbox(title)
 
       checkbox.addEventListener('change', () => {
         const checked = checkbox.checked
@@ -663,11 +640,11 @@ export default class Filter {
         }
       })
 
-      control.appendChild(wrapper)
+      control.appendChild(checkbox)
     }
 
     reset.addEventListener('click', () => {
-      const checkboxes = control.querySelectorAll('.it-filter-checkbox input[type=checkbox]')
+      const checkboxes = control.querySelectorAll('.it-filter-control .it-checkbox.checked')
 
       for (let i = 0, len = checkboxes.length; i < len; i++) {
         const checkbox = checkboxes[i]
