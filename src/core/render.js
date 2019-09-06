@@ -183,7 +183,13 @@ export default function render (options) {
   if (this.state.useFooter) {
     const tfootGroup = temp.cloneNode()
     tfootGroup.className = 'it-tfoot'
-    tfootGroup.appendChild(renderFooter.apply(this))
+
+    const footTr = renderFooter.apply(this)
+
+    if (footTr) {
+      tfootGroup.appendChild(footTr)
+    }
+
     table.appendChild(tfootGroup)
   }
 
@@ -492,6 +498,10 @@ function renderBodyData () {
 
 // 表格脚部渲染
 function renderFooter (refresh = false) {
+  if (!this.state.useFooter) {
+    return null
+  }
+
   const { columnProps, dangerous } = this
   const data = this.state.computedData
 
