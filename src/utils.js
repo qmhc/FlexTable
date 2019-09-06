@@ -537,7 +537,9 @@ export function setClassName (node, className) {
 
   switch (type) {
     case 'string': {
-      node.classList.add(className)
+      if (className) {
+        node.classList.add(className)
+      }
 
       return true
     }

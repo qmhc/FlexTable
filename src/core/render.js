@@ -77,8 +77,10 @@ export default function render (options) {
     wrapper.classList.add('stripe')
   }
 
-  if (getType(id) === 'string') wrapper.setAttribute('id', id)
-  if (getType(className) === 'string') wrapper.classList.add(className)
+  if (id && getType(id) === 'string') wrapper.setAttribute('id', id)
+  if (className) {
+    setClassName(wrapper, className)
+  }
 
   const table = tableTemp.cloneNode()
   wrapper.appendChild(table)
@@ -118,14 +120,6 @@ export default function render (options) {
   // 渲染表主体
   renderBodyStruct.apply(this)
   renderBodyData.apply(this)
-
-  // 渲染表脚
-  if (this.state.useFooter) {
-    const tfootGroup = temp.cloneNode()
-    tfootGroup.className = 'it-tfoot'
-    tfootGroup.appendChild(renderFooter.apply(this))
-    table.appendChild(tfootGroup)
-  }
 
   // 暴露表格主体渲染方法
   // 使用 setTimeout 方法让表格的 refresh 方法尽量靠后执行, 并防止重复执行
@@ -184,6 +178,14 @@ export default function render (options) {
       }
     }, 0)
   })
+
+  // 渲染表脚
+  if (this.state.useFooter) {
+    const tfootGroup = temp.cloneNode()
+    tfootGroup.className = 'it-tfoot'
+    tfootGroup.appendChild(renderFooter.apply(this))
+    table.appendChild(tfootGroup)
+  }
 
   // 加载插件
   for (let i = 0, len = this.plugins.length; i < len; i++) {

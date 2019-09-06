@@ -81,12 +81,12 @@ const getColumns = () => {
           name: 'Age',
           accessor: 'age',
           key: 'age',
-          footer: data => {
-            const span = document.createElement('span')
-            span.style.fontWeight = 700
-            span.textContent = `Max: ${Math.max(...data)}`
-            return span
-          },
+          // footer: data => {
+          //   const span = document.createElement('span')
+          //   span.style.fontWeight = 700
+          //   span.textContent = `Max: ${Math.max(...data)}`
+          //   return span
+          // },
           resize: false,
           edit: {
             type: 'select',
@@ -97,12 +97,12 @@ const getColumns = () => {
           name: 'Visits',
           accessor: 'visits',
           key: 'visits',
-          footer: data => {
-            const span = document.createElement('span')
-            span.style.fontWeight = 700
-            span.textContent = `Total: ${data.reduce((prev, curr) => (prev + curr), 0)}`
-            return span
-          },
+          // footer: data => {
+          //   const span = document.createElement('span')
+          //   span.style.fontWeight = 700
+          //   span.textContent = `Total: ${data.reduce((prev, curr) => (prev + curr), 0)}`
+          //   return span
+          // },
           filter: {
             type: 'number'
           },
@@ -114,18 +114,18 @@ const getColumns = () => {
           name: 'Progress',
           accessor: 'progress',
           key: 'progress',
-          footer: data => {
-            const span = document.createElement('span')
-            span.style.fontWeight = 700
+          // footer: data => {
+          //   const span = document.createElement('span')
+          //   span.style.fontWeight = 700
 
-            let sum = 0
-            for (const value of data) {
-              sum += value
-            }
+          //   let sum = 0
+          //   for (const value of data) {
+          //     sum += value
+          //   }
 
-            span.textContent = `Avg: ${Math.round(sum / data.length)}`
-            return span
-          },
+          //   span.textContent = `Avg: ${Math.round(sum / data.length)}`
+          //   return span
+          // },
           filter: {
             type: 'select',
             options: ['prepare', 'process', 'finish'],
@@ -157,7 +157,11 @@ const table = new FlexTable({
   container: '#app',
   columns,
   data,
-  className: 'my-flex-table',
+  // className: 'my-flex-table',
+  className: {
+    'my-flex-table': true,
+    'data-table': true
+  },
   id: 'myTable',
   rowClassName: data => 'my-table-row',
   stripe: false,
