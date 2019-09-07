@@ -155,6 +155,7 @@ export default function render (options) {
       refreshCallback.push(callback)
     }
 
+    // 让 refresh 尽量晚执行
     refreshTimer = setTimeout(() => {
       if (refreshStruct === true) {
         renderBodyStruct.apply(this)

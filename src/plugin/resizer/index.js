@@ -84,6 +84,7 @@ export default class Resizer {
       columnWidth[i.toString()] = parseInt(th.style.width) || this.defaultColumnWidth
     }
 
+    this.refresh()
     this.created = true
   }
 

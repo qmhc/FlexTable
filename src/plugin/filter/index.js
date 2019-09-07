@@ -289,6 +289,7 @@ export default class Filter {
 
           const originValue = key ? rowData[key] : null
 
+          if (typeof reflectValue === 'undefined') debugger
           const result = method(reflectValue, value, originValue, rowData)
 
           if (result === true) {
@@ -347,6 +348,7 @@ export default class Filter {
   }
 
   _defaultTextFilter (value, filter) {
+    if (typeof value === 'undefined') debugger
     const keyWords = filter.trim().toLowerCase().split(/\s+/g)
     value = value.toString().toLowerCase()
 

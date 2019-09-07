@@ -1,30 +1,33 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<meta charset="utf-8">
-	<title>FlexTable Example</title>
-	<link rel="stylesheet" type="text/css" href="../dist/flex-table.core.css">
+  <meta charset="utf-8">
+  <title>FlexTable Example</title>
+  <link rel="stylesheet" type="text/css" href="../dist/flex-table.core.css">
 </head>
+
 <body>
-	<!-- Open DevTools(F12) to Checkout Console. -->
-	<div id="app"></div>
+  <!-- Open DevTools(F12) to Checkout Console. -->
+  <div id="app"></div>
 </body>
 <script type="text/javascript" src="../dist/flex-table.core.js"></script>
 <script type="text/javascript" src="./mock-min.js"></script>
 <!-- makeData and getColumns -->
 <script type="text/javascript" src="./utils.js"></script>
 <script type="text/javascript">
-	const columns = getColumns()
-	const data = makeData(50)
+  const columns = getColumns()
+  const data = makeData(50)
 
-	console.time('render')
+  console.time('render')
 
-	const table = new FlexTable({
-		container: '#app',
-		data,
-		columns
-	})
+  const table = new FlexTable({
+    container: '#app',
+    data,
+    columns
+  })
 
-	console.timeEnd('render')
+  console.timeEnd('render')
 </script>
+
 </html>

@@ -88,7 +88,7 @@ export default class Pager {
 
   changButtonState () {
     const { startIndex, endIndex } = this._getIndexRange(this.state)
-    // console.log({ startIndex, endIndex, total: this.dataTotal });
+
     toggleDisabled(this.prevButton, startIndex <= 0)
     toggleDisabled(this.nextButton, endIndex >= this.dataTotal)
   }

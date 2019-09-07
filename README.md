@@ -9,7 +9,7 @@
 
 The core code of `FlexTable` only contains rendering table functions, all the other features are provided by plugins, you can also add or replace plugins according to your own use.
 
-![visual](./public/visual2.png)
+![visual](./public/visual.png)
 
 
 ## Start
@@ -97,6 +97,17 @@ A complete configuration.
   columns,
 
   data,
+
+  // whether deep clone data during init
+  // when it is not actively set, FlexTable will automatically set it according to the data size
+  // when data size less then 500, it will be set to true
+  deepClone: true,
+
+  // auto refresh while data change
+  // it is implemented using Proxy, any set operation will cause the table refresh when opened
+  // when using in such as Vue, both deepClone and observeData can be set to false
+  // and then use Vue's watch feature to refresh the table manually
+  observeData: true,
 
   className: 'my-table',
 
@@ -214,9 +225,7 @@ A complete configuration.
 
   },
 
-  theme: 'light',
-
-  deepClone: true // whether deep clone data during init
+  theme: 'light'
 }
 ```
 

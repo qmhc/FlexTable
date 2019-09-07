@@ -444,6 +444,7 @@ export function deepClone (obj) {
       res = parent[key] = type === 'array' ? [] : {}
     }
 
+    // 改用 while 循环可提高效率
     for (const i in data) {
       const _data = data[i]
       const _type = getType(_data)

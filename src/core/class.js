@@ -1,4 +1,5 @@
 import Renderer from './render'
+import ProxyArray from './array'
 import { addEventWhiteList, registerEvent, unregisterEvent, dispatchEvent, subscribeResize } from './events'
 import { deepClone, getClickEventName } from '../utils'
 
@@ -100,10 +101,46 @@ class FlexTable {
     `
     document.body.appendChild(style)
 
-    // 数据克隆
-    this.data = props.deepClone === true ? deepClone(data) : [...data]
-
     this.columns = columns
+    this.observeData = props.observeData !== false
+
+    if (typeof props.deepClone === 'boolean') {
+      this.deepClone = props.deepClone
+    } else {
+      if (data.length < 500) {
+        this.deepClone = true
+      } else {
+        this.deepClone = false
+      }
+    }
+
+    const observer = () => {
+      if (this.observeData && this.refresh) {
+        this.refresh({ data: true, struct: true })
+      }
+    }
+
+    if (this.observeData) {
+      let _data = new ProxyArray(data, observer)
+
+      Reflect.defineProperty(this, 'data', {
+        get () {
+          return _data
+        },
+        set (value) {
+          if (this.deepClone) {
+            // 数据克隆
+            _data = new ProxyArray(deepClone(value), observer)
+          } else {
+            _data = new ProxyArray(value, observer)
+          }
+        }
+      })
+
+      this.data = data
+    } else {
+      this.data = this.deepClone ? deepClone(data) : Array.from(data)
+    }
 
     // 事件属性初始化
     this.eventWhiteList = new Set()

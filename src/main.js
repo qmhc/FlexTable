@@ -18,6 +18,8 @@ const makeData = (size = 386) => {
   return data.person
 }
 
+window.makeData = makeData
+
 const range = (count, start = 1) => {
   const list = []
   for (let i = start; i <= count; i++) {
@@ -81,12 +83,12 @@ const getColumns = () => {
           name: 'Age',
           accessor: 'age',
           key: 'age',
-          // footer: data => {
-          //   const span = document.createElement('span')
-          //   span.style.fontWeight = 700
-          //   span.textContent = `Max: ${Math.max(...data)}`
-          //   return span
-          // },
+          footer: data => {
+            const span = document.createElement('span')
+            span.style.fontWeight = 700
+            span.textContent = `Max: ${Math.max(...data)}`
+            return span
+          },
           resize: false,
           edit: {
             type: 'select',
@@ -97,12 +99,12 @@ const getColumns = () => {
           name: 'Visits',
           accessor: 'visits',
           key: 'visits',
-          // footer: data => {
-          //   const span = document.createElement('span')
-          //   span.style.fontWeight = 700
-          //   span.textContent = `Total: ${data.reduce((prev, curr) => (prev + curr), 0)}`
-          //   return span
-          // },
+          footer: data => {
+            const span = document.createElement('span')
+            span.style.fontWeight = 700
+            span.textContent = `Total: ${data.reduce((prev, curr) => (prev + curr), 0)}`
+            return span
+          },
           filter: {
             type: 'number'
           },
@@ -114,18 +116,18 @@ const getColumns = () => {
           name: 'Progress',
           accessor: 'progress',
           key: 'progress',
-          // footer: data => {
-          //   const span = document.createElement('span')
-          //   span.style.fontWeight = 700
+          footer: data => {
+            const span = document.createElement('span')
+            span.style.fontWeight = 700
 
-          //   let sum = 0
-          //   for (const value of data) {
-          //     sum += value
-          //   }
+            let sum = 0
+            for (const value of data) {
+              sum += value
+            }
 
-          //   span.textContent = `Avg: ${Math.round(sum / data.length)}`
-          //   return span
-          // },
+            span.textContent = `Avg: ${Math.round(sum / data.length)}`
+            return span
+          },
           filter: {
             type: 'select',
             options: ['prepare', 'process', 'finish'],
@@ -157,6 +159,7 @@ const table = new FlexTable({
   container: '#app',
   columns,
   data,
+  observeData: true,
   // className: 'my-flex-table',
   className: {
     'my-flex-table': true,
@@ -172,11 +175,11 @@ const table = new FlexTable({
       trigger: 'action', // or 'click'
       verifier: data => data, // 顶层验证方法
       columnWidth: 142,
-      columnName: '操作',
+      columnName: 'Action',
       labels: {
-        edit: '编辑',
-        save: '保存',
-        cancel: '取消'
+        edit: 'Edit',
+        save: 'Save',
+        cancel: 'Cancel'
       }
     },
     extender: {
@@ -202,7 +205,7 @@ const table = new FlexTable({
       transition: true
     },
     resizer: {
-      force: true
+      force: false
     },
     sorter: {
       multiple: true, // 开启多列排序功能

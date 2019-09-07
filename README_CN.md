@@ -9,7 +9,7 @@
 
 `FlexTable` 的核心代码只包含表格的基础渲染功能, 其余的所有功能均由 `plugin` 提供, 用户也可以根据自己的使用替换或添加插件
 
-![视觉](./public/visual1.png)
+![视觉](./public/visual.png)
 
 
 ## 开始 (Start)
@@ -99,6 +99,17 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
   className: '',
   id: '',
 
+  // 初始化时是否对 data 进行深度克隆
+  // 在不主动设置时, FlexTable 会自动根据 data 的大小自动设置
+  // 当 data 不足 500 条时默认为 true
+  deepClone: true,
+
+  // 将数据设置为响应式, 当数据改变时自动刷新表格
+  // FlexTable 的响应是使用 Proxy 实现的, 在打开时任意的 set 操作都会使表格刷新
+  // 在使用响应式框架时, 可以将 deepClone 和 observeData 都设置为 false
+  // 然后使用框架的 watcher 功能手动地刷新表格
+  observeData: true, 
+
   rowClassName: (data, index) => '', // index 为数据渲染在表格的行索引
 
   stripe: true, // 为行添加斑马纹样式
@@ -186,9 +197,7 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
     }
   },
 
-  theme: 'light',
-
-  deepClone: true // 初始化时是否对 data 进行深度克隆
+  theme: 'light'
 }
 ```
 
