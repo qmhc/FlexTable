@@ -302,7 +302,7 @@ export default class {
           if (type === 'select') {
             const select = createSelect(options)
             select.classList.add('it-editor-control')
-            select.itValue = rowData[key]
+            select.itValue = rowData[key] || ''
 
             const clickOutside = ev => {
               const path = [...ev.path]
@@ -336,7 +336,7 @@ export default class {
             }, 200)
           } else {
             const input = editInputTemp.cloneNode()
-            input.value = rowData[key]
+            input.value = rowData[key] || ''
 
             let inputType = 'text'
 
@@ -411,7 +411,7 @@ export default class {
             if (type === 'select') {
               control = createSelect(options)
               control.classList.add('it-editor-control')
-              control.itValue = data[key]
+              control.itValue = data[key] || ''
             } else {
               control = editInputTemp.cloneNode()
 
@@ -423,7 +423,7 @@ export default class {
 
               control.setAttribute('type', inputType)
 
-              control.value = data[key]
+              control.value = data[key] || ''
             }
 
             td.innerHTML = ''

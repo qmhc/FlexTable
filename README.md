@@ -328,7 +328,7 @@ import myPlugin from 'my-plugin'
 FlexTable.registerPlugin(name, myPlugin)
 ```
 
-You can als replace one plugin with `replacePlugin` method.
+You can also replace one plugin with `replacePlugin` method.
 
 ## License
 

@@ -172,6 +172,12 @@ export default class Resizer {
     })
   }
 
+  afterRenderData () {
+    if (this.created && this.state.force) {
+      this.refresh()
+    }
+  }
+
   afterRender () {
     if (this.created && this.state.force) {
       this.refresh()
