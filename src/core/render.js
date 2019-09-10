@@ -126,8 +126,9 @@ export default function render (options) {
   let refreshTimer = 0
   let refreshData = false
   let refreshStruct = false
+  let refreshCancel = false
 
-  const refreshCallback = []
+  const refreshCallbacks = []
   const defaultOptions = {
     data: true,
     struct: false
@@ -152,11 +153,16 @@ export default function render (options) {
     }
 
     if (getType(callback) === 'function') {
-      refreshCallback.push(callback)
+      refreshCallbacks.push(callback)
     }
 
     // 让 refresh 尽量晚执行
     refreshTimer = setTimeout(() => {
+      if (refreshCancel === true) {
+        refreshCancel = false
+        return false
+      }
+
       if (refreshStruct === true) {
         renderBodyStruct.apply(this)
         refreshStruct = false
@@ -168,13 +174,14 @@ export default function render (options) {
         refreshData = false
       }
 
-      if (refreshCallback.length) {
-        window.requestAnimationFrame(() => {
-          for (let i = 0, len = refreshCallback.length; i < len; i++) {
-            refreshCallback[i]()
-          }
+      if (refreshCallbacks.length) {
+        const copies = Array.from(refreshCallbacks)
 
-          refreshCallback.length = 0
+        refreshCallbacks.length = 0
+        window.requestAnimationFrame(() => {
+          for (let i = 0, len = copies.length; i < len; i++) {
+            copies[i]()
+          }
         })
       }
     }, 0)
@@ -455,7 +462,6 @@ function renderBodyData () {
   for (let i = 0, len = trGroups.length; i < len; i++) {
     const trGroup = trGroups[i]
     const tr = trGroup.querySelector('.it-tr')
-    trGroup.className = 'it-tr-group'
 
     if (data[i]) {
       const rowData = data[i] || {}
@@ -476,6 +482,10 @@ function renderBodyData () {
         const { accessor } = props
         const td = tds[j]
 
+        if (td._itLock === true) {
+          continue
+        }
+
         const result = accessor(rowData, props)
         const html = (result === 0 || result) ? result : ''
 
@@ -483,10 +493,18 @@ function renderBodyData () {
       }
     } else {
       const tds = tr.querySelectorAll('.it-td')
+
       for (let i = 0, len = columnProps.length; i < len; i++) {
-        tds[i].innerHTML = ''
-        tr.itRowId = undefined
+        const td = tds[i]
+
+        if (td._itLock === true) {
+          continue
+        }
+
+        td.innerHTML = ''
       }
+
+      tr.itRowId = undefined
     }
   }
 

@@ -42,8 +42,13 @@
       height: 1.5em;
       min-width: 75px;
     }
+
+    &.error {
+      border-color: #e11823;
+    }
   }
 
+  // 控制列样式
   .it-editor-actions {
     width: 100%;
     // height: 32px;

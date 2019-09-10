@@ -43,6 +43,11 @@ const getColumns = () => {
             method: (prev, next) => {
               return prev.toString().localeCompare(next)
             }
+          },
+          edit: {
+            verifier: value => {
+              return !/[0-9]/.test(value)
+            }
           }
         },
         {
@@ -172,7 +177,7 @@ const table = new FlexTable({
   plugins: {
     selector: {}, // 暂无独立配置项, 只需指定一个空对象
     editor: {
-      trigger: 'action', // or 'click'
+      trigger: 'action', // 'click' or 'action'
       verifier: data => data, // 顶层验证方法
       columnWidth: 142,
       columnName: 'Action',

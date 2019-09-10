@@ -110,19 +110,7 @@
     }
 
     .it-input:not([type=checkbox]) {
-      $border-color: #6da8ec;
-
       height: 2em;
-      transition: all .3s;
-      border-color: rgba(0, 0, 0, .2);
-
-      &:hover, &:focus {
-        border-color: $border-color;
-      }
-
-      &:focus {
-        box-shadow: 0 0 0 2px rgba($border-color, 0.35);
-      }
     }
 
     .it-input[type=checkbox] {

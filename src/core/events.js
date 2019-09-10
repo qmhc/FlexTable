@@ -174,8 +174,9 @@ const clickEventName = getClickEventName()
 document.addEventListener(clickEventName, event => {
   const target = event.target
 
-  for (let i = 0, len = outsides.length; i < len; i++) {
-    const element = outsides[i]
+  let i = 0
+  while (i < outsides.length) {
+    const element = outsides[i++]
 
     if (element !== target && !element.contains(target)) {
       element.dispatchEvent && element.dispatchEvent(clickOutsideEvent)
@@ -191,4 +192,16 @@ export function registerClickOutside (element) {
   outsides.push(element)
 
   return true
+}
+
+export function unregisterClickOutside (element) {
+  const index = outsides.findIndex(item => item === element)
+
+  if (~index) {
+    outsides.splice(index, 1)
+
+    return true
+  }
+
+  return false
 }

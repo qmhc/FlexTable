@@ -154,9 +154,24 @@
 	.it-input {
 		padding: .4em;
 		font-size: inherit;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid;
 		border-radius: 4px;
 		outline: none;
+	}
+
+	$input-border-color: #6da8ec;
+	.it-input:not([type=checkbox]) {
+
+		transition: all .3s;
+		border-color: rgba(black, .2);
+
+		&:hover, &:focus {
+			border-color: $input-border-color;
+		}
+
+		&:focus {
+			box-shadow: 0 0 0 2px rgba($input-border-color, 0.35);
+		}
 	}
 
 	.it-select {
@@ -171,6 +186,7 @@
 		user-select: none;
 		cursor: pointer;
 		color: rgba(0, 0, 0, 1);
+		transition: all .3s;
 
 		.it-dropdown {
 			left: 0;
@@ -183,6 +199,10 @@
 			transition: opacity .3s ease;
 			overflow: hidden;
 			filter: drop-shadow(0 21px 15px rgba(0, 0, 0, 0.1));
+		}
+
+		&:hover {
+			border-color: $input-border-color;
 		}
 
 		&::before {
@@ -203,6 +223,9 @@
 		}
 
 		&.show {
+			border-color: $input-border-color;
+			box-shadow: 0 0 0 2px rgba($input-border-color, 0.35);
+
 			&::before {
 				transform: rotate(-90deg);
 			}

@@ -489,7 +489,7 @@ export function html2Element (html) {
 /**
  * 根据不同的 html 类型渲染
  * @param {HTMLElement} node 需要渲染的 node 对象
- * @param {Number|String|Array|NodeList|HTMLElement} html 需要渲染的 html
+ * @param {Number|String|Array|NodeList|DocumentFragment|Text|Element} html 需要渲染的 html
  * @param {Boolean} dangerous 是否可以直接插入字符串 html
  */
 export function renderElement (node, html, dangerous = false) {
@@ -522,8 +522,16 @@ export function renderElement (node, html, dangerous = false) {
       node.appendChild(fragment)
       break
     }
-    default: {
+    // 文档片段和文本节点不继承于 Element
+    case 'documentfragment':
+    case 'text': {
       node.appendChild(html)
+      break
+    }
+    default: {
+      if (html instanceof Element) {
+        node.appendChild(html)
+      }
     }
   }
 }
@@ -686,4 +694,8 @@ export function animateByHooks (element, hooks) {
       }
     })
   })
+}
+
+export function isNative (construct) {
+  return typeof construct === 'function' && /native code/.test(construct.toString())
 }
