@@ -19,9 +19,9 @@ export default class Pager {
 
     const { state } = this.tableInstance
 
-    const pageable = getType(options.pager) === 'object'
+    const able = getType(options.pager) === 'object'
 
-    if (pageable) {
+    if (able) {
       const { useOptions, pageOptions, pageSize, currentPage } = options.pager
 
       const labels = options.pager.labels || {}
@@ -34,7 +34,7 @@ export default class Pager {
       }
 
       state.pager = {
-        pageable,
+        able,
         useOptions: useOptions !== false,
         pageOptions: getType(pageOptions) === 'array' ? [...pageOptions] : [10, 20, 50, 100],
         currentPage: currentPage || 1,
@@ -42,7 +42,7 @@ export default class Pager {
       }
     } else {
       state.pager = {
-        pageable
+        able
       }
     }
 
@@ -54,7 +54,7 @@ export default class Pager {
   }
 
   shouldUse () {
-    return this.state.pageable
+    return this.state.able
   }
 
   beforeRenderBody () {

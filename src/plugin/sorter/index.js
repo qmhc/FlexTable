@@ -28,15 +28,15 @@ export default class Sorter {
 
     const { state } = this.tableInstance
 
-    const sortable = getType(options.sorter) === 'object'
+    const able = getType(options.sorter) === 'object'
 
-    if (sortable) {
+    if (able) {
       const { multiple, multipleKey } = options.sorter
 
       const keyName = getType(multipleKey) === 'string' ? multipleKey.toLowerCase() : ''
 
       state.sorter = {
-        sortable,
+        able,
         sortBy: [], // 记录列id
         types: [], // 0 normal | 1 asc | 2 desc
         sortData: undefined,
@@ -48,7 +48,7 @@ export default class Sorter {
       // addEventWhiteList.apply(this.tableInstance, ['columnSort'])
     } else {
       state.sorter = {
-        sortable
+        able
       }
     }
 
@@ -60,14 +60,14 @@ export default class Sorter {
   }
 
   shouldUse () {
-    return this.state.sortable !== false
+    return this.state.able
   }
 
   beforeRenderData (data) {
     if (this.created) {
-      const { sortable, sortBy } = this.state
+      const { able, sortBy } = this.state
 
-      if (sortable && typeof sortBy[0] !== 'undefined') {
+      if (able && typeof sortBy[0] !== 'undefined') {
         data = this._getSortData(data)
       }
 
@@ -79,13 +79,13 @@ export default class Sorter {
     const { table, columnProps } = this.tableInstance
     const ths = table.querySelectorAll('.it-thead.shadow .it-th')
 
-    const { sortable, sortBy, types } = this.state
+    const { able, sortBy, types } = this.state
 
     for (let i = 0, len = ths.length; i < len; i++) {
       const props = columnProps[i]
       const { sort, id } = props
       const defaultSort = {
-        able: sortable,
+        able,
         type: 0,
         method: this._defaultSortMethod
       }
@@ -154,16 +154,16 @@ export default class Sorter {
 
     this.created = true
 
-    if (sortBy.length) {
-      this.tableInstance.refresh()
-    }
+    // if (sortBy.length) {
+    //   this.tableInstance.refresh()
+    // }
   }
 
   bindEvent () {
     const { table, columnProps } = this.tableInstance
 
     table.addEventListener('click', evt => {
-      if (this.tableInstance._lock) {
+      if (this.tableInstance._isLock()) {
         return false
       }
 
@@ -281,6 +281,10 @@ export default class Sorter {
   }
 
   _defaultSortMethod (prev, next) {
+    if (typeof prev === 'number' && typeof next === 'number') {
+      return prev - next
+    }
+
     return prev.toString().localeCompare(next)
   }
 }

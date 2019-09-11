@@ -9,6 +9,17 @@ export default class Plugin {
     // 从 options 获取配置项里相关信息, 处理后存入 tableInstance.state
     // 存入 state 时, 应在 state 中创建一个插件的命名空间
     // 例如 tableInstance.state.myPlugin = { ...someState }
+
+    const able = Object.prototype.toString.call(options.plugin) === '[object Object]'
+
+    if (able) {
+      // 有效配置, 在此处初始化 state
+      state.plugin = { able }
+    } else {
+      state.plugin = { able }
+    }
+
+    this.state = state.plugin
   }
 
   // 实例化后可基于 FlexTable 的完整 state 进行处理
@@ -18,7 +29,7 @@ export default class Plugin {
 
   // 判断插件是否该使用
   shouldUse () {
-    return true
+    return this.state.able
   }
 
   // 根据表格行数进行处理, 并返回新行数

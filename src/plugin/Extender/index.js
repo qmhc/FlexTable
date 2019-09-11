@@ -14,14 +14,14 @@ export default class Extender {
 
     const { columns, state } = this.tableInstance
 
-    const extensible = getType(options.extender) === 'object'
+    const able = getType(options.extender) === 'object'
 
-    if (extensible) {
+    if (able) {
       const { renderer, accordion, transition } = options.extender
 
       if (getType(renderer) === 'function') {
         state.extender = {
-          extensible,
+          able,
           renderer,
           transition: transition !== false,
           accordion: accordion === true
@@ -47,7 +47,8 @@ export default class Extender {
           sort: false,
           edit: false,
           filter: false,
-          defaultWidth: 32
+          defaultWidth: 32,
+          lock: true
         }
 
         const children = columns[0].children
@@ -69,12 +70,12 @@ export default class Extender {
         }
       } else {
         state.extender = {
-          extensible: false
+          able: false
         }
       }
     } else {
       state.extender = {
-        extensible
+        able
       }
     }
 
@@ -88,7 +89,7 @@ export default class Extender {
 
   // 判断插件是否该使用
   shouldUse () {
-    return this.state.extensible
+    return this.state.able
   }
 
   beforeRenderBody () {
@@ -100,7 +101,7 @@ export default class Extender {
   }
 
   create () {
-    if (this.state.extensible) {
+    if (this.state.able) {
       this.tableInstance.registerMethod('extendRefresh', this._extendRefresh.bind(this), false)
       this.tableInstance.registerMethod('removeAllExtend', this._removeAllExtend.bind(this), false)
     }
@@ -114,7 +115,7 @@ export default class Extender {
     const clickEventName = this.tableInstance.constructor._clickEventName || 'click'
 
     tbody.addEventListener(clickEventName, event => {
-      if (this.tableInstance._lock) {
+      if (this.tableInstance._isLock()) {
         return false
       }
 

@@ -24,9 +24,9 @@ export default class Selector {
 
     const { state } = this.tableInstance
 
-    const selectable = getType(options.selector) === 'object'
+    const able = getType(options.selector) === 'object'
 
-    if (selectable) {
+    if (able) {
       const { columns } = this.tableInstance
 
       this.selection = []
@@ -94,7 +94,8 @@ export default class Selector {
         sort: false,
         edit: false,
         filter: false,
-        defaultWidth: 32
+        defaultWidth: 32,
+        lock: true
       }
 
       const children = columns[0].children
@@ -116,13 +117,13 @@ export default class Selector {
       }
 
       state.selector = {
-        selectable
+        able
       }
 
       addEventWhiteList.apply(this.tableInstance, ['selectChange'])
     } else {
       state.selector = {
-        selectable
+        able
       }
     }
 
@@ -134,11 +135,11 @@ export default class Selector {
   }
 
   shouldUse () {
-    return this.state.selectable
+    return this.state.able
   }
 
   create () {
-    if (this.state.selectable) {
+    if (this.state.able) {
       this.tableInstance.registerMethod('getSelected', getSelectedDataList.bind(this), false)
     }
 

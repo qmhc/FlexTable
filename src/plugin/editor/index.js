@@ -27,9 +27,9 @@ export default class {
 
     const { columns, state } = this.tableInstance
 
-    const editable = getType(options.editor) === 'object'
+    const able = getType(options.editor) === 'object'
 
-    if (editable) {
+    if (able) {
       const { trigger, verifier, columnWidth, columnName } = options.editor
 
       const labels = options.editor.labels || {}
@@ -50,7 +50,7 @@ export default class {
         if (column.children && column.children.length) {
           for (const j in column.children) {
             column.children[j] = {
-              editable: true,
+              edit: true,
               ...column.children[j]
             }
 
@@ -116,7 +116,8 @@ export default class {
           sort: false,
           filter: false,
           edit: false,
-          defaultWidth: columnWidth || 142
+          defaultWidth: columnWidth || 142,
+          lock: true
         }
 
         const children = columns[columns.length - 1].children
@@ -139,7 +140,7 @@ export default class {
       }
 
       state.editor = {
-        editable,
+        able,
         trigger: this.trigger,
         verifier: this.verifier,
         columnWidth: columnWidth || 142,
@@ -149,7 +150,7 @@ export default class {
       addEventWhiteList.apply(this.tableInstance, ['editSave', 'editCancel'])
     } else {
       state.editor = {
-        editable
+        able
       }
     }
 
@@ -163,16 +164,15 @@ export default class {
   }
 
   shouldUse () {
-    return this.state.editable
+    return this.state.able
   }
 
   create () {
     // create code
     const { table, columnProps } = this.tableInstance
-    const { editable } = this.state
 
     const defaultEdit = {
-      able: editable,
+      able: this.state.able,
       type: 'text',
       verifier: null
     }
@@ -232,7 +232,7 @@ export default class {
     const body = table.querySelector('.it-tbody')
 
     body.addEventListener(this._clickEventName, evt => {
-      if (this.tableInstance._lock) {
+      if (this.tableInstance._isLock()) {
         return false
       }
 
@@ -384,6 +384,8 @@ export default class {
       } catch (e) {}
 
       if (tr) {
+        this.tableInstance._lock(this)
+
         const uid = tr.itRowId
         const tds = tr.querySelectorAll('.it-td')
 
@@ -397,13 +399,13 @@ export default class {
           const td = tds[i]
           const props = columnProps[i]
 
-          let editable = props.edit.able
+          let able = props.edit.able
 
-          if (getType(editable) === 'function') {
-            editable = !!editable(data)
+          if (getType(able) === 'function') {
+            able = !!able(data)
           }
 
-          if (props && editable !== false) {
+          if (props && able !== false) {
             td.classList.add('editing')
 
             const { key, edit } = props
@@ -525,6 +527,7 @@ export default class {
         if (!hasError) {
           nextTick(() => {
             this.editingCount--
+            this.tableInstance._unlock(this)
 
             rowActions.classList.remove('editing')
             dispatchEvent.apply(this.tableInstance, ['editSave', { type: 'action', data: { ...data } }])
@@ -584,6 +587,7 @@ export default class {
         }
 
         this.editingCount--
+        this.tableInstance._unlock(this)
 
         rowActions.classList.remove('editing')
         dispatchEvent.apply(this.tableInstance, ['editCancel', { type: 'action', data: { ...data } }])

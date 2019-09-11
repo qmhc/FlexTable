@@ -10,7 +10,7 @@ const makeData = (size = 386) => {
     [`person|${size}`]: [{
       firstName: /[A-Z][a-z]{3,7}/,
       lastName: /[A-Z][a-z]{3,7}/,
-      'age|16-45': 1,
+      'age|5-45': 1,
       'visits|1-100': 1,
       'progress|0-100': 1
     }]
@@ -154,7 +154,7 @@ const getColumns = () => {
 }
 
 const columns = getColumns()
-const data = makeData(30)
+const data = makeData(300)
 
 // const wrapper = document.createElement('div')
 
@@ -176,6 +176,11 @@ const table = new FlexTable({
   dangerous: false, // 开启插入字符串 html
   plugins: {
     selector: {}, // 暂无独立配置项, 只需指定一个空对象
+    order: {
+      renderer: index => `No.${index}`,
+      type: 'absolute',
+      columnWidth: 72
+    },
     editor: {
       trigger: 'action', // 'click' or 'action'
       verifier: data => data, // 顶层验证方法
@@ -216,17 +221,17 @@ const table = new FlexTable({
       multiple: true, // 开启多列排序功能
       multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift
     },
-    // pager: {
-    //   useOptions: true,
-    //   pageOptions: [10, 15, 20, 25, 30],
-    //   currentPage: 1,
-    //   pageSize: 15,
-    //   labels: {
-    //     prev: '上一页',
-    //     next: '下一页',
-    //     row: '行'
-    //   }
-    // },
+    pager: {
+      useOptions: true,
+      pageOptions: [10, 15, 20, 25, 30],
+      currentPage: 1,
+      pageSize: 15,
+      labels: {
+        prev: '上一页',
+        next: '下一页',
+        row: '行'
+      }
+    },
     filter: {
       filterAll: true, // 所有类均过滤 (如有列单独设置, 则优先使用列设置, 否则使用默认过滤设置)
       highlight: true // 设置对符合过滤条件的结果进行高亮

@@ -117,6 +117,32 @@ export default function render (options) {
 
   table.appendChild(tbodyGroup)
 
+  const afterCreateHooks = []
+
+  // 加载插件
+  for (let i = 0, len = this.plugins.length; i < len; i++) {
+    const plugin = this.plugins[i].instance
+    const disabled = !plugin.shouldUse()
+
+    if (disabled) {
+      continue
+    }
+
+    if (plugin.beforeCreate) {
+      plugin.beforeCreate()
+    }
+
+    plugin.create()
+
+    if (plugin.bindEvent) {
+      plugin.bindEvent()
+    }
+
+    if (plugin.afterCreate) {
+      afterCreateHooks.push(plugin.afterCreate.bind(plugin))
+    }
+  }
+
   // 渲染表主体
   renderBodyStruct.apply(this)
   renderBodyData.apply(this)
@@ -201,28 +227,9 @@ export default function render (options) {
     table.appendChild(tfootGroup)
   }
 
-  // 加载插件
-  for (let i = 0, len = this.plugins.length; i < len; i++) {
-    const plugin = this.plugins[i].instance
-    const disabled = !plugin.shouldUse()
-
-    if (disabled) {
-      continue
-    }
-
-    if (plugin.beforeCreate) {
-      plugin.beforeCreate()
-    }
-
-    plugin.create()
-
-    if (plugin.bindEvent) {
-      plugin.bindEvent()
-    }
-
-    if (plugin.afterCreate) {
-      plugin.afterCreate()
-    }
+  // 创建后钩子
+  for (let i = 0, len = afterCreateHooks.length; i < len; i++) {
+    afterCreateHooks[i]()
   }
 }
 

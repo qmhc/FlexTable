@@ -18,13 +18,13 @@ export default class Scroller {
 
     const { state } = this.tableInstance
 
-    const scrollable = getType(options.scroller) === 'object'
+    const able = getType(options.scroller) === 'object'
 
-    if (scrollable) {
+    if (able) {
       const { height, mouse, wheel, wheelDistance, pullup, pullupThreshold, pullupTip } = options.scroller
 
       state.scroller = {
-        scrollable,
+        able,
         height: height || 300,
         mouse: mouse !== false,
         wheel: wheel === true,
@@ -36,7 +36,7 @@ export default class Scroller {
       }
     } else {
       state.scroller = {
-        scrollable
+        able
       }
     }
 
@@ -48,7 +48,7 @@ export default class Scroller {
   }
 
   shouldUse () {
-    return this.state.scrollable
+    return this.state.able
   }
 
   create () {
@@ -101,15 +101,15 @@ export default class Scroller {
     this._scroll = new BScroll(scroller, options)
 
     this._scroll.on('scrollStart', () => {
-      this.tableInstance._lock = true
+      this.tableInstance._lock(this)
     })
 
     this._scroll.on('scrollCancel', () => {
-      this.tableInstance._lock = false
+      this.tableInstance._unlock(this)
     })
 
     this._scroll.on('scrollEnd', () => {
-      this.tableInstance._lock = false
+      this.tableInstance._unlock(this)
     })
 
     if (getType(pullup) === 'function') {

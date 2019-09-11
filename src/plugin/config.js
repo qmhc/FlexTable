@@ -7,5 +7,6 @@ export default [
   'Pager',
   'Scroller',
   'Editor',
-  'Resizer'
+  'Resizer',
+  'Order'
 ]

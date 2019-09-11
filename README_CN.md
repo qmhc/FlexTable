@@ -135,6 +135,13 @@ FlexTable.registerPlugin('sorter', FlexTable.Sorter)
       force: false // 设置是否在表格加入 document 后将各列设置为真实宽度
     },
 
+    order: {
+      renderer: index => index, // 根据索引结果返回渲染内容
+      type: 'absolute', // 定义为 'relative' 时会根据渲染在表格的实际位置编号
+      columnWidth: 60,
+      columnName: '序号'
+    }
+
     sorter: {
       multiple: true, // 开启多列排序功能
       multipleKey: 'shift' // 启动多列排序的按键, 可选 ctrl, alt, shift

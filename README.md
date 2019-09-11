@@ -145,6 +145,16 @@ A complete configuration.
       force: false
     },
 
+    order: {
+      renderer: index => `No.${index}`,
+
+      type: 'absolute', // or 'relative'
+
+      columnWidth: 72,
+
+      columnName: 'Order'
+    }
+
     sorter: {
       multiple: true, // turn on multi-column sorting
   

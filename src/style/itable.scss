@@ -3,7 +3,7 @@
 	position: relative;
 	display: flex;
 	flex-direction: column;
-  border: 1px solid rgba(0, 0, 0, .1);
+  border: 1px solid rgba(black, .1);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
@@ -28,7 +28,7 @@
 	}
 
 	.it-tr-group {
-		border-bottom: 1px solid rgba(0, 0, 0, .05);
+		border-bottom: 1px solid rgba(black, .05);
 		flex: 1 0 auto;
 		display: flex;
 		flex-direction: column;
@@ -60,15 +60,15 @@
 		user-select: none;
 
 		&.group {
-			background: rgba(0, 0, 0, .03);
-			border-bottom: 1px solid rgba(0, 0, 0, .04);
+			background: rgba(black, .03);
+			border-bottom: 1px solid rgba(black, .04);
 			// z-index: 1;
 		}
 
 		&.shadow {
 			z-index: 1;
 			background: #fff;
-			box-shadow: 0 2px 15px 0 rgba(0, 0, 0, .15);
+			box-shadow: 0 2px 15px 0 rgba(black, .15);
 
 			// .it-th {
 			// 	cursor: pointer;
@@ -82,7 +82,7 @@
 		.it-th {
 			line-height: 1;
 			position: relative;
-			border-right: 1px solid rgba(0, 0, 0, .04);
+			border-right: 1px solid rgba(black, .04);
 			display: inline-flex;
 			// flex-direction: column;
 			justify-content: center;
@@ -112,7 +112,7 @@
 				background: white;
 
 				&:hover {
-					background: rgba(0, 0, 0, .05);
+					background: rgba(black, .05);
 				}
 			}
 		}
@@ -124,17 +124,17 @@
 
 	&.stripe {
 		.it-tr-group:nth-child(odd) .it-tr {
-			background: rgba(0, 0, 0, .03);
+			background: rgba(black, .03);
 		}
 	}
 
 	.it-tfoot {
 		display: flex;
 		flex-direction: column;
-		box-shadow: 0 0 15px 0 rgba(0, 0, 0, .15);
+		box-shadow: 0 0 15px 0 rgba(black, .15);
 		z-index: 10;
 		background: #fff;
-		border-bottom: 1px solid rgba(0, 0, 0, .1);
+		border-bottom: 1px solid rgba(black, .1);
 
 		.it-td {
 			cursor: default;
@@ -143,7 +143,7 @@
 
 	.it-tbody, .it-tfoot {
 		.it-td {
-			border-right: 1px solid rgba(0, 0, 0, .04);
+			border-right: 1px solid rgba(black, .04);
 
 			&:last-child {
 				border-right: none;
@@ -154,7 +154,7 @@
 	.it-input {
 		padding: .4em;
 		font-size: inherit;
-		border: 1px solid;
+		border: 1px solid rgba(black, 0.15);
 		border-radius: 4px;
 		outline: none;
 	}
@@ -177,7 +177,7 @@
 	.it-select {
 		position: relative;
 		display: inline-block;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid rgba(black, 0.15);
 		background: #fff;
 		border-radius: 4px;
 		padding: .4em;
@@ -185,7 +185,7 @@
 		min-width: 100px;
 		user-select: none;
 		cursor: pointer;
-		color: rgba(0, 0, 0, 1);
+		color: rgba(black, 1);
 		transition: all .3s;
 
 		.it-dropdown {
@@ -198,7 +198,7 @@
 			z-index: 10;
 			transition: opacity .3s ease;
 			overflow: hidden;
-			filter: drop-shadow(0 21px 15px rgba(0, 0, 0, 0.1));
+			filter: drop-shadow(0 21px 15px rgba(black, 0.1));
 		}
 
 		&:hover {
@@ -217,7 +217,7 @@
 			border-top-width: 5px;
 			border-bottom-width: 5px;
 			border-right-width: 5px;
-			border-right-color: rgba(0, 0, 0, .35);
+			border-right-color: rgba(black, .35);
 			transition: transform .3s ease;
 			transform-origin: 75% 50%;
 		}

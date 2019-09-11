@@ -6,6 +6,7 @@
 import { temp } from 'core/temps'
 import { addEventWhiteList, dispatchEvent } from 'core/events'
 import { getType } from '@/utils'
+import nextTick from '@/utils/next-tick'
 
 import './style.scss'
 
@@ -17,17 +18,17 @@ export default class Resizer {
 
     const { state } = this.tableInstance
 
-    let resizable = getType(options.resizer) === 'object'
+    let able = getType(options.resizer) === 'object'
 
     if (this._clickEventName === 'touchstart') {
-      resizable = false
+      able = false
     }
 
-    if (resizable) {
+    if (able) {
       const { force } = options.resizer
 
       state.resizer = {
-        resizable,
+        able,
         columnWidth: new Proxy({}, this._getProxyHandler()),
         force: force === true,
         resizing: false
@@ -36,7 +37,7 @@ export default class Resizer {
       addEventWhiteList.apply(this.tableInstance, ['columnResize'])
     } else {
       state.resizer = {
-        resizable
+        able
       }
     }
 
@@ -48,7 +49,7 @@ export default class Resizer {
   }
 
   shouldUse () {
-    return this.state.resizable
+    return this.state.able
   }
 
   create () {
@@ -139,7 +140,7 @@ export default class Resizer {
       // 延迟100ms保证防止触发排序器
       setTimeout(() => {
         this.state.resizing = false
-        this.tableInstance._lock = false
+        this.tableInstance._unlock(this)
       }, 200)
 
       return false
@@ -152,7 +153,7 @@ export default class Resizer {
         evt.stopPropagation()
 
         this.state.resizing = true
-        this.tableInstance._lock = true
+        this.tableInstance._lock(this)
         index = target.itColumnIndex
 
         const tableRect = table.getBoundingClientRect()
@@ -179,9 +180,7 @@ export default class Resizer {
   }
 
   afterRender () {
-    if (this.created && this.state.force) {
-      this.refresh()
-    }
+    this.refresh()
   }
 
   refresh () {
@@ -209,7 +208,11 @@ export default class Resizer {
 
         if (typeof old !== 'undefined' && old !== value) {
           obj[prop] = value
-          _this._renderResize(parseInt(prop))
+
+          nextTick(() => {
+            _this._renderResize(parseInt(prop))
+          })
+
           dispatchEvent.apply(_this.tableInstance, ['columnResize', { index: parseInt(prop), oldWidth: old, newWidth: value }])
         } else {
           obj[prop] = value

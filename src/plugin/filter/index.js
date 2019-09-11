@@ -21,19 +21,19 @@ export default class Filter {
 
     const { state } = this.tableInstance
 
-    const filterable = getType(options.filter) === 'object'
+    const able = getType(options.filter) === 'object'
 
-    if (filterable) {
+    if (able) {
       const { filterAll, highlight } = options.filter
 
       state.filter = {
         filterAll: filterAll === true, // 设置是否默认所有列都添加筛选
         highlight: highlight !== false,
-        filterable
+        able
       }
     } else {
       state.filter = {
-        filterable
+        able
       }
     }
 
@@ -46,17 +46,17 @@ export default class Filter {
   }
 
   shouldUse () {
-    return this.state.filterable
+    return this.state.able
   }
 
   create () {
-    const { filterable, filterAll } = this.state
+    const { able, filterAll } = this.state
     const { table, columnProps } = this.tableInstance
     const theadItems = table.querySelectorAll('.it-thead.shadow > .it-tr .it-th')
     const filterGroup = theadTemp.cloneNode()
 
     const defaultFilter = {
-      able: filterable && filterAll,
+      able: able && filterAll,
       type: 'text',
       vaule: undefined,
       method: this._defaultTextFilter
@@ -167,6 +167,10 @@ export default class Filter {
 
         wrapper.addEventListener('click', event => {
           event.stopPropagation()
+
+          if (this.tableInstance._isLock()) {
+            return false
+          }
 
           this._hideAllControls()
 

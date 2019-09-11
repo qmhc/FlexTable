@@ -16,23 +16,15 @@ export default class Layer {
   constructor (tableInstance, options) {
     this.tableInstance = tableInstance
 
-    const {
-      state
-    } = this.tableInstance
+    const { state } = this.tableInstance
 
-    const layerable = getType(options.layer) === 'object'
+    const able = getType(options.layer) === 'object'
 
-    if (layerable) {
-      const {
-        loading,
-        notFound,
-        delay,
-        loadingText,
-        notFoundText
-      } = options.layer
+    if (able) {
+      const { loading, notFound, delay, loadingText, notFoundText } = options.layer
 
       state.layer = {
-        layerable,
+        able,
         loading: loading === true,
         notFound: notFound !== false,
         delay: delay || 500,
@@ -41,7 +33,7 @@ export default class Layer {
       }
     } else {
       state.layer = {
-        layerable
+        able
       }
     }
 
@@ -53,7 +45,7 @@ export default class Layer {
   }
 
   shouldUse () {
-    return this.state.layerable
+    return this.state.able
   }
 
   beforeRenderData () {
