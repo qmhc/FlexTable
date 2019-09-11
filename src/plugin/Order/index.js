@@ -7,7 +7,7 @@ export default class Plugin {
   constructor (tableInstance, options = {}) {
     this.tableInstance = tableInstance
 
-    const { columns, state } = this.tableInstance
+    const { columns, state, data } = this.tableInstance
 
     const able = getType(options.order) === 'object'
 
@@ -26,13 +26,7 @@ export default class Plugin {
           _absolute = value === true
 
           if (_absolute) {
-            this.absoluteOrderMap = new WeakMap()
-
-            const { data } = this.tableInstance
-
-            for (let i = 0, len = data.length; i < len; i++) {
-              this.absoluteOrderMap.set(data[i], i + 1)
-            }
+            this._refreshOrderMap()
           }
 
           if (change && this.tableInstance.refresh) {
@@ -40,6 +34,8 @@ export default class Plugin {
           }
         }
       })
+
+      this.globalDataLength = data.length
 
       this.absolute = type !== 'relative'
 
@@ -116,13 +112,20 @@ export default class Plugin {
     if (this.absolute) {
       const globalData = this.tableInstance.data
 
-      for (let i = 0, len = data.length; i < len; i++) {
-        const rowData = data[i]
-        if (!this.absoluteOrderMap.has(rowData)) {
-          const index = globalData.findIndex(item => item === rowData) + 1
+      if (globalData.length !== this.globalDataLength) {
+        this.globalDataLength = globalData.length
 
-          if (index) {
-            this.absoluteOrderMap.set(rowData, index)
+        this._refreshOrderMap()
+      } else {
+        for (let i = 0, len = data.length; i < len; i++) {
+          const rowData = data[i]
+
+          if (!this.absoluteOrderMap.has(rowData)) {
+            const index = globalData.findIndex(item => item === rowData) + 1
+  
+            if (index) {
+              this.absoluteOrderMap.set(rowData, index)
+            }
           }
         }
       }
@@ -142,5 +145,15 @@ export default class Plugin {
   create () {
     // create code
     this.created = true
+  }
+
+  _refreshOrderMap () {
+    this.absoluteOrderMap = new WeakMap()
+
+    const { data } = this.tableInstance
+
+    for (let i = 0, len = data.length; i < len; i++) {
+      this.absoluteOrderMap.set(data[i], i + 1)
+    }
   }
 }
