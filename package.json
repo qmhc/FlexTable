@@ -2,16 +2,11 @@
   "author": {
     "name": "qmhc"
   },
-  "browserslist": [
-    "last 1 version",
-    "> 1%",
-    "maintained node versions",
-    "not dead"
-  ],
   "dependencies": {
-    "@babel/polyfill": "^7.4.4",
     "@babel/runtime": "^7.4.5",
-    "better-scroll": "^2.0.0-beta.2"
+    "@babel/runtime-corejs3": "^7.6.0",
+    "better-scroll": "^2.0.0-beta.2",
+    "core-js": "^3.2.1"
   },
   "description": "A native flex table library",
   "devDependencies": {

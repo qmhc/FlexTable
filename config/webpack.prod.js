@@ -13,7 +13,17 @@ const miniCssExtract = new MiniCssExtractPlugin({
 	disable: process.env.NODE_ENV === 'development'
 })
 
-const uglify = new UglifyJSPlugin({ sourceMap: false })
+const uglify = new UglifyJSPlugin({
+	sourceMap: false,
+	uglifyOptions: {
+		output: {
+			comments: false
+		},
+		compress: {
+			passes: 2
+		}
+	}
+})
 
 module.exports = merge(common, {
 	mode: 'production',
