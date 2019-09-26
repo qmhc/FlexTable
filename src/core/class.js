@@ -6,6 +6,12 @@ import { deepClone, getClickEventName } from '../utils'
 import '../style/itable.scss'
 
 class FlexTable {
+  static defaultColumnWidth = 100
+
+  static plugins = []
+
+  static _clickEventName = getClickEventName()
+
   /**
    * 为 FlexTable 注册插件
    * @param {String} name 插件的名称 (唯一的)
@@ -291,11 +297,5 @@ class FlexTable {
     }
   }
 }
-
-FlexTable.defaultColumnWidth = 100
-
-FlexTable.plugins = []
-
-FlexTable._clickEventName = getClickEventName()
 
 export default FlexTable
