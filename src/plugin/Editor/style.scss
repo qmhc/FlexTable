@@ -1,0 +1,97 @@
+.flex-table {
+  .it-tbody {
+    user-select: none;
+
+    .it-td {
+      cursor: default;
+    }
+  }
+
+  .it-tr-group {
+    .it-tr:hover {
+      background: white;
+    }
+  }
+
+  &.stripe {
+		.it-tr-group:nth-child(odd) .it-tr:hover {
+      background: rgba(0, 0, 0, .03);
+    }
+	}
+
+  .it-td {
+    min-height: 40px;
+
+    &.editing {
+      overflow: visible;
+    }
+  }
+
+  .it-editor-control {
+    &.it-input, &.it-select {
+      width: 100%;
+      max-width: 200px;
+    }
+
+    &.it-input {
+      padding: 2px;
+    }
+
+    &.it-select {
+      padding: 0 2px;
+      height: 1.5em;
+      min-width: 75px;
+    }
+
+    &.error {
+      border-color: #e11823;
+    }
+  }
+
+  // 控制列样式
+  .it-editor-actions {
+    width: 100%;
+    // height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .it-button {
+      padding: 2px 8px;
+      margin-right: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, .05);
+      outline-width: 0;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color .3s;
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      &:hover {
+        background: rgba(0, 0, 0, .1);
+      }
+    }
+
+    .it-editor-edit {
+      display: inline-block;
+    }
+
+    .it-editor-save, .it-editor-cancel {
+      display: none;
+    }
+
+    &.editing {
+      .it-editor-edit {
+        display: none;
+      }
+
+      .it-editor-save, .it-editor-cancel {
+        display: inline-block;
+      }
+    }
+  }
+}

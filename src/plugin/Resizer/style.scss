@@ -1,0 +1,36 @@
+.flex-table {
+	.it-thead {
+		.it-th {
+			&.it-resize {
+				overflow: visible;
+
+				&:last-child {
+					overflow: hidden;
+				}
+			}
+
+			.it-resizer {
+				display: inline-block;
+				position: absolute;
+				cursor: col-resize;
+				width: 28px;
+				right: -14px;
+				top: 0;
+				bottom: 0;
+				z-index: 1;
+			}
+		}
+	}
+
+	.it-resize-handler {
+		position: absolute;
+		width: 1px;
+		top: 0;
+		bottom: 0;
+		z-index: 10;
+		$handler-color: rgba(0, 0, 0, .3);
+		background-image: linear-gradient(to bottom, $handler-color 0%, $handler-color 70%, transparent 30%);
+		background-size: 1px 12px;
+		background-repeat: repeat-y;
+	}
+}

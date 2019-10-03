@@ -1,0 +1,17 @@
+.flex-table {
+	.it-tbody-group {
+		position: relative;
+	}
+
+	.it-tbody {
+		// transition: transform .2s ease-out;
+		transform: translateY(0);
+		transition-timing-function: ease-out;
+	}
+
+	.pullup-wrapper {
+		padding: 20px;
+		text-align: center;
+		color: #999;
+	}
+}
