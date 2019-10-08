@@ -10,6 +10,8 @@ const portfinder = require('portfinder')
 const os = require('os')
 const path = require('path')
 
+const appName = 'FlexTable'
+
 const interfaces = os.networkInterfaces()
 
 let host = 'localhost'
@@ -78,7 +80,7 @@ module.exports = new Promise((resolve, reject) => {
 				new FriendlyErrorsPlugin({
 					compilationSuccessInfo: {
 						messages: [
-							`FlexTable application is running at:\n  -- Local:   http://localhost:${port}\n  -- Network: http://${host}:${port}\n`
+							`${appName} application is running at:\n  -- Local:   http://localhost:${port}\n  -- Network: http://${host}:${port}\n`
 						]
 					}
 				})
