@@ -1,4 +1,8 @@
-import { getClickEventName } from '../utils'
+const hasWindow = (typeof window !== 'undefined')
+const hasNavigator = (typeof navigator !== 'undefined')
+const useTouch = hasWindow && ('ontouchstart' in window || (hasNavigator && navigator.msMaxTouchPoints > 0))
+
+export const clickEventName = useTouch ? 'touchstart' : 'click'
 
 /**
  * 将事件名注册到白名单
@@ -169,7 +173,6 @@ window.addEventListener('resize', () => {
 // 注册监听点击了 element 外部的事件
 const outsides = []
 const clickOutsideEvent = new Event('clickoutside')
-const clickEventName = getClickEventName()
 
 document.addEventListener(clickEventName, event => {
   const target = event.target

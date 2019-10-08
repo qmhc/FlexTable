@@ -1,7 +1,7 @@
 import Renderer from './render'
 import ProxyArray from './array'
-import { addEventWhiteList, registerEvent, unregisterEvent, dispatchEvent, subscribeResize } from './events'
-import { deepClone, getClickEventName } from '../utils'
+import { addEventWhiteList, registerEvent, unregisterEvent, dispatchEvent, subscribeResize, clickEventName } from './events'
+import { deepClone } from '../utils'
 
 import '../style/itable.scss'
 
@@ -10,7 +10,7 @@ class FlexTable {
 
   static plugins = []
 
-  static _clickEventName = getClickEventName()
+  static _clickEventName = clickEventName
 
   /**
    * 为 FlexTable 注册插件
