@@ -296,6 +296,18 @@ class FlexTable {
       }
     }
   }
+
+  destroy () {
+    try {
+      this.container.removeChild(this.table)
+    } catch (err) {
+      console.warn(err)
+    }
+
+    this.container = null
+    this.table = null
+    this.plugin = null
+  }
 }
 
 export default FlexTable
